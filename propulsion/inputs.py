@@ -1,6 +1,6 @@
 
 
-class First_stage_requirements:
+class FirstStageRequirements:
     def __init__(self):
 
         Thrust = 19.97e6    # Newton ; Derived from A64 (wiki); =Fz
