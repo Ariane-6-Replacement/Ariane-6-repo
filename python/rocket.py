@@ -13,7 +13,7 @@ class Rocket():
         self.trajectory = Trajectory()
 
     # TEMP
-    def printInputs(self):
+    def print_inputs(self):
         print("Inputs:")
         print("Aerodynamics:", self.aerodynamics.input)
         print("Control:", self.control.input)
@@ -22,7 +22,7 @@ class Rocket():
         print("Trajectory:", self.trajectory.input)
 
     # TEMP
-    def printOutputs(self):
+    def print_outputs(self):
         print("Outputs:")
         print("Aerodynamics:", self.aerodynamics.output)
         print("Control:", self.control.output)
