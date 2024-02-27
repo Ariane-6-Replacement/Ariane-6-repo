@@ -1,0 +1,6 @@
+{
+    "name" : "prometheus",  
+    "fuel" : "methalox",
+    "fuel_density" : "",
+    "Isp": "340"
+}
