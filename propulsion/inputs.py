@@ -9,11 +9,13 @@ class FirstStageRequirements:
         Mx,My,Mz = 0,0,0
 
         time_burn_1st = 100 # seconds, just a guess
-        
 
-class Engine_specs:
+
+class Prometheus:
     def __init__(self):
-        Isp = 347 #s (SHOULD BE CHECKED!)
+        Isp = 360
+        Thrust_default = 980e3
+        cost = 1e6
 
 
 class Fuel_specs:
