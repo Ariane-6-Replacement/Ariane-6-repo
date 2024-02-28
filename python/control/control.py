@@ -2,7 +2,26 @@
 #from surfaces import ControlSurfaces
 #import propulsion
 
-class Control():
+"""
+Equations of Motion:
+dV_x/dt     = 1/M ( T cos(theta + a_t) - L sin(gamma) - D cos(gamma) )
+dV_z/dt     = 1/M ( T sin(theta + a_t) + L cos(gamma) - D sin(gamma) - g )
+dTheta/dt   = 1/r dV_p/dt - V_p / r^2 dr/dt
+
+gamma = arctan(Vz / Vx)
+theta = gamma + alpha
+
+Control variables:
+    - Thrust
+    - a_t
+
+Disturbances:
+    - Lift
+    - Drag
+"""
+
+
+class Control:
     def __init__(self):
         # Structures inputs
         self.moment_of_inertia = 0
