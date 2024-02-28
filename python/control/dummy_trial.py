@@ -6,85 +6,67 @@ import numpy as np
 
 
 """
-Equations of motion:
-dV_x/dt     = 1/M ( T cos(theta + a_t) - L sin(gamma) - D cos(gamma) )
-dV_z/dt     = 1/M ( T sin(theta + a_t) + L cos(gamma) - D sin(gamma) - g )
-dTheta/dt   = 1/r dV_p/dt - V_p / r^2 dr/dt
-
-gamma = arctan(Vz / Vx)
-theta = gamma + alpha
-
 Assumptions:
-    - alpha = 0
-    - L = 0
-    - D = 0
-    - constant T
-    - constant g
-    - constant mass
-    - constant speed
+    - Neglect aerodynamic forces (only thrust and weight)
+    - Consider thrust and mass constant in magnitude
+    - Constant gravity
 
-EoM:
-dV_x/dt = 1/M * T cos(theta + a_t) 
-dV_z/dt = 1/M * T sin(theta + a_t) - g 
+Control variable:
+    - Thrust offset
+    
+Momentum equilibrium:
+    I d^2 (theta) / dt^2 = -T * sin(at)
+
+Force equilibrium:
+    M dV_x/dt = T * cos(theta - at)
+    M dV_y/dt = T * sin(theta - at) - M * g
+    
+Other equations:
+    gamma = Vz / Vx
 """
 
 
-def desired_trajectory(x):
-    return 20*np.log(x+1)
+def angular_acceleration(at, thrust, I):
+    return -thrust / I * np.sin(at)
 
 
-def gamma_trajectory(t):
-    return np.arctan(120 / (t + 6))
+# Time considered
+dt = 1e-2
+time = np.arange(0, 100, dt)
 
-
-def gamma_traj_der(t):
-    return -120 / (t**2 + 12*t + 14436)
-
-
-def gamma_derivative(x, t, mass, g, thrust, theta, Vx, Vz):
-    dVxdt = 1 / mass * thrust * np.cos(theta + x)
-    dVzdt = 1 / mass * thrust * np.sin(theta + x) - g
-
-    dGdt = 1 / (1 + theta**2) * (dVxdt * Vz - Vx * dVzdt) / Vz**2
-    return dGdt
-
+# Target value
+theta_target = np.ones(len(time)) * np.pi / 4  # Assume we want to fly straight at a 45 deg angle for now
 
 # Initial conditions
-Vx = 0
-Vz = 0
-g = 9.81
-mass = 9e5
-theta = np.pi/2
-thrust = 5 * mass * g
+theta = [np.pi / 2]                 # rocket orientation
+w = 0                               # anugular speed
+at = 0                              # thrust offset
+mass = 100                          # mass
+gravity = 9.81                      # gravity
+moment_of_inertia = 10              # mass moment of inertia
+thrust = 5 * gravity * mass         # thrust
 
-# Control variable
-at = 0
-time = np.linspace(0, 600, 1000)
+Vz = (thrust / mass - gravity) * dt
+Vx = Vz / np.tan(np.radians(80))    # Initial gamma = 80 deg
+gamma = [np.arctan(Vz / Vx)]        # flight-path angle
+
+# Start simulation
+Kp = 0.5
+Ki = 0.0
+Kd = 0.0
 for i in range(len(time)):
+    error = theta_target[i] - theta[i]
+    at -= error * Kp * dt
 
+    a = angular_acceleration(at, thrust, moment_of_inertia)
+    w += a * dt
+    theta.append(theta[i] + w * dt)
 
+    Vx += thrust * np.cos(theta[i] - at) * dt
+    Vz += thrust * np.sin(theta[i] - at) * dt
+    gamma.append(np.arctan(Vz / Vx))
 
-
-x = np.linspace(0, 100, 1000)
-z = desired_trajectory(x)
-G = gamma_trajectory(time)
-
-# Plot results
-fig, (ax1, ax2, ax3) = plt.subplots(3)
-ax1.plot(x, z, label='trajectory')
-ax1.set_xlabel('x')
-ax1.set_ylabel('z')
-ax2.plot(time, x, label=r'V$_x$')
-ax2.plot(time, z, label=r'V$_z$')
-ax2.legend()
-ax2.set_xlabel('t')
-ax2.set_ylabel('coord')
-ax3.plot(time, np.degrees(G), 'g', label=r'$\gamma$')
-# ax3.plot(time, gamma_traj_der(time), label=r'd$\gamma$/dt')
-ax3.plot()
-ax3.set_xlabel('t')
-ax3.set_ylabel(r'$\gamma$')
-ax3.legend()
+plt.plot(time, gamma[1:], 'b-')
+plt.plot(time, theta[1:], 'g-')
+plt.plot(time, theta_target, 'r:')
 plt.show()
-
-
