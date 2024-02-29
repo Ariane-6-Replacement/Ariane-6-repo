@@ -28,6 +28,7 @@ class Tank:
         @property
         def inner_volume(self) -> float:
         # Ignores skirts and welds for now
-        return self.dome_fwd.inner_volume + self.cylinder.inner_volume + self.dome_aft.inner_volume
+            return self.dome_fwd.inner_volume + self.cylinder.inner_volume + self.dome_aft.inner_volume
 
-        
+
+
