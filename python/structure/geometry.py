@@ -1,7 +1,6 @@
 """
 Contains formulas for general geometric calculations.
 
-Source(s): my mind, my brain, my heart, my soul, my body, my blood, my sweat, my tears, my life, my death, my everything
 """
 
 import numpy as np
