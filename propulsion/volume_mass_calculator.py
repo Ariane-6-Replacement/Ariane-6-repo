@@ -37,7 +37,10 @@ volume_ox = mass_ox / rho_ox
 volume_fuel = mass_fuel / rho_fuel
 
 Total_volume = volume_ox + volume_fuel
-print(Total_volume)
+print("mass flow:",mass_flow)
+print("mass_ox:",mass_ox,"mass_fuel:",mass_fuel,"Total mass:",mass_ox+mass_fuel)
+print("Volume_ox:",volume_ox,"Volume_fuel:",volume_fuel,"Total Volume",Total_volume)
+
 # VERIFY THAT IT WORKS!!!
 
 
