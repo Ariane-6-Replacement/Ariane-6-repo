@@ -1,6 +1,7 @@
 import geometry
-from NASA_SP8007 import pressure_loading, buckling, buckling_coeff, bending, axial_stress
-from Constants import FOSY, FOSU 
+from NASA_SP8007 import buckling, pressure_loading, buckling_coeff, bending, axial_stress
+
+from constants import FOSY 
 class Cylinder:
     def __init__(self,
                  outer_radius: float,
