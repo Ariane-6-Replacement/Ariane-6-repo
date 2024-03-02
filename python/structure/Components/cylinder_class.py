@@ -28,7 +28,6 @@ class Cylinder:
         self.thrust =thrust
         # self.stiffening_elastic_constants = stiffening_elastic_constants
         # self.stiffening_volume = stiffening_volume
-        self.parent_configuration = None
 
 
 
