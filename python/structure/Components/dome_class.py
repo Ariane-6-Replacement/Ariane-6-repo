@@ -1,6 +1,6 @@
 import geometry
 import numpy as np
-from Flugge import ellipse_stress
+from Flugge.ellipse_stress import *
 class Dome:
     def __init__(self,
                  outer_radius: float,
