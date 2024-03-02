@@ -1,5 +1,5 @@
-from cylinder_class import Cylinder
 from dome_class import Dome
+from cylinder_class import Cylinder
 import numpy as np
 
 class Tank:
@@ -45,3 +45,5 @@ class Tank:
             return self._dome_fwd.inner_volume() + self._cylinder.inner_volume() + self._dome_aft.inner_volume()
 
 
+if __name__ in "__main__":
+    tank_test = Tank(2.5,5E5,'2219',350E6,300,'water')
