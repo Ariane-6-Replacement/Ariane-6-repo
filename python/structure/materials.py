@@ -1,5 +1,5 @@
 materials = {
-    '6082-T6 aluminium':
+    '6082':
         {'name': '6082-T6 aluminium',
          'type': 'metal',
          'yield_stress': 260E6,
