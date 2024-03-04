@@ -13,7 +13,7 @@ def critical_cylinder_bending(r, t ,p, E, v, Ixx):
     parameter = p / E * (r / t) ** 2
     dgamma = gamma_d(parameter)
 
-    M_press = np.ppi * r * E * t**2 * (gamma / np.sqrt(3 * (1 - v ** 2)) + dgamma) + 0.8 * p * np.pi * r**2
+    M_press = np.pi * r * E * t**2 * (gamma / np.sqrt(3 * (1 - v ** 2)) + dgamma) + 0.8 * p * np.pi * r**2
 
     stress = M_press * r / Ixx
     return stress

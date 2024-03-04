@@ -14,7 +14,7 @@ class Tank:
 
       # Calculate dome_fwd and dome_aft directly within __init__
         self._dome_fwd = Dome(self.outer_radius, self.pressure, self.material)
-        self._dome_aft = Dome(self.outer_radius, self.pressure * 1.05, self.material)
+        self._dome_aft = Dome(self.outer_radius, self.pressure * 1.1, self.material)
         
         # Calculate cylinder height and create cylinder object
         cylinder_height = (self.volume - self._dome_fwd.inner_volume - self._dome_aft.inner_volume) / (np.pi * self.outer_radius**2)
@@ -48,5 +48,5 @@ class Tank:
 if __name__ in "__main__":
     tank_test = Tank(2.5,5E5,'2219',3E6,300,'water')
     print('DONE')
-    print(getattr(tank_test.mass))
+    print(tank_test._cylinder.thickness)
     print('FINISHED')
