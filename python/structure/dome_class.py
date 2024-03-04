@@ -1,6 +1,6 @@
 import geometry
 import numpy as np
-from Flugge.ellipse_stress import *
+import ellipse_stress as es
 class Dome:
     def __init__(self,
                  outer_radius: float,
@@ -33,7 +33,7 @@ class Dome:
     
     @property
     def thickness(self) -> float:
-         return ellipse_stress.t_ellipsoid(self.outer_radius, self.height, self.pressure, self.material['yield_stress'])
+         return es.t_ellipsoid(self.outer_radius, self.height, self.pressure, self.material['yield_stress'])
          
     @property
     def inner_radius(self) -> float:
