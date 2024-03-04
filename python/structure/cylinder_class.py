@@ -1,7 +1,8 @@
 import geometry
-from NASA_SP8007 import buckling, pressure_loading, buckling_coeff, bending, axial_stress
-
-from Others.constants import FOSY 
+import  buckling, pressure_loading, buckling_coeff, bending, axial_stress
+# import sys
+# sys.setrecursionlimit(1500)
+from constants import FOSY 
 class Cylinder:
     def __init__(self,
                  outer_radius: float,
@@ -23,7 +24,7 @@ class Cylinder:
 
         # These are the parameters that are passed to the class:
         self.outer_radius = outer_radius
-        self.thickness = pressure
+        self.pressure = pressure
         self.material = material
         self.height = height
         self.thrust =thrust
@@ -66,7 +67,7 @@ class Cylinder:
             s_bending = bending.critical_cylinder_bending(self.outer_radius, t 
             ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], self.section_Ixx)
         return t
-    
+    @property
     def inner_volume(self) -> float:
         return geometry.cylinder_V(self.outer_radius-self.thickness, self.height)
 

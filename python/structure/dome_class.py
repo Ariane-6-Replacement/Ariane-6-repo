@@ -25,12 +25,12 @@ class Dome:
         
         # if self.height / self.outer_radius > 0.707 and self.type_ == "semi-ellipsoidal": raise ValueError(
         #     f"Semi ellipsoidal ratio exceeds critical value ({self.height / self.outer_radius} > 0.707).")
-
+    
     @property
     def height(self) -> float:
             #Critical ratio for the lowest dome height
             return self.outer_radius * 0.707
-    
+   
     @property
     def thickness(self) -> float:
          return es.t_ellipsoid(self.outer_radius, self.height, self.pressure, self.material['yield_stress'])
