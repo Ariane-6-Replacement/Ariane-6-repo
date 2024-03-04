@@ -48,6 +48,8 @@ for i in range(len(t)-1):
     sol = fsolve(force_eq, np.array([1, 1.1*mass*g]), args=(mass, g, ax, az))
     Tx, Tz = sol
 
+    # Introduce disturbances
+
     # Update current condition
     ax, az = force_eq((Tx, Tz), mass, g)
     vx += ax * dt
@@ -57,18 +59,18 @@ for i in range(len(t)-1):
 
     thrust = np.vstack((thrust, np.array([Tx, Tz])))
 
+thrust = np.hstack((thrust, np.hstack((np.linalg.norm(thrust, axis=1).reshape(-1, 1),
+                                       np.arctan(thrust[:, 1]/thrust[:, 0]).reshape(-1, 1)))))
+
 plt.plot(x, z, 'r--')
 plt.plot(x_coord, z_coord, 'b-')
 plt.legend(['Target', 'Real'])
 plt.show()
 
-plt.plot(t, thrust)
-plt.xlabel('Time')
-plt.ylabel('Thrust')
-plt.legend(['Tx', 'Tz'])
+plt.plot(t, thrust[:, :-1])
+plt.legend([r'T$_x$', r'T$_z$', r'T$_{total}$'])
+plt.xlabel('Time [s]')
+plt.ylabel('Thrust [N]')
 plt.show()
 
-plt.plot(t, np.degrees(np.arctan(thrust[:, 1]/thrust[:, 0])))
-plt.xlabel('Time')
-plt.ylabel(r'$\alpha_T$ [deg]')
-plt.show()
+

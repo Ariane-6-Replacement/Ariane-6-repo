@@ -48,6 +48,8 @@ az = 1 / M * T * np.sin(gamma_grid + a_grid) - g
 # linearized_system_x = griddata((a_grid.flatten(), gamma_grid.flatten()), ax.flatten(), (a_grid, gamma_grid), method='cubic')
 # linearized_system_z = griddata((a_grid.flatten(), gamma_grid.flatten()), az.flatten(), (a_grid, gamma_grid), method='cubic')
 
+
+
 if __name__ == '__main__':
     plt.imshow(ax, cmap='seismic', vmax=np.max(np.abs(ax)), vmin=-np.max(np.abs(ax)))
     # Adapt x axis
