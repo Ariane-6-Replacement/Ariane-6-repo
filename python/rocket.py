@@ -29,4 +29,20 @@ class Rocket():
         print("Propulsion:", self.propulsion.output)
         print("Structure:", self.structure.output)
         print("Trajectory:", self.trajectory.output)
+     
+    def dry_mass(self):
+        return self.aerodynamics.mass + self.propulsion.mass + self.structure.mass + self.trajectory.mass
+    
+    def iterate(self):
+        
+        trajectory_points = self.trajectory.points(self.aerodynamics.cd)
+        dry_mass = self.dry_mass()
+        thrust = self.control.thrust(self.aerodynamics.drag, trajectory_points, dry_mass)
+        propellant_mass, propellant_volume, pressure = self.propulsion.propellant(thrust, dry_mass)
+        tank_design = self.structure.tank_design(propellant_mass, propellant_volume, pressure, thrust)
+        control = self.control.forces_moments(tank_design)
+        
+        
+        
+    
 
