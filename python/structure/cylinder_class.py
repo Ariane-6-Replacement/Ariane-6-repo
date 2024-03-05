@@ -1,17 +1,15 @@
 import geometry
 import  buckling, pressure_loading, buckling_coeff, bending, axial_stress
-# import sys
-# sys.setrecursionlimit(1500)
 from constants import FOSY 
+import numpy as np
 class Cylinder:
     def __init__(self,
                  outer_radius: float,
                  material: dict,
                  pressure: float,
                  thrust: float,
-                #  stiffening_elastic_constants: tuple,
+                #  bending:float,
                  height:float,
-                #  stiffening_volume: float
                  ):
         """
         Cylinder object, containing all relevant parameters. Cylinder coordinate system is defined with the origin at the
@@ -28,8 +26,8 @@ class Cylinder:
         self.material = material
         self.height = height
         self.thrust =thrust
-        # self.stiffening_elastic_constants = stiffening_elastic_constants
-        # self.stiffening_volume = stiffening_volume
+    
+        
 
 
 
@@ -43,7 +41,6 @@ class Cylinder:
     def thickness(self) -> float:
         #Calcualte Basic Thickness:
         t_p= pressure_loading.t_hoop_stress(self.material['yield_stress'], self.outer_radius, FOSY, self.pressure)
-        print('TP: ',t_p)
         #Caclculate Axial Stress Thickness:
         t_a = axial_stress.t_axial(self.material['yield_stress'], self.outer_radius, FOSY, self.thrust)
         #Calcualte critical Buckling stress
@@ -51,30 +48,34 @@ class Cylinder:
             t=t_a
         else:
             t=t_p
-        #NOTE: Extra condition on unpressurized buckling
+        #NOTE: Extra condition on unpressurized buckling, check the ratio of dry to wet mass
         s_buckling_stat = buckling.critical_cylinder_buckling(0, self.outer_radius,  t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
-        while s_buckling_stat/FOSY <= axial_stress.s_axial(t,self.outer_radius, FOSY, self.thrust/1.5):
+        while s_buckling_stat/FOSY <= axial_stress.s_axial(t,self.outer_radius, FOSY, self.thrust/5.0):
             t+=0.001
             s_buckling_stat = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
 
         s_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,
                                                          t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
                                                  
-        print(s_buckling)
-        while s_buckling/FOSY or s_buckling_stat/FOSY <= self.material['yield_stress']:
-            t+=0.001
-            s_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
+    
+        # while s_buckling/self.material['yield_stress'] <= FOSY :
+        #     t+=0.001
+        #     s_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
 
         Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
         s_bending = bending.critical_cylinder_bending(self.outer_radius, t 
-            ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)    
+            ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
+           
         #NOTE Fact check this assumption 
-        while s_bending/FOSY <= self.material['yield_stress']:
+        while s_bending/ self.material['yield_stress'] <= FOSY/4:
             t+=0.001
             Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
             s_bending = bending.critical_cylinder_bending(self.outer_radius, t 
             ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
-        return round(t,5)
+        return round(t,4)
+    @property
+    def area(self)->float:
+        return self.height * 2 * np.pi * self.outer_radius
     @property
     def inner_volume(self) -> float:
         return geometry.cylinder_V(self.outer_radius-self.thickness, self.height)
@@ -97,22 +98,10 @@ class Cylinder:
     def sectional_area(self) -> float:
         return geometry.cylindrical_shell_A(self.outer_radius, self.thickness)
     
-
-
     # @property
-    # def stiffening_elastic_constants(self):
-    #     return self._stiffening_elastic_constants
+    # def insulation_mass(self) -> float:
+    #     return 
 
-    # @stiffening_elastic_constants.setter
-    # def stiffening_elastic_constants(self, value):
-    #     self._stiffening_elastic_constants = value
 
     
-    #  @property
-    # def section_Iyy(self) -> float:
-    #     # TODO: Adjust for stiffeners
-    #     return self.section_Ixx
-
-    # @property
-    # def mass(self) -> float:
-    #     # TODO: Adjust for stiffeners
+   

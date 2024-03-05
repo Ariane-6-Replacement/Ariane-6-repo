@@ -33,7 +33,8 @@ class Dome:
    
     @property
     def thickness(self) -> float:
-         return es.t_ellipsoid(self.outer_radius, self.height, self.pressure, self.material['yield_stress'])
+         t=  es.t_ellipsoid(self.outer_radius, self.height, self.pressure, self.material['yield_stress'])
+         return round(t, 4)
          
     @property
     def inner_radius(self) -> float:

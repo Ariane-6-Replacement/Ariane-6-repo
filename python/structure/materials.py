@@ -31,6 +31,17 @@ materials = {
          'thermal_expansion_coeff': 22.0,
          'youngs_modulus': 72E9,
          'shear_modulus': 27E9,
+         'poisson_ratio': 0.33},
+    '2195':
+        {'name': '2195-T8',
+         'type': 'metal',
+         'yield_stress': 590E6, 
+         'shear_stress': 350E6,
+         'bearing_stress': 0,
+         'density': 3000,
+         'thermal_expansion_coeff': 22.0,
+         'youngs_modulus': 69E9,
+         'shear_modulus': 26E9,
          'poisson_ratio': 0.33}
 
 }
