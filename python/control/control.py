@@ -73,6 +73,22 @@ class Control:
         return x_disturbance, z_disturbance
 
     def dummy_control_one(self, target_position: np.ndarray, time_array: np.ndarray, gravity: np.ndarray):
+        """
+        Strengths:
+            - Easy to implement
+            - Easy to interpret
+            - Dynamically stable
+        Weaknesses:
+            - Does not take into account constraints
+            - Hasn't been tested with perturbations
+            - Only accounts for the position, not for the velocity
+            - Relies on large assumptions
+        :param target_position: 2D horizontal array with x on the first row and z on the second
+        :param time_array: 1D horizontal array with the times corresponding to the positions in target_position
+        :param gravity: 1D array corresponding to the gravitational acceleration at every position
+        :return None
+        """
+
         # Check inputs are correct
         assert(np.shape(target_position)[0] == np.size(time_array),
                'target_position needs to be a Nx2 array while time_array is a 1D N-size array')
@@ -91,6 +107,8 @@ class Control:
             sol = fsolve(force_eq, np.array([1, 1.1 * self.mass * gravity[i]]),
                          args=(self.mass, gravity[i], ax, az))
 
+            # Calculate necessary restoring moments
+
             # Introduce disturbances
             Fx, Fz = sol - self.disturbances()
 
@@ -100,4 +118,7 @@ class Control:
             self.state[3] += az * dt
             self.state[0] += self.state[2] * dt
             self.state[1] += self.state[3] * dt
+
+            # Update mass
+
 

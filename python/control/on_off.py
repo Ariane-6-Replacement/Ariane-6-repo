@@ -13,7 +13,7 @@ def force_eq(thrust, mass, gravity, ax0=0, ay0=0):
 
 def trajectory(t):
     x = t**2/6
-    z = 20*np.log(x + 1)
+    z = 200*np.log(x + 1)
     return x, z
 
 
@@ -59,8 +59,12 @@ for i in range(len(t)-1):
 
     thrust = np.vstack((thrust, np.array([Tx, Tz])))
 
+# Calculate thrust and thrust vector
 thrust = np.hstack((thrust, np.hstack((np.linalg.norm(thrust, axis=1).reshape(-1, 1),
                                        np.arctan(thrust[:, 1]/thrust[:, 0]).reshape(-1, 1)))))
+x_coord = np.array(x_coord)
+z_coord = np.array(z_coord)
+theta = np.hstack((np.array([np.pi/2]), np.arctan((z_coord[1:] - z_coord[:-1]) / (x_coord[1:] - x_coord[:-1]))))
 
 plt.plot(x, z, 'r--')
 plt.plot(x_coord, z_coord, 'b-')
@@ -71,6 +75,18 @@ plt.plot(t, thrust[:, :-1])
 plt.legend([r'T$_x$', r'T$_z$', r'T$_{total}$'])
 plt.xlabel('Time [s]')
 plt.ylabel('Thrust [N]')
+plt.show()
+
+plt.plot(t, np.degrees(thrust[:, -1]))
+plt.plot(t, np.degrees(theta))
+plt.xlabel('Time [s]')
+plt.ylabel('Angle [deg]')
+plt.legend([r'$\alpha_T$', r'$\theta$'])
+plt.show()
+
+plt.plot(t, np.degrees(thrust[:, -1] - theta))
+plt.xlabel('Time [s]')
+plt.ylabel('Thrust offset [deg]')
 plt.show()
 
 
