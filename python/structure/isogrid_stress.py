@@ -19,4 +19,4 @@ def critrical_stress(t,R, E):
     Ncr = 0.65/np.sqrt(3(1-v**2)) * E_eq*t_eq**2/R*Beta
     sigma_x = Ncr/t_weight
     
-    return sigma_x
+    return sigma_x, t_weight
