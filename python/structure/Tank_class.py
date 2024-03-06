@@ -33,7 +33,7 @@ class Tank:
             
     @property
     def mass(self)-> float:
-        return (self._dome_fwd.mass + self._dome_aft.mass + self._cylinder.mass) * 1.03
+        return (self._dome_fwd.mass + self._dome_aft.mass + self._cylinder.mass + self._cylinder.insulation)*1.2
 
     @property
     def height(self) -> float:
@@ -42,10 +42,10 @@ class Tank:
     @property
     def inner_volume(self) -> float:
         return self._dome_fwd.inner_volume() + self._cylinder.inner_volume() + self._dome_aft.inner_volume()
-
+  
 
 if __name__ in "__main__":
-    tank_test = Tank(2.5,5E5,'6082',3E6,300)
+    tank_test = Tank(2.5,7E5,'2219',20E6,300)
     print('DONE')
-    print('Thickness: ',tank_test.mass)
+    print('Thickness: ',tank_test._cylinder.thickness)
     print('FINISHED')

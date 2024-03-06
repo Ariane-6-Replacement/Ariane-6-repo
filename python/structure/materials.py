@@ -35,7 +35,7 @@ materials = {
     '2195':
         {'name': '2195-T8',
          'type': 'metal',
-         'yield_stress': 590E6, 
+         'yield_stress': 560E6, 
          'shear_stress': 350E6,
          'bearing_stress': 0,
          'density': 3000,
