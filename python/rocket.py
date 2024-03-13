@@ -1,6 +1,7 @@
 from aerodynamics.aerodynamics import Aerodynamics
 #from control.control import Control
-#from python.propulsion.propulsion import Propulsion
+from python.propulsion.inputs import *
+from python.propulsion.volume_mass_calculator import *
 #from structure.structure import Structure
 #from trajectory.trajectory import Trajectory
 import tkinter as tk
@@ -75,7 +76,7 @@ class Rocket():
         self.boostback = boostback.get()
         self.orbit = orbit.get()
         self.payload = float(payload.get())
-        self.cd = float(cd.get()))
+        self.cd = float(cd.get())
         self.material = material.get()
         self.bulkhead = bulkhead.get()
         self.pressure = float(pressure.get())
@@ -89,6 +90,7 @@ class Rocket():
         print(f"Material: {self.material}")
         print(f"Bulkhead: {self.bulkhead}")
         print(f"Pressure: {self.pressure} bar")
+
 
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
@@ -108,6 +110,10 @@ class Rocket():
             self.root.destroy()
         except: pass
         #self.trust, self.burntime = self.trajectory.FUNCTION(self.cd, self.mass_p, self.mass_s, self.dv, self.engine_thrust)
+        self.thrust = 19.97e6
+        self.burntime = 100
+        first_stage = FirstStageRequirements(self.thrust, self.burntime)
+
         #self.mass_e, self.mass_p, self.volume_p, self.engine_number = self.propulsion.FUNCTION(self.engine_trust, self.ISP, self.trust, self.burntime)
         #self.mass_t = self.structure.TANKDESIGNFUNCTION(self.mass_p, self.volume_p)
         #self.mass_es = self.structure.ENGINEDESIGNFUNCTION(self.engine_number, self.engine_thrust)
