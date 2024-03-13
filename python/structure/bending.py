@@ -12,12 +12,13 @@ def critical_cylinder_bending(r, t ,p, E, v, Ixx):
 
     parameter = p / E * (r / t) ** 2
     dgamma = gamma_d(parameter)
-
+    # print('Gamma: ', gamma)
+    # print('Dgamma: ',dgamma)
     M_press = np.pi * r * E * t**2 * (gamma / np.sqrt(3 * (1 - v ** 2)) + dgamma) + 0.8 * p * np.pi * r**2
 
-    stress = M_press * r / Ixx
-    return stress
-
+    # stress = M_press * r / Ixx
+    # return stress
+    return M_press
 
 # def critical_stiffened_cylinder_bending(E_x, E_y, E_xy, G_xy, C_x, C_y, C_xy, K_xy, D_x, D_y, D_xy, L, r, t, v):
 
