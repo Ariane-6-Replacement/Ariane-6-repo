@@ -34,12 +34,29 @@ class Vinci:
         pass
 
 
-class Fuel:
+class Propellant:
     def __init__(self):
-        self.rho_LOX = get_density("NIST_LOX_densities.json",105.5,500e5,16.04)  # kg/m3 liquid oxygen
-        # self.rho_RP1 = get_density("NIST_methane_densities.json",105.5,500e5,16.04)  # kg/m3 RP1 (kerosen)
-        self.rho_CH4 = get_density("NIST_methane_densities.json",105.5,500e5,16.04)  # kg/m3 liquid methane  # should be checked , at which temperature?
+        # FUEL = METHANE
 
+        # pressure
+        self.pressure_ox = 8e5 # Pa
+        self.pressure_fuel = 8e5 # Pa
+
+        # temperature
+        self.temperature_ox = 90 # K
+        self.temperature_fuel = 111 # K
+
+        # Molar mass
+        self.M_ox = 32.0 / 1000      # kg/mol
+        self.M_fuel = 16.04 / 1000   # kg/mol
+        
+        # density (determined using thermodynamic table, see density.py)
+        self.density_ox = get_density("NIST_LOX_densities.json", self.temperature_ox, self.pressure_ox, self.M_ox*1000)  # kg/m3 liquid oxygen
+        self.density_fuel = get_density("NIST_methane_densities.json", self.temperature_fuel, self.pressure_fuel, self.M_fuel*1000)  # kg/m3 liquid methane  # should be checked , at which temperature?
+        
+        
+        
         # Raptor Mixture Ratio: 3.8 kg LOX to 1kg Methane. [Source](https://en.wikipedia.org/wiki/Raptor_(rocket_engine)).
+
 
 
