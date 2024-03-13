@@ -75,9 +75,9 @@ def critical_cylinder_buckling(p, r, t, l, E, v):
     else:
         parameter = p / E * (r / t) ** 2
         dgamma = gamma_d(parameter)
-        N_cr = 2 * np.pi * E * t ** 2 * (gamma / np.sqrt(3 * (1 - v ** 2)) + dgamma) + p * np.pi * r**2
+        N_cr= 2 * np.pi * E * t ** 2 * (gamma / np.sqrt(3 * (1 - v ** 2)) + dgamma) + p * np.pi * r**2
 
-    return N_cr/t
+    return N_cr
 
 
 def critical_stiffened_cylinder_buckling(E_x, E_y, E_xy, G_xy, C_x, C_y, C_xy, K_xy, D_x, D_y, D_xy, L, r, t, v):
