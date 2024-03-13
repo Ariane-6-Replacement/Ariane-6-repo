@@ -8,7 +8,7 @@ class Cylinder:
                  material: dict,
                  pressure: float,
                  thrust: float,
-                #  bending:float,
+                #  moment:float,
                  height:float,
                  ):
         """
@@ -48,32 +48,32 @@ class Cylinder:
             t=t_a
         else:
             t=t_p
-        
+        print('Intermediate t: ', t)
         #NOTE: Extra condition on unpressurized buckling, check the ratio of dry to wet mass
         s_buckling_stat = buckling.critical_cylinder_buckling(0, self.outer_radius,  t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
-        while s_buckling_stat/FOSY <= axial_stress.s_axial(t,self.outer_radius, FOSY, self.thrust/1.2):
-            t+=0.001
+        while s_buckling_stat/FOSY < self.thrust/1.5:
+            t+=0.0005
             s_buckling_stat = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
 
         s_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,
                                                          t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
                                                  
     
-        # while s_buckling/self.material['yield_stress'] <= FOSY :
-        #     t+=0.001
-        #     s_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
+        while s_buckling/self.thrust < FOSY :
+            t+=0.0005
+            s_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
     
         Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
         s_bending = bending.critical_cylinder_bending(self.outer_radius, t 
             ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
-           
+        print("Test s_bending: ",s_bending)
         #NOTE Fact check this assumption 
-        while s_bending/ self.material['yield_stress'] <= FOSY/4:
-            t+=0.001
+        while s_bending/(0.8*41603151.4) < FOSY:
+            t+=0.0005
             Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
             s_bending = bending.critical_cylinder_bending(self.outer_radius, t 
             ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
-        return round(t,5)
+        return round(t,4)
     @property
     def area(self)->float:
         return self.height * 2 * np.pi * self.outer_radius
