@@ -10,7 +10,7 @@ lox: 80-90K with steps of 2K and 0.1-1.5MPa with steps of of 0.1
 
 def read_json_file(input_file_path):
     script_dir = os.path.dirname(__file__)
-    file_path = os.path.join(script_dir, input_file_path)
+    file_path = os.path.join(script_dir, "propellant_properties", input_file_path)
     with open(file_path, 'r') as file:
         data = json.load(file)
     return data
