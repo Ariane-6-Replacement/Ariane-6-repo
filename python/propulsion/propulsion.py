@@ -25,8 +25,6 @@ class Propulsion():
         self.mass_total = self.mass_ox + self.mass_fuel
 
 
-
-
 if __name__ == "__main__":
 
     engine_name = engine.name
