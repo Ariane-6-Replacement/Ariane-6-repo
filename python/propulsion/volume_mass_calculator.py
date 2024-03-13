@@ -1,7 +1,7 @@
 from inputs import FirstStageRequirements, Prometheus, Fuel
 import sys,os
 
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.abspath('../structure'))
 print(sys.path)
 from python.structure import structure
 
