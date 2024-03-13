@@ -1,8 +1,8 @@
-from aerodynamics.aerodynamics import Aerodynamics
+#from aerodynamics.aerodynamics import Aerodynamics
 #from control.control import Control
-from python.propulsion.inputs import *
-from python.propulsion.volume_mass_calculator import *
-#from structure.structure import Structure
+
+from python.propulsion.propulsion import Propulsion
+from python.structure.structure import Structure
 #from trajectory.trajectory import Trajectory
 import tkinter as tk
 from tkinter import ttk
@@ -67,8 +67,12 @@ class Rocket():
         pressure = tk.StringVar(value='5')
         ttk.Entry(root, textvariable=pressure).grid(column=1, row=8)
 
+        ttk.Label(root, text="Diameter (m):").grid(column=0, row=9)
+        diameter = tk.StringVar(value='5')
+        ttk.Entry(root, textvariable=diameter).grid(column=1, row=9)
+
         # Submit button (Example action, customize as needed)
-        ttk.Button(root, text="Submit", command=root.destroy).grid(column=0, row=9, columnspan=2)
+        ttk.Button(root, text="Submit", command=root.destroy).grid(column=0, row=10, columnspan=2)
         root.mainloop()
 
         self.engine = engine.get()
@@ -80,6 +84,7 @@ class Rocket():
         self.material = material.get()
         self.bulkhead = bulkhead.get()
         self.pressure = float(pressure.get())
+        self.diameter = float(diameter.get())
 
         print(f"Engine: {self.engine} N")
         print(f"Delta V: {self.dv} m/s")
@@ -94,31 +99,33 @@ class Rocket():
 
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
-        #self.propulsion = Propulsion()
+        self.propulsion = Propulsion()
         #self.structure = Structure()
-        #self.trajectory = Trajectory()
+        self.trajectory = Trajectory(self.orbit, self.payload, self.cd)
 
      
     def mass_estimation(self):
         self.mass_s = 100000 # kg
         self.mass_p = 600000 #kg
-
+        self.mass = self.mass_s + self.mass_p
     def cost_estimator(self):
-        pass
+        return self.mass * 2500 #placeholder
     def iterate(self):
         try:
             self.root.destroy()
         except: pass
-        #self.trust, self.burntime = self.trajectory.FUNCTION(self.cd, self.mass_p, self.mass_s, self.dv, self.engine_thrust)
-        self.thrust = 19.97e6
-        self.burntime = 100
-        first_stage = FirstStageRequirements(self.thrust, self.burntime)
+        self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass,  self.dv)
+        self.mass_e, self.mass_p, self.volume_p, self.engine_number = self.propulsion.FUNCTION(self.engine, self.thrust, self.burntime)
 
-        #self.mass_e, self.mass_p, self.volume_p, self.engine_number = self.propulsion.FUNCTION(self.engine_trust, self.ISP, self.trust, self.burntime)
-        #self.mass_t = self.structure.TANKDESIGNFUNCTION(self.mass_p, self.volume_p)
-        #self.mass_es = self.structure.ENGINEDESIGNFUNCTION(self.engine_number, self.engine_thrust)
-        #self.mass_lg = self.structure.LGDESIGNFUNCTION(self.mass_e, self.mass_p, self.mass_t, self.mass_es)
-        #self.mass_s = self.mass_e + self.mass_es + self.mass_lg + self.mass_t
+        self.structure = Structure(self.pressure, self.material, self.volume_p, self.thrust, self.diameter)
+
+        self.mass_t = self.structure.mass_total_tank
+        self.mass_es = self.structure.mass_engine_structure(self.engine_number, self.thrust)
+        self.mass_lg = self.structure.mass_landing_gear(self.mass_e, self.mass_p, self.mass_t, self.mass_es)
+        self.mass_s = self.mass_e + self.mass_es + self.mass_lg + self.mass_t
+        self.mass = self.mass_p + self.mass_s
+
+        self.cost = self.cost_estimator()
 
         self.show_result()
     def show_result(self):
@@ -134,6 +141,8 @@ class Rocket():
             f"Bulkhead: {self.bulkhead}",
             f"Pressure: {self.pressure} bar",
             f"Structural Mass: {self.mass_s} kg"
+            f"Propellant Mass: {self.mass_p} kg"
+            f"Estimated cost: {self.cost} €"
         ]
 
         # Dynamically create labels to display each value

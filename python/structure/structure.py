@@ -33,9 +33,12 @@ class Structure():
         self._ITS_aft = Shell(self.outer_radius,self.material3,0.5+self._tank_aft.dome_fwd.height+self._tank_fwd.dome_aft.height)
         self._EB = Shell(self.outer_radius,self.material3,2+self._tank_aft.dome_aft.height)
 
-    
+    def mass_engine_structure(self, engine_number, thrust):
+        return 0
+    def mass_landing_gear(self, mass_e, mass_p, mass_t, mass_es):
+        return 0
     @property
-    def mass_total(self)-> float:
+    def mass_total_tank(self)-> float:
         return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
 
     @property
