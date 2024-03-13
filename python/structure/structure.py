@@ -15,8 +15,8 @@ class Structure():
         self.mass1 = mass1
         self.mass2 = mass2
         # self.material3 = material3
-        tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.fluid1]
-        tank2 =[self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.fluid2]
+        tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.mass1]
+        tank2 =[self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
         
         self.input = "struc in"
         self.output = 4
@@ -35,10 +35,30 @@ class Structure():
 
     
     @property
-    def mass(self)-> float:
+    def mass_total(self)-> float:
         return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
 
     @property
-    def height(self) -> float:
+    def height_total(self) -> float:
         return self._tank_fwd.cylinder.height + self._tank_aft.cylinder.height + self._ITS_fwd.height +  self._ITS_aft.height + self._EB.height 
-    
+
+
+
+if __name__ in "__main__":
+    test = Structure(2.7,7E5,'2219',328, 440E3, 7E5, 273, 126E3, 20E6,'2195')
+    print('DONE')
+    print('#####################OUTPUT##############')
+    print('Mass:', test.mass_total)
+    print('Height: ', test.height_total)
+    print('#############TANK FWD####################')
+    print('Tank mass:', test._tank_fwd.mass,'height: ',test._tank_fwd.height)
+    print('Cylinder mass: ',test._tank_fwd.cylinder.mass,' heigh:',test._tank_fwd.cylinder.height,' thickenss:',test._tank_fwd.cylinder.thickness)
+    print('Dome mass aft: ',test._tank_fwd.dome_aft.mass,'heigh: ',test._tank_fwd.dome_aft.height,'thickness: ',test._tank_fwd.dome_aft.thickness)
+    print('ITS 1 height:',test._ITS_fwd.height,'mass: ',test._ITS_fwd.mass )
+    print('#############TANK AFT####################')
+    print('Tank mass:', test._tank_aft.mass,'height: ',test._tank_aft.height)
+    print('Cylinder mass: ',test._tank_aft.cylinder.mass,' heigh:',test._tank_aft.cylinder.height,' thickenss:',test._tank_aft.cylinder.thickness)
+    print('Dome mass aft: ',test._tank_aft.dome_aft.mass,'heigh: ',test._tank_aft.dome_aft.height,'thickness: ',test._tank_aft.dome_aft.thickness)
+    print('ITS 2 height:',test._ITS_aft.height,'mass: ',test._ITS_aft.mass )
+    print('#############Engine Bay####################')
+    print('EB height:',test._EB.height,'mass: ',test._EB.mass )

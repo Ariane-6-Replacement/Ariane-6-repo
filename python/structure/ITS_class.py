@@ -30,11 +30,8 @@ class Shell:
         s=0
         t=0.002
         while s/self.material['yield_stress']<3:
-            print('IN')
             t+=0.0005
             s, t_mass = critical_stress(t, self.outer_radius, self.material['youngs_modulus'])
-
-        print('Tmass', t_mass)
         return 2*self.outer_radius*np.pi*self.height*t_mass*self.material['density']
     # +self.insulation
   
