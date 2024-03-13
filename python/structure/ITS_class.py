@@ -40,7 +40,7 @@ class Shell:
             t+=0.0005
             s, t_mass = critical_stress(t, self.outer_radius, self.material['youngs_modulus'])
             I = cylindrical_shell_I(self.outer_radius, t_mass)
-            sigma_max = s_axial(t_mass, self.outer_radius,FOSY, self.thrust) + self.moment * self.outer_radius / I
+            # sigma_max = s_axial(t_mass, self.outer_radius,FOSY, self.thrust) + self.moment * self.outer_radius / I
         return 2*self.outer_radius*np.pi*self.height*t_mass*self.material['density']
     # +self.insulation
   
