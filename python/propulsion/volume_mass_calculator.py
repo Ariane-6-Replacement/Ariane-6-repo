@@ -61,7 +61,7 @@ print("Volume_ox:",volume_ox,"Volume_fuel:",volume_fuel,"Total Volume",total_vol
 
 # IT WORKS :-) !!!
 
-
+print(rho_fuel, rho_ox)
 
 
 
