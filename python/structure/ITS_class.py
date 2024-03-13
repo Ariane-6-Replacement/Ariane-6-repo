@@ -2,11 +2,16 @@
 from isogrid_stress import critical_stress
 import numpy as np
 from materials import materials as m
+from geometry import cylindrical_shell_I
+from ITS_class import s_axial
+from constants import FOSY
 class Shell:
     def __init__(self,
                  outer_radius: float,
                  material: dict,
-                 height:float
+                 height:float,
+                 thrust:float,
+                 moment:float
                  ):
         """
         Cylinder object, containing all relevant parameters. Cylinder coordinate system is defined with the origin at the
@@ -21,6 +26,8 @@ class Shell:
         self.outer_radius = outer_radius
         self.material = m[material]
         self.height = height
+        self.thrust = thrust
+        self.moment = moment
     @property
     def insulation(self):
         return self.height*self.outer_radius*2*np.pi*1.123
@@ -32,6 +39,8 @@ class Shell:
         while s/self.material['yield_stress']<3:
             t+=0.0005
             s, t_mass = critical_stress(t, self.outer_radius, self.material['youngs_modulus'])
+            I = cylindrical_shell_I(self.outer_radius, t_mass)
+            sigma_max = s_axial(t_mass, self.outer_radius,FOSY, self.thrust) + self.moment * self.outer_radius / I
         return 2*self.outer_radius*np.pi*self.height*t_mass*self.material['density']
     # +self.insulation
   
