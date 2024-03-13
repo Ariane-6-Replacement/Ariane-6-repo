@@ -27,11 +27,14 @@ class Propulsion():
 
 if __name__ == "__main__":
 
+    # define inputs for Propulsion() class
     engine_name = engine.name
     thrust = first_stage.Thrust
     burn_time = first_stage.time_burn_1st
 
+    # make propulsion class based on inputs
     propulsion = Propulsion("Prometheus", thrust, burn_time)
 
+    # print/return wanted values
     print(propulsion.mass_ox, propulsion.mass_fuel, propulsion.mass_total)
     print(propulsion.volume_ox, propulsion.volume_fuel, propulsion.volume_total)
