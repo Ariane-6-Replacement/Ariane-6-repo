@@ -1,4 +1,4 @@
-from Tank_class import Tank
+from .Tank_class import Tank
 from cylinder_class import Cylinder
 from ITS_class import Shell
 class Structure():

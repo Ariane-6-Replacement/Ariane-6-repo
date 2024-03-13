@@ -2,7 +2,7 @@
 import numpy as np
 
 class Aerodynamics:
-    def __init__(self, noses_input, fins_input, gridfins_input, parachutes_input, moments):
+    def __init__(self, noses_input, fins_input, gridfins_input, parachutes_input):
         #Input variables are 2D matrices with all variables in columns so rows = number of structures
         fairing = nose(noses_input[0,0],noses_input[0,1])
         structures_ascent = [fairing]
@@ -66,6 +66,7 @@ class fin:
         self.Cla = Cla
         self.Cd  = Cd
         self.arm = arm
+        self.type = "fin"
     
     def drag(self, v, rho):
         F = 0.5 * self.t * self.h * self.cd  * rho * v**2
@@ -78,7 +79,7 @@ class parachute:
     def __init__(self,r):
         self.A = np.pi * r**2
         self.cd = 1.75 #https://www.grc.nasa.gov/www/k-12/VirtualAero/BottleRocket/airplane/rktvrecv.html#:~:text=The%20air%20density%20has%20a,produces%20a%20lower%20terminal%20velocity.
-        
+        self.type = "parachute"
     def drag(self,rho,v):
         F = 0.5 * self.A* self.cd  * rho * v**2
         return F
@@ -87,7 +88,7 @@ class speedbrake:
     def __init__(self,w,h,a):
         self.A = w * h * np.sin(a)
         self.cd = 1.5 #Estimation, need to add w/h dependency
-        
+        self.type = "speedbrake"
     def drag(self,rho,v):
         F = 0.5 * self.A* self.cd  * rho * v**2
         return F 
@@ -96,7 +97,7 @@ class gridfin: ##TBD
     def __init__(self,w,h,a):
         self.A = w * h * np.sin(a)
         self.cd = 1.5 #Estimation, need to add w/h dependency
-        
+        self.type = "gridfin"
     def drag(self,rho,v):
         F = 0.5 * self.A* self.cd  * rho * v**2
         return F      
