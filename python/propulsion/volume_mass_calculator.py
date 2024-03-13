@@ -1,9 +1,14 @@
 from inputs import FirstStageRequirements, Prometheus, Fuel
+import sys,os
 
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+print(sys.path)
+from python.structure import structure
 
 engine = Prometheus()
 first_stage = FirstStageRequirements()
 fuel = Fuel()
+
 
 def calculate_average_fuel_density(fuel_ratio, oxidizer_density, propellant_density):
   """
@@ -41,6 +46,8 @@ print("mass flow:",mass_flow)
 print("mass_ox:",mass_ox,"mass_fuel:",mass_fuel,"Total mass:",mass_ox+mass_fuel)
 print("Volume_ox:",volume_ox,"Volume_fuel:",volume_fuel,"Total Volume",Total_volume)
 
+
+
 # VERIFY THAT IT WORKS!!!
 
 
@@ -48,6 +55,16 @@ print("Volume_ox:",volume_ox,"Volume_fuel:",volume_fuel,"Total Volume",Total_vol
 # average_density = calculate_average_fuel_density(OF_ratio, fuel.rho_LOX, fuel.rho_LM)
 # Total_volume = Total_mass/average_density
 # print(Total_volume)
+
+
+# import stuff from structures
+
+# for pressure
+pressure = 7e5
+structure1 = structure.Structure(6,pressure,"6082",volume_ox,mass_ox,pressure, volume_fuel,mass_fuel, first_stage.Thrust,"6062")
+print("pressure:",pressure,"mass1:", structure1.mass, "height:",structure1.height)
+
+
 
 
 

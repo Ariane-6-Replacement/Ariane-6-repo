@@ -1,6 +1,6 @@
 from aerodynamics.aerodynamics import Aerodynamics
 from control.control import Control
-from propulsion.propulsion import Propulsion
+from python.propulsion.propulsion import Propulsion
 from structure.structure import Structure
 from trajectory.trajectory import Trajectory
 
