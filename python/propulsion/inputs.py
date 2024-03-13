@@ -1,5 +1,5 @@
 import math
-
+from density import get_density
 
 class FirstStageRequirements:
     def __init__(self):
@@ -36,8 +36,10 @@ class Vinci:
 
 class Fuel:
     def __init__(self):
-        self.rho_LOX = 1340  # kg/m3 liquid oxygen
-        self.rho_RP1 = 860  # kg/m3 RP1 (kerosen)
-        self.rho_LM = 460  # kg/m3 liquid methane  # should be checked , at which temperature?
+        self.rho_LOX = get_density("NIST_LOX_densities.json",105.5,500e5,16.04)  # kg/m3 liquid oxygen
+        # self.rho_RP1 = get_density("NIST_methane_densities.json",105.5,500e5,16.04)  # kg/m3 RP1 (kerosen)
+        self.rho_CH4 = get_density("NIST_methane_densities.json",105.5,500e5,16.04)  # kg/m3 liquid methane  # should be checked , at which temperature?
 
         # Raptor Mixture Ratio: 3.8 kg LOX to 1kg Methane. [Source](https://en.wikipedia.org/wiki/Raptor_(rocket_engine)).
+
+

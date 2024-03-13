@@ -12,7 +12,7 @@ Isp = engine.Isp
 burn_time = first_stage.time_burn_1st
 OF_ratio = engine.OF_ratio
 density_ox = fuel.rho_LOX
-density_fuel = fuel.rho_LM
+density_fuel = fuel.rho_MH4
 
 
 # DEFENITIONS
