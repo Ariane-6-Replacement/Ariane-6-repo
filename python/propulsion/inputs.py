@@ -1,7 +1,8 @@
 import math
 from density import get_density
 
-class FirstStageRequirements:
+# CLASSES
+class FirstStage:
     def __init__(self):
         self.Thrust = 19.97e6  # Newton ; Derived from A64 (wiki); =Fz
         self.Fx = 10000  # TBR
@@ -13,9 +14,11 @@ class FirstStageRequirements:
 
 class Prometheus:
     def __init__(self):
+        self.name = "Prometheus"
         self.Isp = 360
-        self.Thrust_default = 980e3
+        self.Thrust = 980e3
         self.cost = 1e6
+        self.mass = 780 # kg
         self.OF_ratio = 3.5  # chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
         # self.OF_ratio = 1.7 # wrong? https://aris-space.ch/introduction-to-prometheus/
         self.exit_diameter = 1.751  # m
@@ -28,8 +31,7 @@ class Prometheus:
         self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
 
 
-
-class Vinci:
+class Vinci: # TODO add specs
     def __init__(self):
         pass
 
@@ -54,9 +56,16 @@ class Propellant:
         self.density_ox = get_density("NIST_LOX_densities.json", self.temperature_ox, self.pressure_ox, self.M_ox*1000)  # kg/m3 liquid oxygen
         self.density_fuel = get_density("NIST_methane_densities.json", self.temperature_fuel, self.pressure_fuel, self.M_fuel*1000)  # kg/m3 liquid methane  # should be checked , at which temperature?
         
-        
-        
         # Raptor Mixture Ratio: 3.8 kg LOX to 1kg Methane. [Source](https://en.wikipedia.org/wiki/Raptor_(rocket_engine)).
+
+
+
+# CHOOSE (so 'settings'/inputs can easily be imported by all files. For example, other engine choice will automatically be used by all files)
+engine = Prometheus()
+first_stage = FirstStage()
+propellant = Propellant()
+
+
 
 
 
