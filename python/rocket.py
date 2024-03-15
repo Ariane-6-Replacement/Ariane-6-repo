@@ -115,7 +115,7 @@ class Rocket():
             self.root.destroy()
         except: pass
         self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass,  self.dv)
-        self.mass_e, self.mass_p, self.volume_p, self.engine_number = self.propulsion.mass_volume(self.engine, self.thrust, self.burntime)
+        self.mass_e, self.mass_p, self.volume_p, self.engine_number = self.propulsion.mass_volume(self.thrust, self.burntime)
 
         self.structure = Structure(self.pressure, self.material, self.volume_p, self.thrust, self.diameter)
 

@@ -3,8 +3,8 @@ from python.structure.isogrid_stress import critical_stress
 import numpy as np
 from python.structure.materials import materials as m
 from python.structure.geometry import cylindrical_shell_I
-from ITS_class import s_axial
-from constants import FOSY
+#from ITS_class import s_axial
+from python.structure.constants import FOSY
 class Shell:
     def __init__(self,
                  outer_radius: float,

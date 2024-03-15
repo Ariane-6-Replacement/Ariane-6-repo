@@ -1,22 +1,23 @@
 # IMPORTS
 from python.propulsion.inputs import engine, first_stage, propellant
 
-# INPUTS
-g0 = 9.80665                            # sea level gravitational parameter        
-Isp = engine.Isp                        # specific impulse
-OF_ratio = engine.OF_ratio              # Oxidiser/fuel ratio
-density_ox = propellant.density_ox      # oxidiser density for input Temperature and Pressure (calculated using thermodynamic NIST database)
-density_fuel = propellant.density_fuel  # fuel density for input Temperature and Pressure (calculated using thermodynamic NIST database)
 
 
 # determines propellant mass flow rate
 def calculate_mass_flow_rate(thrust, Isp):
   # calculate mass flow based on Isp equation
+  g0 = 9.80665
   mass_flow = thrust / (Isp * g0)
   return mass_flow
 
 # determine oxidiser and fuel mass and volume
 def get_propellant_mass_volume(thrust, burn_time):
+  # INPUTS
+  g0 = 9.80665  # sea level gravitational parameter
+  Isp = engine.Isp  # specific impulse
+  OF_ratio = engine.OF_ratio  # Oxidiser/fuel ratio
+  density_ox = propellant.density_ox  # oxidiser density for input Temperature and Pressure (calculated using thermodynamic NIST database)
+  density_fuel = propellant.density_fuel  # fuel density for input Temperature and Pressure (calculated using thermodynamic NIST database)
 
   # mass flow rate
   mass_flow = calculate_mass_flow_rate(thrust, Isp)
