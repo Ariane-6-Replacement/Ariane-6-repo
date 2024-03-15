@@ -1,15 +1,15 @@
 import math
-from density import get_density
+from python.propulsion.density import get_density
 
 # CLASSES
 class FirstStage:
-    def __init__(self):
-        self.Thrust = 19.97e6  # Newton ; Derived from A64 (wiki); =Fz
+    def __init__(self, Thrust = 19.97e6, burn_time = 100):
+        self.Thrust = Thrust  # Newton ; Derived from A64 (wiki); =Fz
         self.Fx = 10000  # TBR
         self.Fy = 10000  # TBR
         self.Mx, self.My, self.Mz = 0, 0, 0
 
-        self.time_burn_1st = 100  # seconds, just a guess
+        self.time_burn_1st = burn_time  # seconds, just a guess
         self.booster_area= 150 #m2  assuming 7 meter diameter
 
 class Prometheus:
