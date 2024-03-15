@@ -21,9 +21,9 @@ class Prometheus:
         self.Thrust = 980e3
         self.cost = 1e6
         self.mass = 780  # kg
-        self.OF_ratio = 3.5  # chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
+        #self.OF_ratio = 3.5  # chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
         # self.OF_ratio = 1.7 # wrong? https://aris-space.ch/introduction-to-prometheus/
-        self.Isp = self.get_Isp()
+        #self.Isp = self.get_Isp(OF_ratio)
         self.exit_diameter = 1.751  # m
         self.exit_area = math.pi * self.exit_diameter ** 2 / 4
         self.height = 4.28  # m
@@ -33,13 +33,13 @@ class Prometheus:
         self.diameter_truss_structure = 3.35
         self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
 
-    def get_Isp(self):
+    def get_Isp(self, OF_ratio):
         """"
         Lower O/F can mean less mass because LOX is heavy. Nominal: Isp = 360 for 100bar and O/F=3.5
         assume Isp goes down with 10 for every 0.1 OF. chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
         """
-
-        return 360 - abs(3.5 - self.OF_ratio) * 100
+        self.ISP = 360 - abs(3.5 - OF_ratio) * 100
+        return  self.ISP
 
 
 

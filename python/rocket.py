@@ -11,7 +11,7 @@ from python.structure.materials import materials as m
 
 class Rocket():
     def __init__(self, engine, dv, boostback, orbit, payload, cd, material_tank, material_misc, pressure_ox,
-                 pressure_fuel, diameter):
+                 pressure_fuel, diameter, OF_ratio):
 
         self.engine = engine.get()
         self.dv = float(dv.get())
@@ -25,6 +25,7 @@ class Rocket():
         self.pressure_ox = float(pressure_ox.get())
         self.pressure_fuel = float(pressure_fuel.get())
         self.diameter = float(diameter.get())
+        self.OF_ratio = float(OF_ratio.get())
 
         print(f"Engine: {self.engine}")
         print(f"Delta V: {self.dv} m/s")
@@ -55,7 +56,8 @@ class Rocket():
             self.root.destroy()
         except: pass
         self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass,  self.dv)
-        self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = self.propulsion.mass_volume(self.thrust, self.burntime)
+        self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = (
+            self.propulsion.mass_volume(self.thrust, self.burntime, self.OF_ratio))
         self.mass_p = self.mass_ox + self.mass_fuel
         self.structure.calc(self.volume_ox, self.mass_ox, self.volume_fuel, self.mass_fuel, self.thrust)
         self.mass_t = self.structure.mass_total_tank
@@ -92,9 +94,9 @@ class Rocket():
         iterate_button.grid(column=0, row=len(values) + 1, pady=10)
         self.root.mainloop()
 def make_rocket(engine, dv, boostback, orbit, payload, cd, material_tank, material_misc, pressure_ox,
-                 pressure_fuel, diameter):
+                 pressure_fuel, diameter, OF_ratio):
     r = Rocket(engine, dv, boostback, orbit, payload, cd, material_tank, material_misc, pressure_ox,
-                 pressure_fuel, diameter)
+                 pressure_fuel, diameter, OF_ratio)
     r.mass_estimation()
     r.iterate()
 
@@ -182,24 +184,16 @@ if __name__ == "__main__":
     ttk.Entry(root, textvariable=diameter).grid(column=1, row=i)
 
     i += 1
+    ttk.Label(root, text="O/F ratio :").grid(column=0, row=i)
+    OF_ratio = tk.StringVar(value='3.5')
+    ttk.Entry(root, textvariable=OF_ratio).grid(column=1, row=i)
     # Submit button (Example action, customize as needed)
-
+    i+=1
     ttk.Button(root, text="Submit", command= lambda: make_rocket(engine, dv, boostback, orbit, payload, cd, material_tank, material_misc, pressure_ox,
-                 pressure_fuel, diameter)).grid(column=0, row=i, columnspan=2)
+                 pressure_fuel, diameter, OF_ratio)).grid(column=0, row=i, columnspan=2)
 
     root.mainloop()
-    engine = engine.get()
-    dv = float(dv.get())
-    boostback = boostback.get()
-    orbit = orbit.get()
-    payload = float(payload.get())
-    cd = float(cd.get())
-    material_tank = material_tank.get()
-    material_misc = material_misc.get()
-    # self.bulkhead = bulkhead.get()
-    pressure_ox = float(pressure_ox.get())
-    pressure_fuel = float(pressure_fuel.get())
-    diameter = float(diameter.get())
+
 
 
 

@@ -11,11 +11,10 @@ def calculate_mass_flow_rate(thrust, Isp):
   return mass_flow
 
 # determine oxidiser and fuel mass and volume
-def get_propellant_mass_volume(thrust, burn_time):
+def get_propellant_mass_volume(thrust, burn_time, OF_ratio):
   # INPUTS
   g0 = 9.80665  # sea level gravitational parameter
-  Isp = engine.Isp  # specific impulse
-  OF_ratio = engine.OF_ratio  # Oxidiser/fuel ratio
+  Isp = engine.get_Isp(OF_ratio)  # specific impulse
   density_ox = propellant.density_ox  # oxidiser density for input Temperature and Pressure (calculated using thermodynamic NIST database)
   density_fuel = propellant.density_fuel  # fuel density for input Temperature and Pressure (calculated using thermodynamic NIST database)
 
