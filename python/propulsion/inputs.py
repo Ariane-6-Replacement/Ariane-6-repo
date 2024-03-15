@@ -18,12 +18,12 @@ class FirstStage:
 class Prometheus:
     def __init__(self):
         self.name = "Prometheus"
-        self.Isp = self.get_Isp()
         self.Thrust = 980e3
         self.cost = 1e6
         self.mass = 780  # kg
         self.OF_ratio = 3.5  # chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
         # self.OF_ratio = 1.7 # wrong? https://aris-space.ch/introduction-to-prometheus/
+        self.Isp = self.get_Isp()
         self.exit_diameter = 1.751  # m
         self.exit_area = math.pi * self.exit_diameter ** 2 / 4
         self.height = 4.28  # m
