@@ -3,10 +3,10 @@ from volume_mass_calculator import get_propellant_mass_volume
 import math
 
 class Propulsion():
-    def __init__(self, engine_name, thrust, burn_time):
+    def __init__(self, engine_name):
         # engine name
         self.engine_name = engine_name
-
+    def mass_volume(self,thrust, burn_time):
         # engine number and mass
         self.engine_number = math.ceil(thrust / engine.Thrust)
         self.total_engine_mass = engine.mass * self.engine_number
@@ -23,7 +23,7 @@ class Propulsion():
         self.mass_ox = mass_ox
         self.mass_fuel = mass_fuel
         self.mass_total = self.mass_ox + self.mass_fuel
-
+        return self.total_engine_mass, self.mass_total, self.volume_total, self.engine_number
 
 if __name__ == "__main__":
 

@@ -3,7 +3,7 @@
 
 from python.propulsion.propulsion import Propulsion
 from python.structure.structure import Structure
-#from trajectory.trajectory import Trajectory
+from python.trajectory.trajectory import Trajectory
 import tkinter as tk
 from tkinter import ttk
 
@@ -99,7 +99,7 @@ class Rocket():
 
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
-        self.propulsion = Propulsion()
+        self.propulsion = Propulsion(self.engine)
         #self.structure = Structure()
         self.trajectory = Trajectory(self.orbit, self.payload, self.cd)
 
@@ -115,7 +115,7 @@ class Rocket():
             self.root.destroy()
         except: pass
         self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass,  self.dv)
-        self.mass_e, self.mass_p, self.volume_p, self.engine_number = self.propulsion.FUNCTION(self.engine, self.thrust, self.burntime)
+        self.mass_e, self.mass_p, self.volume_p, self.engine_number = self.propulsion.mass_volume(self.engine, self.thrust, self.burntime)
 
         self.structure = Structure(self.pressure, self.material, self.volume_p, self.thrust, self.diameter)
 
