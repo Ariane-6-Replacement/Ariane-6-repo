@@ -69,13 +69,13 @@ class Rocket():
         material_misc.set(material_options[0])  # default value
 
         # Bulkhead
-        i += 1
-        ttk.Label(root, text="Bulkhead:").grid(column=0, row=i)
-        bulkhead = tk.StringVar()
-        bulkhead_options = ['shared', 'separate']
-        ttk.Combobox(root, textvariable=bulkhead, values=bulkhead_options, state="readonly").grid(column=1,row=i)
+        #i += 1
+        #ttk.Label(root, text="Bulkhead:").grid(column=0, row=i)
+        ##bulkhead = tk.StringVar()
+        #bulkhead_options = ['shared', 'separate']
+        #ttk.Combobox(root, textvariable=bulkhead, values=bulkhead_options, state="readonly").grid(column=1,row=i)
 
-        bulkhead.set("shared")  # default value
+        #bulkhead.set("shared")  # default value
 
         # Pressure
         i += 1
@@ -106,19 +106,19 @@ class Rocket():
         self.cd = float(cd.get())
         self.material_tank = material_tank.get()
         self.material_misc = material_misc.get()
-        self.bulkhead = bulkhead.get()
+        #self.bulkhead = bulkhead.get()
         self.pressure_ox = float(pressure_ox.get())
         self.pressure_fuel = float(pressure_fuel.get())
         self.diameter = float(diameter.get())
 
-        print(f"Engine: {self.engine} N")
+        print(f"Engine: {self.engine}")
         print(f"Delta V: {self.dv} m/s")
         print(f"Boostback: {self.boostback}")
         print(f"Orbit: {self.orbit}")
         print(f"Payload: {self.payload} kg")
         print(f"Drag Coefficient: {self.cd}")
         print(f"Material: {self.material_tank}")
-        print(f"Bulkhead: {self.bulkhead}")
+        #print(f"Bulkhead: {self.bulkhead}")
         print(f"Pressure: {self.pressure_ox} bar")
 
 
@@ -134,7 +134,7 @@ class Rocket():
         self.mass_p = 600000 #kg
         self.mass = self.mass_s + self.mass_p
     def cost_estimator(self):
-        return self.mass * 2.500 #placeholder
+        return self.mass * 25.00 #placeholder
     def iterate(self):
         try:
             self.root.destroy()
@@ -162,7 +162,7 @@ class Rocket():
             f"Payload: {self.payload} kg",
             f"Drag Coefficient: {self.cd}",
             f"Material: {self.material_tank}",
-            f"Bulkhead: {self.bulkhead}",
+            #f"Bulkhead: {self.bulkhead}",
             f"Pressure: {self.pressure_ox} bar",
             f"Structural Mass: {self.mass_s:.0f} kg",
             f"Propellant Mass: {self.mass_p:.0f} kg",
