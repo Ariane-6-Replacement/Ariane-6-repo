@@ -47,7 +47,14 @@ class Rocket():
         ttk.Entry(root, textvariable=cd).grid(column=1, row=5)
 
         # Material
-        ttk.Label(root, text="Material:").grid(column=0, row=6)
+        ttk.Label(root, text="Material Tank:").grid(column=0, row=6)
+        material = tk.StringVar()
+        material_options = ['steel', 'aluminum', 'composites']
+        ttk.Combobox(root, textvariable=material, values=material_options, state="readonly").grid(column=1, row=6)
+
+        material.set("steel")  # default value
+
+        ttk.Label(root, text="Material Mish:").grid(column=0, row=7)
         material = tk.StringVar()
         material_options = ['steel', 'aluminum', 'composites']
         ttk.Combobox(root, textvariable=material, values=material_options, state="readonly").grid(column=1, row=6)
@@ -81,7 +88,8 @@ class Rocket():
         self.orbit = orbit.get()
         self.payload = float(payload.get())
         self.cd = float(cd.get())
-        self.material = material.get()
+        self.material_tank = material_tank.get()
+        self.material_misc = material_misc.get()
         self.bulkhead = bulkhead.get()
         self.pressure = float(pressure.get())
         self.diameter = float(diameter.get())
@@ -100,7 +108,7 @@ class Rocket():
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
         self.propulsion = Propulsion(self.engine)
-        #self.structure = Structure()
+        self.structure = Structure(self.diameter/2, self.material_tank, self.pressure_ox, self.pressure_fuel, self.material_misc):
         self.trajectory = Trajectory(self.orbit, self.payload, self.cd)
 
      
