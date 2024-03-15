@@ -1,8 +1,8 @@
 
-from isogrid_stress import critical_stress
+from python.structure.isogrid_stress import critical_stress
 import numpy as np
-from materials import materials as m
-from geometry import cylindrical_shell_I
+from python.structure.materials import materials as m
+from python.structure.geometry import cylindrical_shell_I
 from ITS_class import s_axial
 from constants import FOSY
 class Shell:

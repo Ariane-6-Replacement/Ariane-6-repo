@@ -1,5 +1,5 @@
-from inputs import engine, first_stage, propellant
-from volume_mass_calculator import get_propellant_mass_volume
+from python.propulsion.inputs import engine, first_stage, propellant
+from python.propulsion.volume_mass_calculator import get_propellant_mass_volume
 import math
 
 class Propulsion():

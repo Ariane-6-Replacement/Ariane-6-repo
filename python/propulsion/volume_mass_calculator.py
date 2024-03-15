@@ -1,5 +1,5 @@
 # IMPORTS
-from inputs import engine, first_stage, propellant
+from python.propulsion.inputs import engine, first_stage, propellant
 
 # INPUTS
 g0 = 9.80665                            # sea level gravitational parameter        
