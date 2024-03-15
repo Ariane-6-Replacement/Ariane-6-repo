@@ -33,8 +33,8 @@ if __name__ == "__main__":
     burn_time = first_stage.time_burn_1st
 
     # make propulsion class based on inputs
-    propulsion = Propulsion("Prometheus", thrust, burn_time)
+    propulsion = Propulsion("Prometheus")
 
     # print/return wanted values
-    print(propulsion.mass_ox, propulsion.mass_fuel, propulsion.mass_total)
-    print(propulsion.volume_ox, propulsion.volume_fuel, propulsion.volume_total)
+    # print(propulsion.mass_ox, propulsion.mass_fuel, propulsion.mass_total)
+    # print(propulsion.volume_ox, propulsion.volume_fuel, propulsion.volume_total)
