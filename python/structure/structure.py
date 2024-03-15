@@ -2,25 +2,27 @@ from python.structure.Tank_class import Tank
 from python.structure.cylinder_class import Cylinder
 from python.structure.ITS_class import Shell
 class Structure():
-    def __init__(self, outer_radius, pressure1, material, volume1, mass1, pressure2,volume2, mass2, thrust, material3
-                 ):
+    def __init__(self, outer_radius,material, pressure_ox, pressure_fuel, material3):
         self.outer_radius = outer_radius
-        self.pressure1 = pressure1
-        self.pressure2 = pressure2
-        self.thrust = thrust
+        self.pressure1 = pressure_ox
+        self.pressure2 = pressure_fuel
+
         self.material = material
         self.material3 = material3 
-        self.volume1 = volume1
-        self.volume2 = volume2
-        self.mass1 = mass1
-        self.mass2 = mass2
+
         # self.material3 = material3
+    def calc(self,  volume_ox, mass_ox,  volume_fuel, mass_fuel, thrust):
+        self.thrust = thrust
+        self.volume1 = volume_ox
+        self.volume2 = volume_fuel
+        self.mass1 = mass_ox
+        self.mass2 = mass_fuel
         tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.mass1]
         tank2 =[self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
-        
+
         self.input = "struc in"
         self.output = 4
-        if mass1 > mass2:
+        if self.mass1 > self.mass2:
             self._tank_fwd = Tank(*tank2)
             self._tank_aft = Tank(*tank1)
         else:
