@@ -22,7 +22,7 @@ class Structure():
 
         self.input = "struc in"
         self.output = 4
-        if mass1 > mass2:
+        if self.mass1 > self.mass2:
             self._tank_fwd = Tank(*tank2)
             self._tank_aft = Tank(*tank1)
         else:

@@ -1,4 +1,4 @@
-import python.structure.geometry
+import python.structure.geometry as geometry
 import numpy as np
 import python.structure.ellipse_stress as es
 class Dome:

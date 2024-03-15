@@ -23,7 +23,7 @@ class Propulsion():
         self.mass_ox = mass_ox
         self.mass_fuel = mass_fuel
         self.mass_total = self.mass_ox + self.mass_fuel
-        return self.total_engine_mass, self.mass_total, self.volume_total, self.engine_number
+        return self.total_engine_mass, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number
 
 if __name__ == "__main__":
 
