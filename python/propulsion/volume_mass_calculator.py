@@ -1,6 +1,5 @@
 # IMPORTS
-from python.propulsion.inputs import engine, first_stage, propellant
-
+from inputs import engine, first_stage, propellant
 
 
 # determines propellant mass flow rate
@@ -43,7 +42,8 @@ def get_propellant_mass_volume(thrust, burn_time, OF_ratio):
 if __name__ == "__main__":
   thrust = first_stage.Thrust
   burn_time = first_stage.time_burn_1st
-  mass_ox, mass_fuel, volume_ox, volume_fuel = get_propellant_mass_volume(thrust, burn_time)
+  OF_ratio = engine.OF_ratio
+  mass_ox, mass_fuel, volume_ox, volume_fuel = get_propellant_mass_volume(thrust, burn_time, OF_ratio)
 
   # return/print whatever you want
   print("mass_ox:",mass_ox,"mass_fuel:",mass_fuel,"Total mass:",mass_ox+mass_fuel)

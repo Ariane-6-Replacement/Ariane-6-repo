@@ -1,6 +1,6 @@
 import math
 
-from python.propulsion.density import get_density
+from density import get_density
 
 
 # CLASSES
@@ -27,7 +27,7 @@ class Prometheus:
         self.exit_diameter = 1.751  # m
         self.exit_area = math.pi * self.exit_diameter ** 2 / 4
         self.height = 4.28  # m
-        self.Ox_to_fuel_ratio = 3.5
+        self.OF_ratio = 3.5
         self.p_exit = 40000  # pa
         self.turbopump_overall_power = 10e6  # MW
         self.diameter_truss_structure = 3.35
