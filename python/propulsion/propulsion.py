@@ -9,7 +9,7 @@ class Propulsion():
     def mass_volume(self,thrust, burn_time, OF_ratio):
         # engine number and mass
         self.engine_number = math.ceil(thrust / engine.Thrust)
-        self.total_engine_mass = engine.mass * self.engine_number
+        self.total_engine_mass = engine.mass_sea * self.engine_number
 
         # calculate mass, volume
         mass_ox, mass_fuel, volume_ox, volume_fuel = get_propellant_mass_volume(thrust, burn_time, OF_ratio)

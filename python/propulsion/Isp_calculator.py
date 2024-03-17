@@ -7,15 +7,38 @@ import numpy as np
 from volume_mass_calculator import get_propellant_mass_volume
 from inputs import engine, first_stage, propellant
 
-# INPUTS
-g0 = 9.80665
+# source: https://www.nextbigfuture.com/2023/07/ariane-test-fires-reusable-prometheus-rocket-engine.html
+def get_Isp_source1():
+    return 360
 
-# for the mixture
-# Cp = ?   # specific heat at const pressure
-# Cv = ?   # specific heat at const volume
-# gamma = ~1.2 # Cp/Cv
+# source: paper: 'High-Performance, Partially Reusable Launchers for Europe'
+# paper states: estimated Isp for prometheus CH4 variant = 287s (sea level) and 319 (vacuum)
+def get_Isp_source2():
+    return 287
 
-for gamma in np.linspace(1.1, 1.3, 5):
+# source: paper: European Next Reusable Ariane (ENTRAIN): A Multidisciplinary Study on a VTVL and a VTHL Booster Stage
+# paper estimates Isp for first stage of reusable booster = 288
+def get_Isp_source3():
+    return 288
+
+
+# TODO find representitive historical data
+def get_Isp_historical():
+    # TODO find representitive historical data
+    return 300
+
+
+
+# use thermal rocket propulsion equations in order to calculate Isp
+def get_Isp_trp(): 
+    # INPUTS
+    g0 = 9.80665
+
+    # for the mixture
+    # Cp = ?   # specific heat at const pressure
+    # Cv = ?   # specific heat at const volume
+    gamma = 1.2 # Cp/Cv
+
     Ra = 8.314 # J/MK
 
     # calculate molar mass of propellant
@@ -43,8 +66,34 @@ for gamma in np.linspace(1.1, 1.3, 5):
     # TRP formula (page 14)
     Isp = w / g0
 
-    print('Gamma:', np.round(gamma, 2))
-    print('The estimated Isp based on TRP equations is:', Isp)
+    print('The estimated Isp based on TRP equations is:', Isp, 'for gamma =', gamma)
+
+    return Isp
+
+
+# tries to find a good estimate for the Isp of prometheus, based on calculations and sources.
+def estimate_Isp():
+    # calculate Isp based on TRP equations
+    Isp_calc = get_Isp_trp()
+
+    # determine Isp based on historical data
+    Isp_his = get_Isp_historical()
+
+    # determine Isp based on sources
+    Isp1 = get_Isp_source1()
+    Isp2 = get_Isp_source2()
+    Isp3 = get_Isp_source3()
+
+    Isp_estimated = np.average([Isp_calc, Isp1, Isp2, Isp3])
+
+    return Isp_estimated
+
+
+
+Isp_estimated = estimate_Isp()
+print(Isp_estimated)
+
+
 
 
 
