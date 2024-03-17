@@ -1,6 +1,6 @@
-import geometry
+import python.structure.geometry as geometry
 import numpy as np
-import ellipse_stress as es
+import python.structure.ellipse_stress as es
 class Dome:
     def __init__(self,
                  outer_radius: float,

@@ -1,18 +1,18 @@
 
-from isogrid_stress import critical_stress
+from python.structure.isogrid_stress import critical_stress
 import numpy as np
-from materials import materials as m
-from geometry import cylindrical_shell_I
-from ITS_class import s_axial
-from constants import FOSY
+from python.structure.materials import materials as m
+from python.structure.geometry import cylindrical_shell_I
+#from ITS_class import s_axial
+from python.structure.constants import FOSY
 class Shell:
     def __init__(self,
                  outer_radius: float,
                  material: dict,
-                 height:float,
-                 thrust:float,
-                 moment:float
-                 ):
+                 height:float):
+                 #thrust:float,
+                 #moment:float
+                 #):
         """
         Cylinder object, containing all relevant parameters. Cylinder coordinate system is defined with the origin at the
         center of the bottom edge. The z_c axis moves along the cylinder's axis in the direction from aft to forward.
@@ -26,8 +26,8 @@ class Shell:
         self.outer_radius = outer_radius
         self.material = m[material]
         self.height = height
-        self.thrust = thrust
-        self.moment = moment
+        #self.thrust = thrust
+       # self.moment = moment
     @property
     def insulation(self):
         return self.height*self.outer_radius*2*np.pi*1.123
