@@ -46,7 +46,8 @@ class Tank:
   
 
 # if __name__ in "__main__":
-#     tank_test = Tank(2.5,7E5,'2219',20E6,300)
+#     tank_test = Tank(2.5,7.8E5,'2219',11E6,400,300E3)
 #     print('DONE')
 #     print('Thickness: ',tank_test._cylinder.thickness)
+#     print('Mass: ',tank_test.mass)
 #     print('FINISHED')
