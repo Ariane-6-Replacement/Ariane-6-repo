@@ -43,7 +43,7 @@ class Prometheus:
     #     return  self.ISP
         
         self.Isp = 306.266 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
-
+        return self.Isp
 
 
 
