@@ -18,7 +18,7 @@ dV_split = [0.346768978, 0.653231022] # Stage dV fraction (0 to 1)
 m_payload = 22_800 # Payload mass (kg) 
 inert_mass_fractions = [0.0551575931, 0.0403852128] # Mass of structure relative to total mass of that stage (0 to 1)
 I_sp = [296.5, 340] # Engine specific impulse for each stage.
-rockets_per_stage = np.array([1, 1])
+
 
 ############################################################################
 
@@ -86,86 +86,78 @@ if __name__ == "__main__":
     ############################################################################
 
     # COST CONVERSION FUNCTIONS
-def Costmodel():
-    def __init__(self):
-    def man_years_to_million_euro_2022(man_years):
+class Costmodel():
+    def __init__(self, launches_per_year = 11, rocket_fleet_count = 5, number_of_engines = 11, rocket_reflights = 15,
+        launch_site_capacity = 12, engine_unit_cost = 1000000, engine_reflights = 15, M_drymass):
+
+        total_flights = rocket_fleet_count * rocket_reflights
+        rockets_per_stage = np.array([1, 1])
+        self.development_model = DevelopModel(system_nature = "none", team_experience = "none", M_drymass)
+        f4 = self.development_model.f4
+        self.production_model = ProductionModel(rockets_per_stage, dry_masses, f4)
+        self.total_production_cost, total_unit_production_cost, N = self.production_model.get_total_production_cost(
+            rocket_fleet_count)
+        self.operation_model = OperationModel(launches_per_year, total_unit_production_cost, engine_unit_cost, N, number_of_engines,
+                 rocket_reflights, engine_reflights, launch_site_capacity)
+    def man_years_to_million_euro_2022(self,man_years):
         return man_years * 0.3397536 # TODO: ADD REFERENCE
 
-    def million_euro_to_man_years_2022(million_euro):
+    def million_euro_to_man_years_2022(self, million_euro):
         return million_euro / 0.3397536
 
-    ############################################################################
+    def get_cost_per_launch(self):
+        total_lifecycle_cost =  self.development_model.get_dev_costs()+ \
+                                self.total_production_cost + \
+                                self.operation_model.get_operation_cost():
 
-    # COST INPUTS
+        cost_per_launch = total_lifecycle_cost / total_flights + propellant_cost_per_launch + indirect_operations_cost_per_launch
 
-    ############################################################################
-
-    launches_per_year = 11
-    rocket_fleet_count = 5
-    number_of_engines = 11
-    rocket_reflights = 15
-    launch_site_capacity = 12 # Maximum number of launches that the launch site can do per year
-    # TODO: Add engine unit cost in man-years
-    engine_unit_cost = million_euro_to_man_years_2022(1_000_000) # Man-years
-    engine_reflights = 15
-
-    total_flights = rocket_fleet_count * rocket_reflights
-
-    ############################################################################
-
-    # DEVELOPMENT COST
-
-    ############################################################################
-
+       # print("Cost per launch (man-years):", cost_per_launch)
+       # print("Cost per launch (million euros):", man_years_to_million_euro_2022(cost_per_launch))
     #---------------------------------------------------------------------------
+class DevelopModel():
+    def __init__(self, system_nature = "none", team_experience = "none", M_drymass):
 
-    system_nature = "" # "new" # or: "similar", "similar_modified"
-    team_experience = "" # "none" # or "some_related", "experienced"
+        self.f1 = 1 # Technical Difficulty Factor
+        self.f2 = 1 # Tech Quality Factor (from graph)
+        self.f3 = 1 # Team Experience Factor
+        self.f4 = 0.86 # Learning factor # 0.86 corresponds to 6 rockets per year
+        self.M_drymass = M_drymass
+        if system_nature == "new":
+            self.f1 = 1.25 # New system: 1.25
+        elif system_nature == "similar":
+            self.f1 = 0.9 # Similar systems exist: 0.8 -> 1.0
+        elif system_nature == "similar_modified":
+            self.f1 = 0.6 # Same as built by 1st party, only modifications: 0.4 -> 0.8
 
-    f1 = 1 # Technical Difficulty Factor
-    f2 = 1 # Tech Quality Factor (from graph)
-    f3 = 1 # Team Experience Factor
-    f4 = 0.86 # Learning factor # 0.86 corresponds to 6 rockets per year
-
-    if system_nature == "new":
-        f1 = 1.25 # New system: 1.25
-    elif system_nature == "similar":
-        f1 = 0.9 # Similar systems exist: 0.8 -> 1.0
-    elif system_nature == "similar_modified":
-        f1 = 0.6 # Same as built by 1st party, only modifications: 0.4 -> 0.8
-
-    if team_experience == "none":
-        f3 = 1.2 # New : 1.1 -> 1.3
-    elif team_experience == "some_related":
-        f3 = 0.95 # Some related experience: 0.9 -> 1.1
-    elif team_experience == "experienced":
-        f3 = 0.75 # Previous relevant experience: 0.6 -> 0.9
-
-    # Man-years
-    def get_dev_costs_expandable(M_drymass, f_1, f_2, f_3):
-        return 3140 * M_drymass ** 0.21 * f_1 * f_2 * f_3
+        if team_experience == "none":
+            self.f3 = 1.2 # New : 1.1 -> 1.3
+        elif team_experience == "some_related":
+            self.f3 = 0.95 # Some related experience: 0.9 -> 1.1
+        elif team_experience == "experienced":
+            self.f3 = 0.75 # Previous relevant experience: 0.6 -> 0.9
 
     # Man-years
-    def get_dev_costs_ballistic_reusable(M_drymass, f_1, f_2, f_3):
-        return 4080 * M_drymass ** 0.21 * f_1 * f_2 * f_3
-
-    reusable_costs = get_dev_costs_ballistic_reusable(dry_masses[0], f1, f2, f3)
-    expandable_costs = get_dev_costs_expandable(dry_masses[1:dry_masses.size], f1, f2, f3)
-
-    #---------------------------------------------------------------------------
-
-    management_factor = 1.1
+    def get_dev_costs_expandable(self):
+        return 3140 * self.M_drymass[0] ** 0.21 * self.f_1 * self.f_2 * self.f_3
 
     # Man-years
-    total_dev_cost = management_factor * (np.sum(reusable_costs) + np.sum(expandable_costs))
-
+    def get_dev_costs_ballistic_reusable(self):
+        return 4080 * self.M_drymass[1:dry_masses.size] ** 0.21 * self.f_1 * self.f_2 * self.f_3
+    def get_dev_costs(self):
+        reusable_costs = self.get_dev_costs_ballistic_reusable()
+        expandable_costs = self.get_dev_costs_expandable()
+        management_factor = 1.1
+        # Man-years
+        total_dev_cost = management_factor * (np.sum(reusable_costs) + np.sum(expandable_costs))
+        return total_dev_cost
     #---------------------------------------------------------------------------
 
     ############################################################################
 
-    print("Ballistic reusable dev costs:", reusable_costs)
-    print("Expandable dev costs:", expandable_costs)
-    print("Total dev costs:", total_dev_cost)
+    #print("Ballistic reusable dev costs:", reusable_costs)
+    ##print("Expandable dev costs:", expandable_costs)
+    #print("Total dev costs:", total_dev_cost)
 
     ############################################################################
 
@@ -174,108 +166,117 @@ def Costmodel():
     ############################################################################
 
     #---------------------------------------------------------------------------
-
+class ProductionModel():
     # Man-years
-    unit_production_cost = 5.0 * rockets_per_stage * f4 * dry_masses ** 0.46
+    def __init__(self, rockets_per_stage, dry_masses, f4):
+        self.dry_masses = dry_masses
+        self.rockets_per_stage = rockets_per_stage
+        self.f4 = f4
+    def get_total_production_cost(self, number_of_units):
+        unit_production_cost = 5.0 * self.rockets_per_stage * self.f4 * self.dry_masses ** 0.46
 
-    #---------------------------------------------------------------------------
+        # ---------------------------------------------------------------------------
 
-    # Number of individual rocket stages (including identical ones)
-    N = np.sum(rockets_per_stage)
+        # Number of individual rocket stages (including identical ones)
+        N = np.sum(self.rockets_per_stage)
 
-    total_unit_production_cost = 1.02 ** N * np.sum(unit_production_cost)
+        total_unit_production_cost = 1.02 ** N * np.sum(unit_production_cost)
+        total_production_cost = number_of_units * total_unit_production_cost
+        # ---------------------------------------------------------------------------
 
-    #---------------------------------------------------------------------------
 
-    def get_total_production_cost(number_of_units, total_per_unit_production_cost):
-        return number_of_units * total_per_unit_production_cost
+        return total_production_cost, total_unit_production_cost, N
 
-    total_production_cost = get_total_production_cost(rocket_fleet_count, total_unit_production_cost)
+   # total_production_cost = get_total_production_cost(rocket_fleet_count, total_unit_production_cost)
 
     #---------------------------------------------------------------------------
 
     ############################################################################
 
-    print("Unit production cost:", unit_production_cost)
-    print("Total per unit production cost:", total_unit_production_cost)
-    print("Total production cost for %s" % (rocket_fleet_count), "rockets:", total_production_cost)
+    #print("Unit production cost:", unit_production_cost)
+    #print("Total per unit production cost:", total_unit_production_cost)
+    #print("Total production cost for %s" % (rocket_fleet_count), "rockets:", total_production_cost)
 
     ############################################################################
 
     # FLIGHT OPERATIONS COST
 
     ############################################################################
-
+class OperationModel():
     #---------------------------------------------------------------------------
+    def __init__(self, launches_per_year, total_unit_production_cost, engine_unit_cost, N, number_of_engines,
+                 rocket_reflights, engine_reflights, launch_site_capacity):
+        a_expandable = 3
+        a_reusable = 4
 
-    a_expandable = 3
-    a_reusable = 4
-
-    a_values = np.array([a_reusable, a_expandable])
+        a_values = np.array([a_reusable, a_expandable])
 
     # Man-years
-    technical_system_management_cost = (5 + np.sum(a_values)) * launches_per_year ** -0.35
+        self.technical_system_management_cost = (5 + np.sum(a_values)) * launches_per_year ** -0.35
+
+        #---------------------------------------------------------------------------
+
+        b_expandable = 12
+        b_reusable = 20
+
+        b_values = np.array([b_reusable, b_expandable])
+
+        # Man-years
+        self.prelaunch_operations_cost = (16 + np.sum(b_values)) * launches_per_year ** -0.35
+
+        #---------------------------------------------------------------------------
+
+        d_expandable = 1
+        d_reusable = 2
+
+        d_values = np.array([d_reusable, d_expandable])
+
+        # Man-years
+        self.launch_and_mission_operations_cost = (4 + np.sum(d_values)) * launches_per_year ** -0.15
+
+        #---------------------------------------------------------------------------
+
+        total_propellant_mass = np.sum(prop_masses)
+
+        average_boil_off_rate = 0.2 # LOX and Methane similar: 0.2
+
+        # Man-years / launch
+        self.propellant_cost_per_launch = (0.016 * total_propellant_mass * average_boil_off_rate *
+                                           (total_propellant_mass * launches_per_year) ** -0.16)
+
+        #---------------------------------------------------------------------------
+
+        # recovery_cost is skipped because both land at launch site
+
+        #---------------------------------------------------------------------------
+
+        stage_refurbishment_effort = 3
+        guidance_and_control_refurbishment_effort = 2
+        engine_refurbishment_effort = 0.2
+        fabrication_effort = total_unit_production_cost
+        engine_effort = engine_unit_cost
+
+        # Man-years
+        self.refurbishment_cost = N * (stage_refurbishment_effort + guidance_and_control_refurbishment_effort) + number_of_engines * engine_refurbishment_effort \
+                            + 2.5 * 10 ** -5 * rocket_reflights * fabrication_effort + 5 * 10 ** -5 * engine_reflights * engine_effort
+
+        #---------------------------------------------------------------------------
+
+        # Man-years per launch
+        self.indirect_operations_cost_per_launch = 40 * launch_site_capacity ** 0.34 / launches_per_year ** 0.55
 
     #---------------------------------------------------------------------------
-
-    b_expandable = 12
-    b_reusable = 20
-
-    b_values = np.array([b_reusable, b_expandable])
-
-    # Man-years
-    prelaunch_operations_cost = (16 + np.sum(b_values)) * launches_per_year ** -0.35
-
-    #---------------------------------------------------------------------------
-
-    d_expandable = 1
-    d_reusable = 2
-
-    d_values = np.array([d_reusable, d_expandable])
-
-    # Man-years
-    launch_and_mission_operations_cost = (4 + np.sum(d_values)) * launches_per_year ** -0.15
-
-    #---------------------------------------------------------------------------
-
-    total_propellant_mass = np.sum(prop_masses)
-
-    average_boil_off_rate = 0.2 # LOX and Methane similar: 0.2
-
-    # Man-years / launch
-    propellant_cost_per_launch = 0.016 * total_propellant_mass * average_boil_off_rate * (total_propellant_mass * launches_per_year) ** -0.16
-
-    #---------------------------------------------------------------------------
-
-    # recovery_cost is skipped because both land at launch site
-
-    #---------------------------------------------------------------------------
-
-    stage_refurbishment_effort = 3
-    guidance_and_control_refurbishment_effort = 2
-    engine_refurbishment_effort = 0.2
-    fabrication_effort = total_unit_production_cost
-    engine_effort = engine_unit_cost
-
-    # Man-years
-    refurbishment_cost = N * (stage_refurbishment_effort + guidance_and_control_refurbishment_effort) + number_of_engines * engine_refurbishment_effort \
-                        + 2.5 * 10 ** -5 * rocket_reflights * fabrication_effort + 5 * 10 ** -5 * engine_reflights * engine_effort
-
-    #---------------------------------------------------------------------------
-
-    # Man-years per launch
-    indirect_operations_cost_per_launch = 40 * launch_site_capacity ** 0.34 / launches_per_year ** 0.55
-
-    #---------------------------------------------------------------------------
-
+    def get_operation_cost(self):
+        return self.technical_system_management_cost  + self.prelaunch_operations_cost  + \
+                                self.launch_and_mission_operations_cost  + self.refurbishment_cost
     ############################################################################
 
-    print("Technical system management cost:", technical_system_management_cost)
-    print("Prelaunch operations cost: ", prelaunch_operations_cost)
-    print("Launch and mission operations cost: ", launch_and_mission_operations_cost)
-    print("Propellant cost per launch:", propellant_cost_per_launch)
-    print("Refurbishment cost:", refurbishment_cost)
-    print("Indirect operations cost per launch:", indirect_operations_cost_per_launch)
+    #print("Technical system management cost:", technical_system_management_cost)
+    #print("Prelaunch operations cost: ", prelaunch_operations_cost)
+    #print("Launch and mission operations cost: ", launch_and_mission_operations_cost)
+    #print("Propellant cost per launch:", propellant_cost_per_launch)
+    #print("Refurbishment cost:", refurbishment_cost)
+    #print("Indirect operations cost per launch:", indirect_operations_cost_per_launch)
 
     ############################################################################
 
@@ -300,14 +301,4 @@ def Costmodel():
 
     ############################################################################
 
-    total_lifecycle_cost =  total_dev_cost + \
-                            total_production_cost + \
-                            technical_system_management_cost  + \
-                            prelaunch_operations_cost  + \
-                            launch_and_mission_operations_cost  + \
-                            refurbishment_cost
 
-    cost_per_launch = total_lifecycle_cost / total_flights + propellant_cost_per_launch + indirect_operations_cost_per_launch
-
-    print("Cost per launch (man-years):", cost_per_launch)
-    print("Cost per launch (million euros):", man_years_to_million_euro_2022(cost_per_launch))

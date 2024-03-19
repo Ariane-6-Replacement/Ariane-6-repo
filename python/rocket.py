@@ -54,9 +54,10 @@ class Rocket():
         mass_estimator = MassCalculator()
         wet_masses = mass_estimator.get_wet_masses(self.dv, self.dv_split, [self.mf1,self.mf2],
                                                    [self.propulsion.Isp, self.isp2], self.payload)
-        self.mass_p = mass_estimator.get_propellant_masses(wet_masses, [self.mf1,self.mf2])
-        self.mass_s = mass_estimator.get_dry_masses(wet_masses, [self.mf1,self.mf2])
+        self.mass_p, self.mass_p2 = mass_estimator.get_propellant_masses(wet_masses, [self.mf1,self.mf2])
+        self.mass_s, self.mass_s2  = mass_estimator.get_dry_masses(wet_masses, [self.mf1,self.mf2])
         self.mass = self.mass_s + self.mass_p
+        self.mass2 = self.mass_p2 + self.mass_s2
     def cost_estimator(self):
         return self.mass * 25.00 #placeholder
     def iterate(self):
@@ -90,6 +91,7 @@ class Rocket():
             f"Pressure: {self.pressure_ox} bar",
             f"Structural Mass: {self.mass_s:.0f} kg",
             f"Propellant Mass: {self.mass_p:.0f} kg",
+            f"Upper stage Mass: {self.mass2:.0f} kg",
             f"Estimated cost: €{self.cost:.0f} "
         ]
 
