@@ -1,5 +1,6 @@
 import pandas as pd
-
+import matplotlib.pyplot as plt
+import numpy as np
 class Trajectory():
     def __init__(self, orbit, payload, cd):
         data = [['Standard Geostationary Transfer Orbit', 'GTO', 6, 250, 35786, 178, 11500],
@@ -15,4 +16,9 @@ class Trajectory():
     def thrust_burntime(self, mass, dv):
         thrust = 19e6
         burntime = 100 #placeholders
+        x = np.array([1,2,3,4,5,6,7,8,9])
+        y = x**0.5
+        self.fig, ax = plt.subplots(1, 1, figsize=(3, 2))
+        ax.plot(x, y, label='Traj')
+
         return thrust, burntime

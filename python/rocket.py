@@ -7,26 +7,25 @@ from python.trajectory.trajectory import Trajectory
 import tkinter as tk
 from tkinter import ttk
 from python.structure.materials import materials as m
-
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class Rocket():
-    def __init__(self, engine, dv, boostback, orbit, payload, cd, material_tank, material_misc, pressure_ox,
-                 pressure_fuel, diameter, OF_ratio):
+    def __init__(self, input_dict):
 
-        self.engine = engine.get()
-        self.dv = float(dv.get())
-        self.boostback = boostback.get()
-        self.orbit = orbit.get()
-        self.payload = float(payload.get())
-        self.cd = float(cd.get())
-        self.material_tank = material_tank.get()
-        self.material_misc = material_misc.get()
-        # self.bulkhead = bulkhead.get()
-        self.pressure_ox = float(pressure_ox.get())
-        self.pressure_fuel = float(pressure_fuel.get())
-        self.diameter = float(diameter.get())
-        self.OF_ratio = float(OF_ratio.get())
-
+        self.engine = input_dict["engine"].get()
+        self.dv = float(input_dict["dv"].get())
+        self.boostback = input_dict["boostback"].get()
+        self.orbit = input_dict["orbit"].get()
+        self.payload = float(input_dict["payload"].get())
+        self.cd = float(input_dict["cd"].get())
+        self.material_tank = input_dict["material_tank"].get()
+        self.material_misc = input_dict["material_misc"].get()
+        self.bulkhead = input_dict["bulkhead"].get()
+        self.pressure_ox = float(input_dict["pressure_ox"].get())
+        self.pressure_fuel = float(input_dict["pressure_fuel"].get())
+        self.diameter = float(input_dict["diameter"].get())
+        self.OF_ratio = float(input_dict["OF_ratio"].get())
+        self.root = None
         print(f"Engine: {self.engine}")
         print(f"Delta V: {self.dv} m/s")
         print(f"Boostback: {self.boostback}")
@@ -52,9 +51,7 @@ class Rocket():
     def cost_estimator(self):
         return self.mass * 25.00 #placeholder
     def iterate(self):
-        try:
-            self.root.destroy()
-        except: pass
+
         self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass,  self.dv)
         self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = (
             self.propulsion.mass_volume(self.thrust, self.burntime, self.OF_ratio))
@@ -70,7 +67,8 @@ class Rocket():
 
         self.show_result()
     def show_result(self):
-        self.root = tk.Tk()
+        if self.root == None:
+            self.root = tk.Tk()
         values = [
             f"Engine: {self.engine} N",
             f"Delta V: {self.dv} m/s",
@@ -83,114 +81,120 @@ class Rocket():
             f"Pressure: {self.pressure_ox} bar",
             f"Structural Mass: {self.mass_s:.0f} kg",
             f"Propellant Mass: {self.mass_p:.0f} kg",
-            f"Estimated cost: {self.cost:.0f} €"
+            f"Estimated cost: €{self.cost:.0f} "
         ]
 
         # Dynamically create labels to display each value
         for i, value in enumerate(values):
             ttk.Label(self.root, text=value).grid(column=0, row=i, sticky='w')
 
+        fig = self.trajectory.fig
+        canvas = FigureCanvasTkAgg(fig, master=self.root)
+        canvas_widget = canvas.get_tk_widget()
+
+        # Place the canvas within the Tkinter window
+        canvas_widget.grid(row=i+1, column=0, sticky="nsew")
+
         iterate_button = ttk.Button(self.root, text="Iterate", command= self.iterate)
         iterate_button.grid(column=0, row=len(values) + 1, pady=10)
         self.root.mainloop()
-def make_rocket(engine, dv, boostback, orbit, payload, cd, material_tank, material_misc, pressure_ox,
-                 pressure_fuel, diameter, OF_ratio):
-    r = Rocket(engine, dv, boostback, orbit, payload, cd, material_tank, material_misc, pressure_ox,
-                 pressure_fuel, diameter, OF_ratio)
+def make_rocket(input_dict):
+    r = Rocket(input_dict)
     r.mass_estimation()
     r.iterate()
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Input Screen")
+    input_dict = {}
     i = 0
     ttk.Label(root, text="Engine:").grid(column=0, row=i)
-    engine = tk.StringVar()
+    input_dict["engine"] = tk.StringVar()
     engine_options = ['Prometheus']
-    ttk.Combobox(root, textvariable=engine, values=engine_options, state="readonly").grid(column=1, row=i)
+    ttk.Combobox(root, textvariable=input_dict["engine"], values=engine_options, state="readonly").grid(column=1, row=i)
 
-    engine.set("Prometheus")  # default value
+    input_dict["engine"].set("Prometheus")  # default value
     i += 1
     # Delta V
     ttk.Label(root, text="Delta V 1st stage (m/s):").grid(column=0, row=i)
-    dv = tk.StringVar(value='3000')
-    ttk.Entry(root, textvariable=dv).grid(column=1, row=i)
+    input_dict["dv"] = tk.StringVar(value='3000')
+    ttk.Entry(root, textvariable=input_dict["dv"]).grid(column=1, row=i)
 
     # Boostback
     i += 1
     ttk.Label(root, text="Boostback:").grid(column=0, row=i)
-    boostback = tk.BooleanVar(value=False)
-    ttk.Checkbutton(root, variable=boostback).grid(column=1, row=i)
+    input_dict["boostback"] = tk.BooleanVar(value=False)
+    ttk.Checkbutton(root, variable=input_dict["boostback"]).grid(column=1, row=i)
 
     # Orbit
     i += 1
     ttk.Label(root, text="Orbit:").grid(column=0, row=i)
-    orbit = tk.StringVar()
+    input_dict["orbit"] = tk.StringVar()
     orbit_options = ['LEO', 'MEO', 'GEO', 'HEO']
-    ttk.Combobox(root, textvariable=orbit, values=orbit_options, state="readonly").grid(column=1, row=i)
-    orbit.set("LEO")  # default value
+    ttk.Combobox(root, textvariable=input_dict["orbit"], values=orbit_options, state="readonly").grid(column=1, row=i)
+    input_dict["orbit"].set("LEO")  # default value
 
     # Payload
     i += 1
     ttk.Label(root, text="Payload (kg):").grid(column=0, row=i)
-    payload = tk.StringVar(value='20000')
-    ttk.Entry(root, textvariable=payload).grid(column=1, row=i)
+    input_dict["payload"]= tk.StringVar(value='20000')
+    ttk.Entry(root, textvariable=input_dict["payload"]).grid(column=1, row=i)
 
     # Drag Coefficient
     i += 1
     ttk.Label(root, text="Drag Coefficient:").grid(column=0, row=i)
-    cd = tk.StringVar(value='0.2')
-    ttk.Entry(root, textvariable=cd).grid(column=1, row=i)
+    input_dict["cd"] = tk.StringVar(value='0.2')
+    ttk.Entry(root, textvariable=input_dict["cd"]).grid(column=1, row=i)
 
     # Material
     i += 1
     ttk.Label(root, text="Material Tank:").grid(column=0, row=i)
-    material_tank = tk.StringVar()
+    input_dict["material_tank"] = tk.StringVar()
     material_options = list(m.keys())
-    ttk.Combobox(root, textvariable=material_tank, values=material_options, state="readonly").grid(column=1, row=i)
+    ttk.Combobox(root, textvariable=input_dict["material_tank"], values=material_options, state="readonly").grid(column=1, row=i)
 
-    material_tank.set(material_options[0])  # default value
+    input_dict["material_tank"].set(material_options[0])  # default value
+
     i += 1
     ttk.Label(root, text="Material Misc:").grid(column=0, row=i)
-    material_misc = tk.StringVar()
+    input_dict["material_misc"] = tk.StringVar()
     material_options = list(m.keys())
-    ttk.Combobox(root, textvariable=material_misc, values=material_options, state="readonly").grid(column=1, row=i)
+    ttk.Combobox(root, textvariable=input_dict["material_misc"], values=material_options, state="readonly").grid(column=1, row=i)
 
-    material_misc.set(material_options[0])  # default value
+    input_dict["material_misc"].set(material_options[0])  # default value
 
-    # Bulkhead
-    # i += 1
-    # ttk.Label(root, text="Bulkhead:").grid(column=0, row=i)
-    ##bulkhead = tk.StringVar()
-    # bulkhead_options = ['shared', 'separate']
-    # ttk.Combobox(root, textvariable=bulkhead, values=bulkhead_options, state="readonly").grid(column=1,row=i)
+    #Bulkhead
+    i += 1
+    ttk.Label(root, text="Bulkhead:").grid(column=0, row=i)
+    input_dict["bulkhead"] = tk.StringVar()
+    bulkhead_options = ['shared', 'separate']
+    ttk.Combobox(root, textvariable=input_dict["bulkhead"], values=bulkhead_options, state="readonly").grid(column=1,row=i)
 
-    # bulkhead.set("shared")  # default value
+    input_dict["bulkhead"].set("shared")  # default value
 
     # Pressure
     i += 1
     ttk.Label(root, text="Pressure OX (bar):").grid(column=0, row=i)
-    pressure_ox = tk.StringVar(value='5')
-    ttk.Entry(root, textvariable=pressure_ox).grid(column=1, row=i)
+    input_dict["pressure_ox"] = tk.StringVar(value='5')
+    ttk.Entry(root, textvariable=input_dict["pressure_ox"]).grid(column=1, row=i)
 
     i += 1
     ttk.Label(root, text="Pressure fuel (bar):").grid(column=0, row=i)
-    pressure_fuel = tk.StringVar(value='5')
-    ttk.Entry(root, textvariable=pressure_fuel).grid(column=1, row=i)
+    input_dict["pressure_fuel"] = tk.StringVar(value='5')
+    ttk.Entry(root, textvariable=input_dict["pressure_fuel"]).grid(column=1, row=i)
 
     i += 1
     ttk.Label(root, text="Diameter (m):").grid(column=0, row=i)
-    diameter = tk.StringVar(value='5')
-    ttk.Entry(root, textvariable=diameter).grid(column=1, row=i)
+    input_dict["diameter"] = tk.StringVar(value='5')
+    ttk.Entry(root, textvariable=input_dict["diameter"]).grid(column=1, row=i)
 
     i += 1
     ttk.Label(root, text="O/F ratio :").grid(column=0, row=i)
-    OF_ratio = tk.StringVar(value='3.5')
-    ttk.Entry(root, textvariable=OF_ratio).grid(column=1, row=i)
+    input_dict["OF_ratio"] = tk.StringVar(value='3.5')
+    ttk.Entry(root, textvariable=input_dict["OF_ratio"]).grid(column=1, row=i)
     # Submit button (Example action, customize as needed)
     i+=1
-    ttk.Button(root, text="Submit", command= lambda: make_rocket(engine, dv, boostback, orbit, payload, cd, material_tank, material_misc, pressure_ox,
-                 pressure_fuel, diameter, OF_ratio)).grid(column=0, row=i, columnspan=2)
+    ttk.Button(root, text="Submit", command= lambda: make_rocket(input_dict)).grid(column=0, row=i, columnspan=2)
 
     root.mainloop()
 

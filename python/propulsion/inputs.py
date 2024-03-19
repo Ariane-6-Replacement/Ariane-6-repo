@@ -1,6 +1,6 @@
 import math
 
-from density import get_density
+from python.propulsion.density import get_density
 
 
 # CLASSES
@@ -34,7 +34,7 @@ class Prometheus:
         self.diameter_truss_structure = 3.35
         self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
 
-    # def get_Isp(self, OF_ratio):
+    def get_Isp(self, OF_ratio):
     #     """"
     #     Lower O/F can mean less mass because LOX is heavy. Nominal: Isp = 360 for 100bar and O/F=3.5
     #     assume Isp goes down with 10 for every 0.1 OF. chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
@@ -43,7 +43,7 @@ class Prometheus:
     #     return  self.ISP
         
         self.Isp = 306.266 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
-
+        return self.Isp
 
 
 
