@@ -86,7 +86,8 @@ if __name__ == "__main__":
     ############################################################################
 
     # COST CONVERSION FUNCTIONS
-
+def Costmodel():
+    def __init__(self):
     def man_years_to_million_euro_2022(man_years):
         return man_years * 0.3397536 # TODO: ADD REFERENCE
 
