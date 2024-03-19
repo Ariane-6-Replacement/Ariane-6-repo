@@ -1,5 +1,5 @@
-from python.structure.Components.Tank_class import Tank
-from python.structure.Components.ITS_class import Shell
+from Components.Tank_class import Tank
+from Components.ITS_class import Shell
 class Structure():
     def __init__(self, outer_radius,material, pressure_ox, pressure_fuel, material3):
         self.outer_radius = outer_radius

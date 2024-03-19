@@ -1,7 +1,7 @@
-from structure.Components.dome_class import Dome
-from structure.Components.cylinder_class import Cylinder
+from Components.dome_class import Dome
+from Components.cylinder_class import Cylinder
 import numpy as np
-from structure.materials import materials as m
+from materials import materials as m
 class Tank:
     def __init__(self, outer_radius, pressure, material ,thrust, volume, mass_p) -> None:
         self.outer_radius = outer_radius

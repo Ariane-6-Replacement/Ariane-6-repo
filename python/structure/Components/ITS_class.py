@@ -1,10 +1,10 @@
 
-from python.structure.Loading.isogrid_stress import critical_stress
+from Loading.isogrid_stress import critical_stress
 import numpy as np
-from structure.materials import materials as m
-from structure.geometry import cylindrical_shell_I
-from python.structure.Components.ITS_class import s_axial
-from structure.constants import FOSY
+from materials import materials as m
+from geometry import cylindrical_shell_I
+from Loading.axial_stress import s_axial
+from constants import FOSY
 class Shell:
     def __init__(self,
                  outer_radius: float,
