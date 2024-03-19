@@ -46,8 +46,8 @@ class MassCalculator:
             wet_masses.append(wet_mass_i)
 
         # Convert to tonnes after iterations are done
-        for i, _ in enumerate(wet_masses):
-            wet_masses[i] /= 1000
+        #for i, _ in enumerate(wet_masses):
+        #    wet_masses[i] /= 1000
 
         return list(reversed(wet_masses))
 
@@ -112,7 +112,8 @@ class Costmodel():
                                 self.operation_model.get_operation_cost()
 
         cost_per_launch = total_lifecycle_cost / self.total_flights + self.operation_model.propellant_cost_per_launch + self.operation_model.indirect_operations_cost_per_launch
-        return cost_per_launch
+
+        return self.man_years_to_million_euro_2022(cost_per_launch)
        # print("Cost per launch (man-years):", cost_per_launch)
        # print("Cost per launch (million euros):", man_years_to_million_euro_2022(cost_per_launch))
         #---------------------------------------------------------------------------
@@ -140,11 +141,11 @@ class DevelopModel():
 
     # Man-years
     def get_dev_costs_expandable(self):
-        return 3140 * self.M_drymass[0] ** 0.21 * self.f_1 * self.f_2 * self.f_3
+        return 3140 * self.M_drymass[0] ** 0.21 * self.f1 * self.f2 * self.f3
 
     # Man-years
     def get_dev_costs_ballistic_reusable(self):
-        return 4080 * self.M_drymass[1:self.M_drymass.size] ** 0.21 * self.f_1 * self.f_2 * self.f_3
+        return 4080 * self.M_drymass[1:self.M_drymass.size] ** 0.21 * self.f1 * self.f2 * self.f3
     def get_dev_costs(self):
         reusable_costs = self.get_dev_costs_ballistic_reusable()
         expandable_costs = self.get_dev_costs_expandable()

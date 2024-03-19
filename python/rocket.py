@@ -1,5 +1,6 @@
 #from aerodynamics.aerodynamics import Aerodynamics
 #from control.control import Control
+import numpy as np
 
 from python.propulsion.propulsion import Propulsion
 from python.structure.structure import Structure
@@ -60,7 +61,7 @@ class Rocket():
         self.mass = self.mass_s + self.mass_p
         self.mass2 = self.mass_p2 + self.mass_s2
     def cost_estimator(self):
-        cost_calc = Costmodel([self.mass_s,self.mass_s2], [self.mass_p,self.mass_p2])
+        cost_calc = Costmodel(np.array([self.mass_s,self.mass_s2]), np.array([self.mass_p,self.mass_p2]))
         cost_per_launch = cost_calc.get_cost_per_launch()
         return cost_per_launch
     def iterate(self):
