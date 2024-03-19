@@ -68,18 +68,18 @@ class MassCalculator:
         return m_dry_masses
 
 
-if __name__ == "__main__":
-    wet_masses = get_wet_masses(dV, dV_split, inert_mass_fractions, I_sp, m_payload)
-    prop_masses = get_propellant_masses(wet_masses, inert_mass_fractions)
-    dry_masses = get_dry_masses(wet_masses, inert_mass_fractions)
+#if __name__ == "__main__":
+#    wet_masses = get_wet_masses(dV, dV_split, inert_mass_fractions, I_sp, m_payload)
+#    prop_masses = get_propellant_masses(wet_masses, inert_mass_fractions)
+#    dry_masses = get_dry_masses(wet_masses, inert_mass_fractions)
 
-    print("Wet masses:", wet_masses, "(tonnes)")
-    print("Propellant masses:", prop_masses, "(tonnes)")
-    print("Dry masses:", dry_masses, "(tonnes)")
+#    print("Wet masses:", wet_masses, "(tonnes)")
+#    print("Propellant masses:", prop_masses, "(tonnes)")
+#   print("Dry masses:", dry_masses, "(tonnes)")
 
-    dry_masses = np.array(dry_masses)
-    prop_masses = np.array(prop_masses)
-
+#    dry_masses = np.array(dry_masses)
+ #   prop_masses = np.array(prop_masses)
+#
 
 
 
@@ -87,18 +87,19 @@ if __name__ == "__main__":
 
     # COST CONVERSION FUNCTIONS
 class Costmodel():
-    def __init__(self, launches_per_year = 11, rocket_fleet_count = 5, number_of_engines = 11, rocket_reflights = 15,
-        launch_site_capacity = 12, engine_unit_cost = 1000000, engine_reflights = 15, M_drymass):
+    def __init__(self, M_drymass, prop_masses, launches_per_year = 11, rocket_fleet_count = 5, number_of_engines = 11, rocket_reflights = 15,
+        launch_site_capacity = 12, engine_unit_cost = 1000000, engine_reflights = 15):
 
-        total_flights = rocket_fleet_count * rocket_reflights
+        self.total_flights = rocket_fleet_count * rocket_reflights
         rockets_per_stage = np.array([1, 1])
-        self.development_model = DevelopModel(system_nature = "none", team_experience = "none", M_drymass)
+        self.development_model = DevelopModel(M_drymass,system_nature = "none", team_experience = "none")
         f4 = self.development_model.f4
-        self.production_model = ProductionModel(rockets_per_stage, dry_masses, f4)
+        self.production_model = ProductionModel(rockets_per_stage, M_drymass, f4)
         self.total_production_cost, total_unit_production_cost, N = self.production_model.get_total_production_cost(
             rocket_fleet_count)
-        self.operation_model = OperationModel(launches_per_year, total_unit_production_cost, engine_unit_cost, N, number_of_engines,
-                 rocket_reflights, engine_reflights, launch_site_capacity)
+        self.operation_model = OperationModel(launches_per_year, total_unit_production_cost, engine_unit_cost, N,
+                                              number_of_engines, rocket_reflights, engine_reflights,
+                                              launch_site_capacity, prop_masses)
     def man_years_to_million_euro_2022(self,man_years):
         return man_years * 0.3397536 # TODO: ADD REFERENCE
 
@@ -108,15 +109,15 @@ class Costmodel():
     def get_cost_per_launch(self):
         total_lifecycle_cost =  self.development_model.get_dev_costs()+ \
                                 self.total_production_cost + \
-                                self.operation_model.get_operation_cost():
+                                self.operation_model.get_operation_cost()
 
-        cost_per_launch = total_lifecycle_cost / total_flights + propellant_cost_per_launch + indirect_operations_cost_per_launch
-
+        cost_per_launch = total_lifecycle_cost / self.total_flights + self.operation_model.propellant_cost_per_launch + self.operation_model.indirect_operations_cost_per_launch
+        return cost_per_launch
        # print("Cost per launch (man-years):", cost_per_launch)
        # print("Cost per launch (million euros):", man_years_to_million_euro_2022(cost_per_launch))
-    #---------------------------------------------------------------------------
+        #---------------------------------------------------------------------------
 class DevelopModel():
-    def __init__(self, system_nature = "none", team_experience = "none", M_drymass):
+    def __init__(self, M_drymass, system_nature = "none", team_experience = "none"):
 
         self.f1 = 1 # Technical Difficulty Factor
         self.f2 = 1 # Tech Quality Factor (from graph)
@@ -143,7 +144,7 @@ class DevelopModel():
 
     # Man-years
     def get_dev_costs_ballistic_reusable(self):
-        return 4080 * self.M_drymass[1:dry_masses.size] ** 0.21 * self.f_1 * self.f_2 * self.f_3
+        return 4080 * self.M_drymass[1:self.M_drymass.size] ** 0.21 * self.f_1 * self.f_2 * self.f_3
     def get_dev_costs(self):
         reusable_costs = self.get_dev_costs_ballistic_reusable()
         expandable_costs = self.get_dev_costs_expandable()
@@ -205,7 +206,7 @@ class ProductionModel():
 class OperationModel():
     #---------------------------------------------------------------------------
     def __init__(self, launches_per_year, total_unit_production_cost, engine_unit_cost, N, number_of_engines,
-                 rocket_reflights, engine_reflights, launch_site_capacity):
+                 rocket_reflights, engine_reflights, launch_site_capacity, prop_masses):
         a_expandable = 3
         a_reusable = 4
 
