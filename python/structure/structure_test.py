@@ -1,4 +1,4 @@
-from python.structure.Components.Tank_class import Tank
+from Components.Tank_class import Tank
 from python.structure.Components.ITS_class import Shell
 from python.structure.Components.CBT_class import CBT
 class Structure():
