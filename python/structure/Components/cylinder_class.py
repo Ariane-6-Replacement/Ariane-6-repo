@@ -1,5 +1,5 @@
 import geometry
-import  buckling, pressure_loading, bending, axial_stress
+from Loading import  buckling, pressure_loading, bending, axial_stress
 from constants import FOSY 
 import numpy as np
 class Cylinder:

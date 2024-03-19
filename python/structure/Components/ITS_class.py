@@ -45,8 +45,8 @@ class Shell:
     # +self.insulation
   
 
-# if __name__ in "__main__":
-#     tank_test = Shell(2.5,'2195',2,11E6)
-#     print('DONE')
-#     print('Output: ',tank_test.mass)
-#     print('FINISHED')
+if __name__ in "__main__":
+    tank_test = Shell(2.5,'2195',2,11E6)
+    print('DONE')
+    print('Output: ',tank_test.mass)
+    print('FINISHED')
