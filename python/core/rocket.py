@@ -2,11 +2,13 @@
 #from control.control import Control
 import numpy as np
 
-from cost.model import MassCalculator
-from propulsion.propulsion import Propulsion
-from structure.structure import Structure
-from trajectory.trajectory import Trajectory
-from structure.materials import materials as m
+from python.propulsion.propulsion import Propulsion
+from python.structure.structure import Structure
+from python.trajectory.trajectory import Trajectory
+from python.structure.materials import materials as m
+from python.cost_model import MassCalculator
+from python.cost_model import Costmodel
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class Rocket():
     def __init__(self, **kwargs):
@@ -48,6 +50,17 @@ class Rocket():
         self.mass = self.mass_p + self.mass_s
 
         self.cost = self.cost_estimator()
+
+        self.show_result()
+
+if __name__ == "__main__":
+
+
+
+
+    r = Rocket(input_dict)
+    r.mass_estimation()
+    r.iterate()
 
 
 
