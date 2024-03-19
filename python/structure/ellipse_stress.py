@@ -43,4 +43,4 @@ def t_ellipsoid(r, h , p , s_yield):
     A = R1/2
     B = R1 * (1-R1/(2*R2))
     t = p * FOSY/ s_yield * np.sqrt(A**2 - A * B + B**2)
-    return round(t,5)
+    return round(t,4)

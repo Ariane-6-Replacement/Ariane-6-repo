@@ -1,7 +1,6 @@
-from Tank_class import Tank
-from cylinder_class import Cylinder
-from ITS_class import Shell
-from CBT_class import CBT
+from python.structure.Components.Tank_class import Tank
+from python.structure.Components.ITS_class import Shell
+from python.structure.Components.CBT_class import CBT
 class Structure():
     def __init__(self,type, outer_radius, pressure1, material, volume1, mass1, pressure2,volume2, mass2, thrust, material3
                  ):

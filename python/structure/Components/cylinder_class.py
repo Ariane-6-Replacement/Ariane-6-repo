@@ -1,9 +1,6 @@
-import python.structure.geometry as geometry
-import  python.structure.buckling as buckling
-import python.structure.pressure_loading as pressure_loading
-import python.structure.bending as bending
-import python.structure.axial_stress as axial_stress
-from python.structure.constants import FOSY
+import geometry
+import  buckling, pressure_loading, bending, axial_stress
+from constants import FOSY 
 import numpy as np
 class Cylinder:
     def __init__(self,
@@ -71,7 +68,7 @@ class Cylinder:
             ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
         print("Test s_bending: ",s_bending)
         #NOTE Fact check this assumption 
-        while s_bending/(0.8*41603151.4) < FOSY:
+        while s_bending/(self.thrust/2) < FOSY:
             t+=0.0005
             Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
             s_bending = bending.critical_cylinder_bending(self.outer_radius, t 
@@ -102,7 +99,6 @@ class Cylinder:
     def sectional_area(self) -> float:
         return geometry.cylindrical_shell_A(self.outer_radius, self.thickness)
     
-
     @property
     def insulation(self)->float:
         return self.area*1.123
