@@ -7,6 +7,7 @@ from python.trajectory.trajectory import Trajectory
 import tkinter as tk
 from tkinter import ttk
 from python.structure.materials import materials as m
+from python.cost_model import MassCalculator
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class Rocket():
@@ -25,6 +26,8 @@ class Rocket():
         self.pressure_fuel = float(input_dict["pressure_fuel"].get())
         self.diameter = float(input_dict["diameter"].get())
         self.OF_ratio = float(input_dict["OF_ratio"].get())
+        dv1 = float(input_dict["dv_split"].get())
+        self.dv_split = [dv1, 1-dv1]
         self.root = None
         print(f"Engine: {self.engine}")
         print(f"Delta V: {self.dv} m/s")
@@ -48,6 +51,10 @@ class Rocket():
         self.mass_s = 100000 # kg
         self.mass_p = 600000 #kg
         self.mass = self.mass_s + self.mass_p
+        mass_estimator = MassCalculator()
+        wet_masses = mass_estimator.get_wet_masses(self.dv, self.dv_split, inert_mass_fractions, self.propulsion.Isp, self.payload)
+        prop_masses = mass_estimator.get_propellant_masses(wet_masses, inert_mass_fractions)
+        dry_masses = mass_estimator.get_dry_masses(wet_masses, inert_mass_fractions)
     def cost_estimator(self):
         return self.mass * 25.00 #placeholder
     def iterate(self):
@@ -103,6 +110,29 @@ def make_rocket(input_dict):
     r.mass_estimation()
     r.iterate()
 
+def update_value(event):
+    # Get the value from the slider
+    slider_value = slider.get()
+    # Update the value displayed in the input box
+    dvs.delete(0, tk.END)
+    dvs.insert(0, f"{slider_value:.3f}")
+
+
+def update_slider(event=None):
+    # Get the value from the input box
+    input_value = dvs.get()
+    try:
+        # Try to convert the input value to a float
+        value = float(input_value)
+        # Ensure the value is within the range 0 to 1
+        value = max(0, min(1, value))
+        # Update the slider position
+        slider.set(value)
+    except ValueError:
+        # If the input value cannot be converted to a float, do nothing
+        pass
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Input Screen")
@@ -116,7 +146,7 @@ if __name__ == "__main__":
     input_dict["engine"].set("Prometheus")  # default value
     i += 1
     # Delta V
-    ttk.Label(root, text="Delta V 1st stage (m/s):").grid(column=0, row=i)
+    ttk.Label(root, text="Delta V total (m/s):").grid(column=0, row=i)
     input_dict["dv"] = tk.StringVar(value='3000')
     ttk.Entry(root, textvariable=input_dict["dv"]).grid(column=1, row=i)
 
@@ -192,6 +222,25 @@ if __name__ == "__main__":
     ttk.Label(root, text="O/F ratio :").grid(column=0, row=i)
     input_dict["OF_ratio"] = tk.StringVar(value='3.5')
     ttk.Entry(root, textvariable=input_dict["OF_ratio"]).grid(column=1, row=i)
+
+    # dV_fraction slider
+    i += 1
+    ttk.Label(root, text="dV fraction stage 1:").grid(column=0, row=i)
+    slider = ttk.Scale(root, from_=0, to=1, orient="horizontal", length=200, command=update_value)
+    slider.grid(row=i, column=1, padx=10, pady=10)
+
+    # Create an input box
+    i += 1
+    #input_box = ttk.Entry(root)
+    #input_box.grid(row=i, column=1, padx=10, pady=5)
+
+
+    input_dict["dv_split"] = tk.StringVar(value='0.5')
+    dvs = ttk.Entry(root, textvariable=input_dict["dv_split"])
+    dvs.bind("<Return>", update_slider)
+    dvs.grid(column=1, row=i)
+    update_slider()
+
     # Submit button (Example action, customize as needed)
     i+=1
     ttk.Button(root, text="Submit", command= lambda: make_rocket(input_dict)).grid(column=0, row=i, columnspan=2)
