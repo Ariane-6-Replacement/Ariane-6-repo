@@ -1,4 +1,4 @@
-from python.structure.buckling_coeff import gamma_d
+from python.structure.Loading.buckling_coeff import gamma_d
 import numpy as np
 
 
