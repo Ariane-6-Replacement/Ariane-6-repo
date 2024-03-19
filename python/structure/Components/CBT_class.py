@@ -1,5 +1,5 @@
-from cylinder_class import Cylinder
-from dome_class import Dome
+from python.structure.Components.cylinder_class import Cylinder
+from python.structure.Components.dome_class import Dome
 from materials import materials as m
 import numpy as np 
 

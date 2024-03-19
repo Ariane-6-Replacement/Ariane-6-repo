@@ -1,6 +1,5 @@
-from python.structure.Tank_class import Tank
-from python.structure.cylinder_class import Cylinder
-from python.structure.ITS_class import Shell
+from Components.Tank_class import Tank
+from structure.Components.ITS_class import Shell
 class Structure():
     def __init__(self, outer_radius,material, pressure_ox, pressure_fuel, material3):
         self.outer_radius = outer_radius
@@ -29,8 +28,6 @@ class Structure():
             self._tank_fwd = Tank(*tank1)
             self._tank_aft = Tank(*tank2)
             
-        # self._ITS_fwd = Cylinder(self.outer_radius,self.material3,0,self.trust*1.2,1)
-        # self._ITS_aft = Cylinder(self.outer_radius,self.material3,0,self.trust*2,1.5)
         self._ITS_fwd = Shell(self.outer_radius,self.material3,0.5+self._tank_fwd.dome_fwd.height)
         self._ITS_aft = Shell(self.outer_radius,self.material3,0.5+self._tank_aft.dome_fwd.height+self._tank_fwd.dome_aft.height)
         self._EB = Shell(self.outer_radius,self.material3,2+self._tank_aft.dome_aft.height)
