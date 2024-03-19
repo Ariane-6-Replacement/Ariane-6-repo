@@ -8,6 +8,7 @@ import tkinter as tk
 from tkinter import ttk
 from python.structure.materials import materials as m
 from python.cost_model import MassCalculator
+from python.cost_model import Costmodel
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class Rocket():
@@ -59,7 +60,9 @@ class Rocket():
         self.mass = self.mass_s + self.mass_p
         self.mass2 = self.mass_p2 + self.mass_s2
     def cost_estimator(self):
-        return self.mass * 25.00 #placeholder
+        cost_calc = Costmodel([self.mass_s,self.mass_s2], [self.mass_p,self.mass_p2])
+        cost_per_launch = cost_calc.get_cost_per_launch()
+        return cost_per_launch
     def iterate(self):
 
         self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass,  self.dv)

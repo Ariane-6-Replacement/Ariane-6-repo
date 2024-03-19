@@ -1,6 +1,9 @@
-import geometry
-import  buckling, pressure_loading, bending, axial_stress
-from constants import FOSY 
+import python.structure.geometry as geometry
+import python.structure.buckling as buckling
+import python.structure.pressure_loading as pressure_loading
+import python.structure.bending as bending
+import python.structure.axial_stress as axial_stress
+from python.structure.constants import FOSY
 import numpy as np
 class Cylinder:
     def __init__(self,
