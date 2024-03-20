@@ -9,7 +9,6 @@ def eom(effective_thrust, mass, gamma, v):
     return dVdt, dGdt
 
 
-
 # Data
 g0 = 9.81
 c_eff = 400 * g0
@@ -36,9 +35,9 @@ dm = propellant_mass / burn_time
 burnout = False
 while gamma[-1] > 0:
     dV, dG = eom(effective_thrust=thrust,
-                 mass=total_mass,
-                 gamma=gamma[-1],
-                 v=np.linalg.norm(velocity[-1]))
+                mass=total_mass,
+                gamma=gamma[-1],
+                v=np.linalg.norm(velocity[-1]))
 
     gamma.append(gamma[-1] + dG * dt)
     new_v = np.linalg.norm(velocity[-1]) + dV * dt

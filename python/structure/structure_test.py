@@ -1,9 +1,9 @@
-from Components.Tank_class import Tank
+from python.structure.Components.Tank_class import Tank
 from python.structure.Components.ITS_class import Shell
 from python.structure.Components.CBT_class import CBT
+
 class Structure():
-    def __init__(self,type, outer_radius, pressure1, material, volume1, mass1, pressure2,volume2, mass2, thrust, material3
-                 ):
+    def __init__(self,type, outer_radius, pressure1, material, volume1, mass1, pressure2,volume2, mass2, thrust, material3):
         self.type = type 
         self.outer_radius = outer_radius
         self.pressure1 = pressure1
@@ -46,8 +46,10 @@ class Structure():
 
     def mass_engine_structure(self, engine_number, thrust):
         return 0
+    
     def mass_landing_gear(self, mass_e, mass_p, mass_t, mass_es):
         return 0
+    
     @property
     def mass_total(self)-> float:
         if self.type == 'CBT':
@@ -64,7 +66,8 @@ class Structure():
 
 
 
-if __name__ in "__main__":
+if __name__ == "__main__":
+    print("ENTERING HERE")
     test = Structure('CBT',2.7,7E5,'2219',328, 440E3, 7E5, 273, 126E3, 20E6,'2195')
     print('DONE')
     print('Mass: ', test.mass_total)
