@@ -1,171 +1,184 @@
 import tkinter as tk
 from tkinter import ttk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
 
 class Label():
-    def __init__(self, root, label, font=...):
-        self.label = ttk.Label(root, text=label, font=font)
-        self.element = None
+    def __init__(self, root, label, **kwargs):
+        self.label = ttk.Label(root, text=label, **kwargs)
+
+class Entry():
+    def __init__(self, root, value, range=None, **kwargs):
+        self.var = tk.StringVar(value=str(value))
+        self.element = ttk.Entry(root, textvariable=self.var, **kwargs)
+        self.range = range
+
+class Button():
+    def __init__(self, root, columnspan, **kwargs):
+        self.label = ttk.Button(root, **kwargs)
+        self.label.grid(columnspan=columnspan)
 
 class LabelEntry(Label):
-    def __init__(self, root, label, value, width=20):
+    def __init__(self, root, label, value, range=None, **kwargs):
         super().__init__(root, label)
-        self.element = ttk.Entry(root, textvariable=tk.StringVar(val=value), width=width)
+        self.var = tk.StringVar(value=str(value))
+        self.element = ttk.Entry(root, textvariable=self.var, **kwargs)
+        self.range = range
 
 class LabelCombobox(Label):
-    def __init__(self, root, label, value, values, width=20, state="readonly"):
+    def __init__(self, root, label, value_index, values, **kwargs):
         super().__init__(root, label)
-        self.element = ttk.Combobox(self.root, textvariable=value, values=values, state=state, width=width)
+        assert value_index < len(values), "Specified dropdown index is outside of range of values provided"
+        self.var = tk.StringVar(value=str(values[value_index]))
+        self.element = ttk.Combobox(root, textvariable=self.var, values=values, **kwargs)
+
+class LabelCheckbutton(Label):
+    def __init__(self, root, label, value, **kwargs):
+        super().__init__(root, label)
+        self.var = tk.BooleanVar(value=bool(value))
+        self.element = ttk.Checkbutton(root, variable=self.var, **kwargs)
+
+class LabelScale(Label):
+    def __init__(self, root, label, padx, pady, from_, to_, **kwargs):
+        super().__init__(root, label)
+        assert to_ > from_, "Slider to value must be greater than from value"
+        self.var = tk.DoubleVar(value=0.5)
+        self.element = ttk.Scale(root, variable=self.var, from_=from_, to=to_, **kwargs)
+        self.element.grid(padx=padx, pady=pady)
 
 class UI():
     def __init__(self, rocket):
         self.rocket = rocket
-        self.root = tk.Tk()
-        # self.input_dict = {}
+        
+    def get_outputs(self):
+        ui_outputs = {}
+        for key, ui in self.labels.items():
+            if hasattr(ui, 'var'):
+                var = ui.var
+                value = var.get()
+                try:
+                    # Try to convert the input value to a float
+                    value = float(value)
+                    if ui.range is not None:
+                        value = max(float(ui.range[0]), min(float(ui.range[1]), value))
+                except:
+                    try:
+                        index = ui.element.current()
+                        values = ui.element.cget('values')
+                        assert index < len(values), "Specified dropdown index is outside of range of values provided"
+                        value = values[index]
+                    except:
+                        try:
+                            value = bool(value)
+                        except:
+                            raise TypeError("Failed to get value from tkinter element")
+                ui_outputs[key] = value
+        return ui_outputs
 
-    def update_value(event):
-        # Get the value from the slider
-        slider_value = slider.get()
-        # Update the value displayed in the input box
-        dvs.delete(0, tk.END)
-        dvs.insert(0, f"{slider_value:.3f}")
-
-    # def update_slider(event=None):
-    #     # Get the value from the input box
-    #     input_value = dvs.get()
-    #     try:
-    #         # Try to convert the input value to a float
-    #         value = float(input_value)
-    #         # Ensure the value is within the range 0 to 1
-    #         value = max(0, min(1, value))
-    #         # Update the slider position
-    #         slider.set(value)
-    #     except ValueError:
-    #         # If the input value cannot be converted to a float, do nothing
-    #         pass
     def create(self):
         self.root = tk.Tk()
         self.root.title("Input Screen")
 
-        custom_font = ('Helvetica', 12, 'bold')
-        ttk.Label(self.root, text="General properties", font=custom_font).grid(column=1, row=i)
+        label_font = ('Helvetica', 12, 'bold')
 
         self.labels = {
+            '0th_label': Label(self.root, "General properties", font=label_font),
             'dv': LabelEntry(self.root, "Delta V total (m/s):", self.rocket.dv),
-            'orbit': LabelCombobox(self.root, "Orbit:", self.rocket.orbit_options[self.rocket.orbit], self.rocket.orbit_options, 17),
+            'orbit': LabelCombobox(self.root, "Orbit:", self.rocket.orbit, self.rocket.orbit_options, state="readonly", width=17),
             'payload': LabelEntry(self.root, "Payload (kg):", self.rocket.payload),
-            'drag_coeff': LabelEntry(self.root, "Drag Coefficient:", self.rocket.cd),
-            'inert_mass': LabelEntry(self.root, "Inert mass fraction 2nd stage:", self.rocket.mf2),
-            'isp_2': LabelEntry(self.root, "ISP 2nd stage:", self.rocket.isp2),
-            '1_st_label': Label(self.root, "1st stage properties:", custom_font),
-            'dv_frac_slider': LabelScale(self.root, "dV fraction stage 1:", 0, 1, "horizontal", 150, command = lambda a, b : a * b)
+            'cd': LabelEntry(self.root, "Drag Coefficient:", self.rocket.cd),
+            'mf2': LabelEntry(self.root, "Inert mass fraction 2nd stage:", self.rocket.mf2),
+            'isp2': LabelEntry(self.root, "ISP 2nd stage:", self.rocket.isp2),
+            '1st_label': Label(self.root, "1st stage properties", font=label_font),
+            'dv_split_slider': LabelScale(self.root, "dV fraction stage 1:", padx=10, pady=10, from_=0, to_=1, orient="horizontal", length=150, command=lambda event: self.update_dv_split()),
+            'dv_split': Entry(self.root, self.rocket.dv_split, range=[0, 1]),
+            'engine': LabelCombobox(self.root, "Engine:", self.rocket.engine, self.rocket.engine_options, state="readonly", width=17),
+            'mf1': LabelEntry(self.root, "Inert mass fraction 1st stage:", self.rocket.mf1),
+            'boostback': LabelCheckbutton(self.root, "Boostback:", self.rocket.boostback),
+            'material_tank': LabelCombobox(self.root, "Material Tank:", self.rocket.material_tank, self.rocket.material_options, state="readonly", width=17),
+            'material_misc': LabelCombobox(self.root, "Material Misc:", self.rocket.material_misc, self.rocket.material_options, state="readonly", width=17),
+            'bulkhead': LabelCombobox(self.root, "Bulkhead:", self.rocket.bulkhead, self.rocket.bulkhead_options, state="readonly", width=17),
+            'pressure_ox': LabelEntry(self.root, "Pressure OX (bar):", self.rocket.pressure_ox),
+            'pressure_fuel': LabelEntry(self.root, "Pressure fuel (bar):", self.rocket.pressure_fuel),
+            'diameter': LabelEntry(self.root, "Diameter (m):", self.rocket.diameter),
+            'of_ratio': LabelEntry(self.root, "O/F ratio:", self.rocket.of_ratio),
+            'submit': Button(self.root, columnspan=2, text="Submit")
         }
         
         for i, key in enumerate(self.labels.keys()):
-            self.labels[key].label.grid(column=0, row=i)
-            e = self.labels[key].element
-            if e is not None:
-                e.grid(column=1, row=i)
+            if hasattr(self.labels[key], 'label'):
+                self.labels[key].label.grid(column=0, row=i)
+            if hasattr(self.labels[key], 'element'):
+                self.labels[key].element.grid(column=1, row=i)
 
-        ttk.Label(self.root, text=).grid(column=0, row=i)
-        slider = ttk.Scale(self.root, from_=0, to=1, orient="horizontal", length=150, command=update_value).grid(padx=10, pady=10)
-
-        i += 1
-        dvs = ttk.Entry(self.root, textvariable=input_dict["dv_split"])
-        #dvs.bind("<Return>", update_slider)
-        dvs.grid(column=1, row=i)
-        #update_slider()
-
-        i+=1
-        ttk.Label(self.root, text="Engine:").grid(column=0, row=i)
-        engine_options = ['Prometheus']
-        ttk.Combobox(self.root, textvariable=input_dict["engine"], values=engine_options, state="readonly", width=17).grid(column=1, row=i)
-
-
-        i += 1
-        ttk.Label(self.root, text="Inert mass fraction 1st stage").grid(column=0, row=i)
-        ttk.Entry(self.root, textvariable=input_dict["mf1"]).grid(column=1, row=i)
-        # Boostback
-        i += 1
-        ttk.Label(self.root, text="Boostback:").grid(column=0, row=i)
-        ttk.Checkbutton(self.root, variable=input_dict["boostback"]).grid(column=1, row=i)
-
-
-        # Material
-        i += 1
-        ttk.Label(self.root, text="Material Tank:").grid(column=0, row=i)
-        material_options = list(m.keys())
-        ttk.Combobox(self.root, textvariable=input_dict["material_tank"], values=material_options, state="readonly", width=17
-                    ).grid(column=1, row=i)
-
-        input_dict["material_tank"].set(material_options[0])  # default value
-
-        i += 1
-        ttk.Label(self.root, text="Material Misc:").grid(column=0, row=i)
-        material_options = list(m.keys())
-        ttk.Combobox(self.root, textvariable=input_dict["material_misc"], values=material_options, state="readonly", width=17
-                    ).grid(column=1, row=i)
-
-        input_dict["material_misc"].set(material_options[0])  # default value
-
-        #Bulkhead
-        i += 1
-        ttk.Label(self.root, text="Bulkhead:").grid(column=0, row=i)
-        bulkhead_options = ['shared', 'separate']
-        ttk.Combobox(self.root, textvariable=input_dict["bulkhead"], values=bulkhead_options, state="readonly", width=17
-                    ).grid(column=1,row=i)
-
-        # Pressure
-        i += 1
-        ttk.Label(self.root, text="Pressure OX (bar):").grid(column=0, row=i)
-        ttk.Entry(self.root, textvariable=input_dict["pressure_ox"]).grid(column=1, row=i)
-
-        i += 1
-        ttk.Label(self.root, text="Pressure fuel (bar):").grid(column=0, row=i)
-        ttk.Entry(self.root, textvariable=input_dict["pressure_fuel"]).grid(column=1, row=i)
-
-        i += 1
-        ttk.Label(self.root, text="Diameter (m):").grid(column=0, row=i)
-        ttk.Entry(self.root, textvariable=input_dict["diameter"]).grid(column=1, row=i)
-
-        i += 1
-        ttk.Label(self.root, text="O/F ratio :").grid(column=0, row=i)
-        ttk.Entry(self.root, textvariable=input_dict["OF_ratio"]).grid(column=1, row=i)
-
-
-        # Submit button (Example action, customize as needed)
-        i+=1
-        ttk.Button(self.root, text="Submit", command= lambda: make_rocket(input_dict)).grid(column=0, row=i, columnspan=2)
+        self.labels['dv_split'].element.bind("<Return>", lambda event: self.update_dv_split_slider())
+        self.labels['submit'].label.bind("<ButtonRelease-1>", lambda event: self.submit_new_rocket())
 
         self.root.mainloop()
 
     def show_result(self):
+        root = tk.Tk()
+        root.title("Output Screen")
+
         values = [
-            f"Engine: {self.engine} N",
-            f"Delta V: {self.dv} m/s",
-            f"Boostback: {self.boostback}",
-            f"Orbit: {self.orbit}",
-            f"Payload: {self.payload} kg",
-            f"Drag Coefficient: {self.cd}",
-            f"Material: {self.material_tank}",
-            #f"Bulkhead: {self.bulkhead}",
-            f"Pressure: {self.pressure_ox} bar",
-            f"Structural Mass: {self.mass_s:.0f} kg",
-            f"Propellant Mass: {self.mass_p:.0f} kg",
-            f"Upper Stage Mass: {self.mass2:.0f} kg",
-            f"Estimated Cost: €{self.cost:.0f} "
+            f"Thrust: {self.rocket.thrust} N",
+            f"Engine Number: {self.rocket.engine_number}",
+            f"Delta V: {self.rocket.dv} m/s",
+            f"Boostback: {self.rocket.boostback}",
+            f"Orbit: {self.rocket.orbit}",
+            f"Payload: {self.rocket.payload} kg",
+            f"Drag Coefficient: {self.rocket.cd}",
+            f"Material: {self.rocket.material_tank}",
+            f"Bulkhead: {self.rocket.bulkhead}",
+            f"Pressure: {self.rocket.pressure_ox} bar",
+            f"Structural Mass: {self.rocket.mass_s:.0f} kg",
+            f"Propellant Mass: {self.rocket.mass_p:.0f} kg",
+            f"1st Stage Mass: {self.rocket.mass:.0f} kg",
+            f"Upper Stage Mass: {self.rocket.mass2:.0f} kg",
+            f"Total Lifetime Cost: {self.rocket.lifetime_cost:.0f} million euros",
+            f"Cost Per Launch: {self.rocket.per_launch_cost:.0f} million euros",
+            #f"Estimated Cost: €{self.rocket.cost:.0f} "
         ]
 
         # Dynamically create labels to display each value
         for i, value in enumerate(values):
-            ttk.Label(self.self.root, text=value).grid(column=0, row=i, sticky='w')
+            ttk.Label(root, text=value).grid(column=0, row=i, sticky='w')
 
-        fig = self.trajectory.fig
-        canvas = FigureCanvasTkAgg(fig, master=self.self.root)
+        fig = self.rocket.trajectory.fig
+        canvas = FigureCanvasTkAgg(fig, master=root)
         canvas_widget = canvas.get_tk_widget()
 
         # Place the canvas within the Tkinter window
-        canvas_widget.grid(row=i+1, column=0, sticky="nsew")
+        canvas_widget.grid(column=0, row=len(values), sticky="nsew")
 
-        iterate_button = ttk.Button(self.self.root, text="Iterate", command= self.iterate)
+        iterate_button = ttk.Button(root, text="Iterate")
+        iterate_button.bind("<ButtonRelease-1>", lambda event: self.iterate_rocket())
         iterate_button.grid(column=0, row=len(values) + 1, pady=10)
-        self.self.root.mainloop()
+
+        root.mainloop()
+
+    def update_dv_split(self):
+        value = self.labels['dv_split_slider'].var.get()
+        # Reduce significant figures for readability
+        value = float(f"{value:.3f}")
+        self.labels['dv_split'].var.set(value)
+
+    def update_dv_split_slider(self):
+        input_box = self.labels['dv_split']
+        value = float(self.labels['dv_split'].var.get())
+        if input_box.range is not None:
+            # Clamp
+            value = max(float(input_box.range[0]), min(float(input_box.range[1]), value))
+        self.labels['dv_split_slider'].var.set(value)
+        self.labels['dv_split'].var.set(value)
+
+    def submit_new_rocket(self):
+        outputs = self.get_outputs()
+        self.rocket.update_values(**outputs)
+        self.rocket.mass_estimation()
+        self.rocket.iterate()
+        self.show_result()
+
+    def iterate_rocket(self):
+        self.rocket.iterate()
+        self.show_result()
