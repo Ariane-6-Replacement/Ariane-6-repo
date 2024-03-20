@@ -57,21 +57,21 @@ class UI():
                 var = ui.var
                 value = var.get()
                 try:
-                    # Try to convert the input value to a float
-                    value = float(value)
-                    if ui.range is not None:
-                        value = max(float(ui.range[0]), min(float(ui.range[1]), value))
+                    index = ui.element.current()
+                    values = ui.element.cget('values')
+                    assert index < len(values), "Specified dropdown index is outside of range of values provided"
+                    value = index
                 except:
                     try:
-                        index = ui.element.current()
-                        values = ui.element.cget('values')
-                        assert index < len(values), "Specified dropdown index is outside of range of values provided"
-                        value = values[index]
+                        # Try to convert the input value to a float
+                        value = float(value)
+                        if ui.range is not None:
+                            value = max(float(ui.range[0]), min(float(ui.range[1]), value))
                     except:
-                        try:
-                            value = bool(value)
-                        except:
-                            raise TypeError("Failed to get value from tkinter element")
+                            try:
+                                value = bool(value)
+                            except:
+                                raise TypeError("Failed to get value from tkinter element")
                 ui_outputs[key] = value
         return ui_outputs
 
@@ -121,15 +121,16 @@ class UI():
         root.title("Output Screen")
 
         values = [
+            f"Engine: {self.rocket.engine_options[self.rocket.engine]}",
             f"Thrust: {self.rocket.thrust} N",
             f"Engine Number: {self.rocket.engine_number}",
             f"Delta V: {self.rocket.dv} m/s",
             f"Boostback: {self.rocket.boostback}",
-            f"Orbit: {self.rocket.orbit}",
+            f"Orbit: {self.rocket.orbit_options[self.rocket.orbit]}",
             f"Payload: {self.rocket.payload} kg",
             f"Drag Coefficient: {self.rocket.cd}",
-            f"Material: {self.rocket.material_tank}",
-            f"Bulkhead: {self.rocket.bulkhead}",
+            f"Material: {self.rocket.material_options[self.rocket.material_tank]}",
+            f"Bulkhead: {self.rocket.bulkhead_options[self.rocket.bulkhead]}",
             f"Pressure: {self.rocket.pressure_ox} bar",
             f"Structural Mass: {self.rocket.mass_s:.0f} kg",
             f"Propellant Mass: {self.rocket.mass_p:.0f} kg",

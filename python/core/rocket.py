@@ -3,7 +3,7 @@
 import numpy as np
 
 from python.propulsion.propulsion import Propulsion
-from python.structure.structure import Structure
+from python.structure.structure_main import Structure
 from python.structure.materials import materials as materials
 from python.trajectory.trajectory import Trajectory
 from python.cost.model import MassCalculator
@@ -17,9 +17,9 @@ class Rocket():
         self.__dict__.update(**kwargs)
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
-        self.propulsion = Propulsion(self.engine, self.of_ratio)
+        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio)
         self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox, self.pressure_fuel, self.material_options[self.material_misc])
-        self.trajectory = Trajectory(self.orbit, self.payload, self.cd)
+        self.trajectory = Trajectory(self.orbit_options[self.orbit], self.payload, self.cd)
 
     def mass_estimation(self):
         self.inert_mass_fractions = np.array([self.mf1, self.mf2])
@@ -52,37 +52,3 @@ class Rocket():
         self.mass = self.mass_p + self.mass_s
 
         self.lifetime_cost, self.per_launch_cost = self.cost_estimator()
-
-if __name__ == "__main__":
-    rocket = Rocket(
-        dv = 3000,
-        orbit_options = ['LEO', 'MEO', 'GEO', 'HEO'],
-        orbit = 0, # index in orbit options
-        payload = 20000,
-        cd = 0.2,
-        mf2 = 0.04,
-        isp2 = 296,
-        dv_split = 0.5,
-        engine_options = ['Prometheus'],
-        engine = 0, # index in engine options
-        mf1 = 0.05,
-        boostback = False,
-        material_options = list(materials.keys()),
-        material_tank = 0, # index in material options
-        material_misc = 0, # index in material options
-        bulkhead_options = ["shared", "separate"],
-        bulkhead = 0, # index in bulkhead options
-        pressure_ox = 5,
-        pressure_fuel = 5,
-        diameter = 5,
-        of_ratio = 3.5,
-    )
-    rocket.mass_estimation()
-    rocket.iterate()
-
-    print("Rocket lifetime cost:", rocket.lifetime_cost)
-    print("Per launch cost:", rocket.per_launch_cost)
-
-
-
-

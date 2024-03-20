@@ -1,11 +1,6 @@
-<<<<<<< HEAD:python/structure/structure.py
 from python.structure.Components.Tank_class import Tank
 from python.structure.Components.ITS_class import Shell
 
-=======
-from Components.Tank_class import Tank
-from Components.ITS_class import Shell
->>>>>>> d5405aa1f327f1301485c7d79d164dd8f97c62e4:python/structure/structure_main.py
 class Structure():
     def __init__(self, outer_radius,material, pressure_ox, pressure_fuel, material3):
         self.outer_radius = outer_radius
