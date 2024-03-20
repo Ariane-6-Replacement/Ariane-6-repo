@@ -1,7 +1,8 @@
-import geometry
-from Loading import  buckling, pressure_loading, bending, axial_stress
-from constants import FOSY 
+import python.structure.geometry as geometry
+from python.structure.Loading import buckling, pressure_loading, bending, axial_stress
+from python.structure.constants import FOSY 
 import numpy as np
+
 class Cylinder:
     def __init__(self,
                  outer_radius: float,
@@ -9,8 +10,7 @@ class Cylinder:
                  pressure: float,
                  thrust: float,
                 #  moment:float,
-                 height:float,
-                 ):
+                 height:float):
         """
         Cylinder object, containing all relevant parameters. Cylinder coordinate system is defined with the origin at the
         center of the bottom edge. The z_c axis moves along the cylinder's axis in the direction from aft to forward.
@@ -25,7 +25,7 @@ class Cylinder:
         self.pressure = pressure
         self.material = material
         self.height = height
-        self.thrust =thrust
+        self.thrust = thrust
     
         
 
@@ -39,9 +39,9 @@ class Cylinder:
 
     @property
     def thickness(self) -> float:
-        #Calcualte Basic Thickness:
+        # Calcualte Basic Thickness:
         t_p= pressure_loading.t_hoop_stress(self.material['yield_stress'], self.outer_radius, FOSY, self.pressure)
-        #Caclculate Axial Stress Thickness:
+        # Calculate Axial Stress Thickness:
         t_a = axial_stress.t_axial(self.material['yield_stress'], self.outer_radius, FOSY, self.thrust)
         # Calcualte critical Buckling stress
         if t_a>t_p:
@@ -49,7 +49,7 @@ class Cylinder:
         else:
             t=t_p
         print('Intermediate t: ', t)
-        #NOTE: Extra condition on unpressurized buckling, check the ratio of dry to wet mass
+        # NOTE: Extra condition on unpressurized buckling, check the ratio of dry to wet mass
         s_buckling_stat = buckling.critical_cylinder_buckling(0, self.outer_radius,  t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
         while s_buckling_stat/FOSY < self.thrust/1.5:
             t+=0.0005
@@ -64,19 +64,23 @@ class Cylinder:
             s_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
     
         Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
-        s_bending = bending.critical_cylinder_bending(self.outer_radius, t 
-            ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
-        print("Test s_bending: ",s_bending)
-        #NOTE Fact check this assumption 
-        while s_bending/(self.thrust/2) < FOSY:
-            t+=0.0005
+        s_bending = bending.critical_cylinder_bending(self.outer_radius, t, self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
+        print("Test s_bending:",s_bending)
+        # NOTE: Fact check this assumption 
+        loop_limit = 100_000
+        i = 0
+        while s_bending / (self.thrust / 2) < FOSY and i < loop_limit:
+            t += 0.0005
             Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
             s_bending = bending.critical_cylinder_bending(self.outer_radius, t 
             ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
-        return round(t,4)
+            i += 1
+        return round(t, 4)
+    
     @property
     def area(self)->float:
         return self.height * 2 * np.pi * self.outer_radius
+    
     @property
     def inner_volume(self) -> float:
         return geometry.cylinder_V(self.outer_radius-self.thickness, self.height)
@@ -93,7 +97,6 @@ class Cylinder:
     def mass(self) -> float:
         material_volume = self.outer_volume - self.inner_volume
         return self.material["density"] * material_volume
-
 
     @property
     def sectional_area(self) -> float:

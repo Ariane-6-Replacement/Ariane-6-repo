@@ -1,9 +1,8 @@
 import numpy as np
-import sat_math_funcs as sm
+import trajectory.sat_math_funcs as sm
 import plotting_functions as pf
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-
 
 g = 9.81 # [m/s^2]
 T = 8e6# thrust [N]
@@ -23,6 +22,7 @@ theta0 = 0
 h0 = 0
 
 y = [v0,psi0,theta0,h0 ]
+    
 def pressure(h):
         #Taken from https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html
         

@@ -4,8 +4,8 @@
 
 # IMPORTS
 import numpy as np
-from volume_mass_calculator import get_propellant_mass_volume
-from inputs import engine, first_stage, propellant
+from python.propulsion.volume_mass_calculator import get_propellant_mass_volume
+from python.propulsion.inputs import engine, first_stage, propellant
 
 # source: https://www.nextbigfuture.com/2023/07/ariane-test-fires-reusable-prometheus-rocket-engine.html
 def get_Isp_source1():
@@ -44,8 +44,8 @@ def get_Isp_trp():
     # calculate molar mass of propellant
     thrust = first_stage.Thrust
     burn_time = first_stage.time_burn_1st
-    OF_ratio = engine.OF_ratio
-    mass_ox, mass_fuel, volume_ox, volume_fuel = get_propellant_mass_volume(thrust, burn_time, OF_ratio)
+    of_ratio = engine.of_ratio
+    mass_ox, mass_fuel, volume_ox, volume_fuel = get_propellant_mass_volume(thrust, burn_time, of_ratio)
 
     # determine molar mass of propellant absed on OF ratio
     n_moles_MH4 = mass_fuel / propellant.M_fuel
@@ -89,9 +89,10 @@ def estimate_Isp():
     return Isp_estimated
 
 
+if __name__ == "__main__":
 
-Isp_estimated = estimate_Isp()
-print(Isp_estimated)
+    Isp_estimated = estimate_Isp()
+    print(Isp_estimated)
 
 
 

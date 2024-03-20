@@ -4,6 +4,7 @@ This function finds the axial critical stress for isogrid stiffenned cylinders i
 Source: "NASA ISOGRID HANDBOOK" by McDonnel Douglas
 """
 import numpy as np 
+
 def critical_stress(t,R, E):
     '''
     t - shell thickness

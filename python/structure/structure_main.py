@@ -1,5 +1,11 @@
+<<<<<<< HEAD:python/structure/structure.py
+from python.structure.Components.Tank_class import Tank
+from python.structure.Components.ITS_class import Shell
+
+=======
 from Components.Tank_class import Tank
 from Components.ITS_class import Shell
+>>>>>>> d5405aa1f327f1301485c7d79d164dd8f97c62e4:python/structure/structure_main.py
 class Structure():
     def __init__(self, outer_radius,material, pressure_ox, pressure_fuel, material3):
         self.outer_radius = outer_radius
@@ -10,14 +16,14 @@ class Structure():
         self.material3 = material3 
 
         # self.material3 = material3
-    def calc(self,  volume_ox, mass_ox,  volume_fuel, mass_fuel, thrust):
+    def calc(self, volume_ox, mass_ox, volume_fuel, mass_fuel, thrust):
         self.thrust = thrust
         self.volume1 = volume_ox
         self.volume2 = volume_fuel
         self.mass1 = mass_ox
         self.mass2 = mass_fuel
         tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.mass1]
-        tank2 =[self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
+        tank2 = [self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
 
         self.input = "struc in"
         self.output = 4
@@ -28,16 +34,18 @@ class Structure():
             self._tank_fwd = Tank(*tank1)
             self._tank_aft = Tank(*tank2)
             
-        self._ITS_fwd = Shell(self.outer_radius,self.material3,0.5+self._tank_fwd.dome_fwd.height)
-        self._ITS_aft = Shell(self.outer_radius,self.material3,0.5+self._tank_aft.dome_fwd.height+self._tank_fwd.dome_aft.height)
-        self._EB = Shell(self.outer_radius,self.material3,2+self._tank_aft.dome_aft.height)
+        self._ITS_fwd = Shell(self.outer_radius, self.material3, 0.5 + self._tank_fwd.dome_fwd.height, thrust)
+        self._ITS_aft = Shell(self.outer_radius, self.material3, 0.5 + self._tank_aft.dome_fwd.height + self._tank_fwd.dome_aft.height, thrust)
+        self._EB = Shell(self.outer_radius, self.material3, 2 + self._tank_aft.dome_aft.height, thrust)
 
     def mass_engine_structure(self, engine_number, thrust):
         return 0
+    
     def mass_landing_gear(self, mass_e, mass_p, mass_t, mass_es):
         return 0
+    
     @property
-    def mass_total_tank(self)-> float:
+    def mass_total_tank(self) -> float:
         return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
 
     @property
@@ -46,7 +54,8 @@ class Structure():
 
 
 
-if __name__ in "__main__":
+if __name__ == "__main__":
+    print("CALCULATING STRUCTURE")
     test = Structure(2.7,7E5,'2219',328, 440E3, 7E5, 273, 126E3, 20E6,'2195')
     print('DONE')
     print('#####################OUTPUT##############')

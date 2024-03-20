@@ -4,7 +4,7 @@ Contains formulas related to critical stresses due to buckling as a failure mode
 Source(s): NASA SP-8007
 """
 
-from Loading.buckling_coeff import gamma_d
+from python.structure.Loading.buckling_coeff import gamma_d
 import numpy as np
 import pandas as pd
 

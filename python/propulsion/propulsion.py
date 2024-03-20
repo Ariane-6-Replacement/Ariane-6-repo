@@ -1,22 +1,22 @@
-from python.propulsion.inputs import engine as engine
-from python.propulsion.inputs import first_stage as first_stage
-from python.propulsion.inputs import propellant as propellant
+from python.propulsion.inputs import engine
+from python.propulsion.inputs import first_stage
+from python.propulsion.inputs import propellant
 from python.propulsion.volume_mass_calculator import get_propellant_mass_volume
 import math
 
 class Propulsion():
-    def __init__(self, engine_name, OF_ratio):
+    def __init__(self, engine_name, of_ratio):
         # engine name
         self.engine_name = engine_name
-        self.OF_ratio = OF_ratio
-        self.Isp = engine.get_Isp(OF_ratio)
+        self.of_ratio = of_ratio
+        self.Isp = engine.get_Isp(of_ratio)
     def mass_volume(self,thrust, burn_time):
         # engine number and mass
         self.engine_number = math.ceil(thrust / engine.Thrust)
         self.total_engine_mass = engine.mass_sea * self.engine_number
 
         # calculate mass, volume
-        mass_ox, mass_fuel, volume_ox, volume_fuel = get_propellant_mass_volume(thrust, burn_time, self.OF_ratio)
+        mass_ox, mass_fuel, volume_ox, volume_fuel = get_propellant_mass_volume(thrust, burn_time, self.of_ratio)
 
         # propellant volume
         self.volume_ox = volume_ox
@@ -30,7 +30,6 @@ class Propulsion():
         return self.total_engine_mass, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number
 
 if __name__ == "__main__":
-
     # define inputs for Propulsion() class
     engine_name = engine.name
     thrust = first_stage.Thrust

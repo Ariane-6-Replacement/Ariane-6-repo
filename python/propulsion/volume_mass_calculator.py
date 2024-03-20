@@ -1,4 +1,3 @@
-# IMPORTS
 from python.propulsion.inputs import engine as engine
 from python.propulsion.inputs import first_stage as first_stage
 from python.propulsion.inputs import propellant as propellant
@@ -11,11 +10,11 @@ def calculate_mass_flow_rate(thrust, Isp):
   return mass_flow
 
 # determine oxidiser and fuel mass and volume
-def get_propellant_mass_volume(thrust, burn_time, OF_ratio):
+def get_propellant_mass_volume(thrust, burn_time, of_ratio):
   # INPUTS
   g0 = 9.80665  # sea level gravitational parameter
 
-  Isp = engine.get_Isp(OF_ratio)  # specific impulse
+  Isp = engine.get_Isp(of_ratio)  # specific impulse
   density_ox = propellant.density_ox  # oxidiser density for input Temperature and Pressure (calculated using thermodynamic NIST database)
   density_fuel = propellant.density_fuel  # fuel density for input Temperature and Pressure (calculated using thermodynamic NIST database)
 
@@ -24,8 +23,8 @@ def get_propellant_mass_volume(thrust, burn_time, OF_ratio):
 
   # mass calculations
   mass_total = mass_flow * burn_time
-  mass_ox = OF_ratio / (1+OF_ratio) * mass_total
-  mass_fuel = 1 / (1+OF_ratio) * mass_total
+  mass_ox = of_ratio / (1+of_ratio) * mass_total
+  mass_fuel = 1 / (1+of_ratio) * mass_total
 
   # volume calculations
   volume_ox = mass_ox / density_ox
@@ -44,8 +43,8 @@ def get_propellant_mass_volume(thrust, burn_time, OF_ratio):
 if __name__ == "__main__":
   thrust = first_stage.Thrust
   burn_time = first_stage.time_burn_1st
-  OF_ratio = 350
-  mass_ox, mass_fuel, volume_ox, volume_fuel = get_propellant_mass_volume(thrust, burn_time, OF_ratio)
+  of_ratio = 350
+  mass_ox, mass_fuel, volume_ox, volume_fuel = get_propellant_mass_volume(thrust, burn_time, of_ratio)
 
   # return/print whatever you want
   print("mass_ox:",mass_ox,"mass_fuel:",mass_fuel,"Total mass:",mass_ox+mass_fuel)

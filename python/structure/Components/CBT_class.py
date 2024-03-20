@@ -1,12 +1,12 @@
 from python.structure.Components.cylinder_class import Cylinder
 from python.structure.Components.dome_class import Dome
-from materials import materials as m
+from python.structure.materials import materials as m
 import numpy as np 
 
 class CBT:
-  def __init__(self, outer_radius, pressure, material ,thrust, 
+  def __init__(self, outer_radius, pressure, material, thrust, 
               #  moment,
-                volume_ox, mass_ox, volume_f, mass_f) -> None:
+                volume_ox, mass_ox, volume_f, mass_f):
     self.outer_radius = outer_radius
     self.pressure = pressure
     self.thrust = thrust

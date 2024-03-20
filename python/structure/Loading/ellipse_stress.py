@@ -5,7 +5,7 @@ Source: "Stresses in Shells" by Flugge
 """
 
 from math import sin, cos
-from constants import FOSY
+from python.structure.constants import FOSY
 import numpy as np
 
 

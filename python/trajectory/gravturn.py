@@ -1,8 +1,10 @@
 import numpy as np
 import sat_math_funcs as sm
 from scipy.integrate import odeint
+
 # constants  
 g = 9.81 # m/s^2
+
 def norm(r):
     return np.linalg.norm(r) 
 
