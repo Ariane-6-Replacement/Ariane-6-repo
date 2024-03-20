@@ -1,6 +1,6 @@
-from core.rocket import Rocket
-from ui.setup import UI
-from structure.materials import materials as materials
+from python.core.rocket import Rocket
+from python.ui.setup import UI
+from python.structure.materials import materials as materials
 
 def main():
     rocket = Rocket(
@@ -12,13 +12,15 @@ def main():
         mf2 = 0.04,
         isp2 = 296,
         dv_split = 0.5,
-        engine = "Prometheus",
+        engine_options = ['Prometheus'],
+        engine = 0, # index in engine options
         mf1 = 0.05,
         boostback = False,
         material_options = list(materials.keys()),
         material_tank = 0, # index in material options
         material_misc = 0, # index in material options
-        bulkhead = "shared",
+        bulkhead_options = ["shared", "separate"],
+        bulkhead = 0, # index in bulkhead options
         pressure_ox = 5,
         pressure_fuel = 5,
         diameter = 5,
