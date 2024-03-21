@@ -23,6 +23,9 @@ class Propulsion():
         self.volume_fuel = volume_fuel
         self.volume_total = self.volume_ox + self.volume_fuel
 
+
+
+
         # propellant mass
         self.mass_ox = mass_ox
         self.mass_fuel = mass_fuel

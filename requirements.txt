@@ -1,5 +1,4 @@
-#numpy==
-#scipy==
-#matplotlib==
-#tkinter==
-#pandas==
+numpy
+scipy
+matplotlib
+pandas
