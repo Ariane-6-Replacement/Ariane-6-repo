@@ -38,7 +38,10 @@ class Structure():
         
         elif type == 'CBT':
             #NOTE: 1 - oxidizer, 2 - fuel, possibly add moment 
-            self._CBT = CBT(outer_radius, pressure1, material ,thrust, volume1, mass1, volume2, mass2)
+            self._CBT = CBT(self.outer_radius, self.pressure1, self.material ,self.thrust, self.volume1, self.mass1, self.volume2, self.mass2)
+            self._ITS = Shell(self.outer_radius,self.material,1+self._dome_fwd.height,self.thrust)
+            self._EB = Shell(self.outer_radius,self.material,2+self._dome_aft.height,self.thrust)
+          
 
 
 
@@ -53,7 +56,7 @@ class Structure():
     @property
     def mass_total(self)-> float:
         if self.type == 'CBT':
-            return self._CBT.mass + self._EB.mass + self._ITS_fwd.mass 
+            return self._CBT.mass + self._EB.mass + self._ITS.mass 
         else: 
             return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
 
@@ -67,7 +70,6 @@ class Structure():
 
 
 if __name__ == "__main__":
-    print("ENTERING HERE")
     test = Structure('CBT',2.7,7E5,'2219',328, 440E3, 7E5, 273, 126E3, 20E6,'2195')
     print('DONE')
     print('Mass: ', test.mass_total)

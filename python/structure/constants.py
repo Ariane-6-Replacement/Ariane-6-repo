@@ -1,2 +1,5 @@
-FOSY = 1.5
-FOSU = 1.75
+FOSY = 1.2
+FOSU = 1.5
+
+
+
