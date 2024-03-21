@@ -3,7 +3,7 @@ from python.structure.Loading.isogrid_stress import critical_stress
 from python.structure.materials import materials as m
 from python.structure.geometry import cylindrical_shell_I
 from python.structure.Loading.axial_stress import s_axial
-from python.structure.constants import FOSY
+from python.structure.constants import FOS_ITS
 import numpy as np
 
 class Shell:
@@ -38,14 +38,12 @@ class Shell:
         s_crit=0   #Initial Critical Buckling Stress
         t=0.002   #Shell thickness - assumed 
         s_max = 1
-        while s_crit / s_max < 2.0:
+        while s_crit / s_max < FOS_ITS:
             if t>0.025:
                 raise ValueError
             s_crit, t_mass = critical_stress(t, self.outer_radius, self.material['youngs_modulus'])
-            print(s_crit/10E6)
             I = cylindrical_shell_I(self.outer_radius, t_mass)
             s_max = (s_axial(t_mass, self.outer_radius,1.0,self.thrust) + self.thrust/2 * self.outer_radius / I)
-            print(s_max/10E6)
             t += 0.0005
         return 2 * self.outer_radius * np.pi * self.height * t_mass * self.material['density']
 
