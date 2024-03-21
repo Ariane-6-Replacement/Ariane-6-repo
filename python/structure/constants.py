@@ -1,5 +1,6 @@
 FOSY = 1.2
 FOSU = 1.5
+FOS_ITS = 2.0
 
 
 
