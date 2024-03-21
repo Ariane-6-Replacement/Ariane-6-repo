@@ -26,6 +26,8 @@ class CBT:
       self._cylinder_fwd = Cylinder(self.outer_radius, self.material, self.pressure, self.thrust, cylinder_height_fwd)
       self._cylinder_aft = Cylinder(self.outer_radius, self.material, self.pressure, self.thrust, cylinder_height_aft)
 
+
+
     else:
       self._dome_fwd = Dome(self.outer_radius, self.pressure, self.material)
       self._dome_mid = Dome(self.outer_radius, self.pressure +self.mass_ox*9.81*1.5/(np.pi*self.outer_radius**2) , self.material)
@@ -34,6 +36,7 @@ class CBT:
       cylinder_height_aft = round((self.volume_f * 1.05 - self._dome_aft.inner_volume + self._dome_mid.outer_volume) / (np.pi * self.outer_radius**2),3)
       self._cylinder_fwd = Cylinder(self.outer_radius, self.material, self.pressure, self.thrust, cylinder_height_fwd)
       self._cylinder_aft = Cylinder(self.outer_radius, self.material, self.pressure, self.thrust, cylinder_height_aft)
+
 
   
   @property
