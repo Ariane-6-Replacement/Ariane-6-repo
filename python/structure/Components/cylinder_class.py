@@ -9,7 +9,6 @@ class Cylinder:
                  material: dict,
                  pressure: float,
                  thrust: float,
-                #  moment:float,
                  height:float):
         """
         Cylinder object, containing all relevant parameters. Cylinder coordinate system is defined with the origin at the
@@ -48,33 +47,32 @@ class Cylinder:
             t=t_a
         else:
             t=t_p
-        print('Intermediate t: ', t)
         # NOTE: Extra condition on unpressurized buckling, check the ratio of dry to wet mass
-        s_buckling_stat = buckling.critical_cylinder_buckling(0, self.outer_radius,  t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
-        while s_buckling_stat/FOSY < self.thrust/1.5:
+        N_buckling_stat = buckling.critical_cylinder_buckling(0, self.outer_radius,  t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
+        while N_buckling_stat/FOSY < self.thrust/1.5:
             t+=0.0005
-            s_buckling_stat = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
+            N_buckling_stat = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
 
-        s_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,
+        N_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,
                                                          t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
                                                  
     
-        while s_buckling/self.thrust < FOSY :
+        while N_buckling/self.thrust < FOSY :
             t+=0.0005
-            s_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
+            N_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
     
         Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
-        s_bending = bending.critical_cylinder_bending(self.outer_radius, t, self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
-        print("Test s_bending:",s_bending)
+        M_buckling = bending.critical_cylinder_bending(self.outer_radius, t, self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
+     
         # NOTE: Fact check this assumption 
-        loop_limit = 100_000
-        i = 0
-        while s_bending / (self.thrust / 2) < FOSY and i < loop_limit:
+
+        while M_buckling / (self.thrust / 2) < FOSY:
+            if t>0.02:
+                raise ValueError
             t += 0.0005
             Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
-            s_bending = bending.critical_cylinder_bending(self.outer_radius, t 
+            M_buckling = bending.critical_cylinder_bending(self.outer_radius, t 
             ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
-            i += 1
         return round(t, 4)
     
     @property
