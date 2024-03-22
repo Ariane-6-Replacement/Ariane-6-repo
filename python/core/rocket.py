@@ -3,7 +3,7 @@
 import numpy as np
 
 from python.propulsion.propulsion import Propulsion
-from python.structure.structure_main import Structure
+from python.structure.structure import Structure
 from python.structure.materials import materials as materials
 from python.trajectory.trajectory import Trajectory
 from python.cost.model import MassCalculator
