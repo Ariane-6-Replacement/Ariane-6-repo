@@ -44,8 +44,8 @@ class Rocket():
         self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass, self.dv)
         self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = self.propulsion.mass_volume(self.thrust, self.burntime)
         self.mass_p = self.mass_ox + self.mass_fuel
-        self.structure.calc(self.volume_ox, self.mass_ox, self.volume_fuel, self.mass_fuel, self.thrust)
-        self.mass_t = self.structure.mass_total_tank
+        self.structure.calc(self.bulkhead_options[self.bulkhead],self.volume_ox, self.mass_ox, self.volume_fuel, self.mass_fuel, 10E6)
+        self.mass_t = self.structure.mass_total #Returns mass of the tank/s ITS/s and engine bay
         self.mass_es = self.structure.mass_engine_structure(self.engine_number, self.thrust)
         self.mass_lg = self.structure.mass_landing_gear(self.mass_e, self.mass_p, self.mass_t, self.mass_es)
         self.mass_s = self.mass_e + self.mass_es + self.mass_lg + self.mass_t

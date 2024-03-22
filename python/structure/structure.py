@@ -25,7 +25,7 @@ class Structure():
         # self.input = "struc in"
         # self.output = 4
 
-        if type == "DUAL":
+        if type == "separate":
             
             tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.mass1]
             tank2 =[self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
@@ -45,7 +45,7 @@ class Structure():
             self._EB = Shell(self.outer_radius,self.material3,2+self._tank_aft.dome_aft.height,self.thrust)
         
         
-        elif type == 'CBT':
+        elif type == 'shared':
             
             #NOTE: 1 - oxidizer, 2 - fuel, possibly add moment 
             self._CBT = CBT(self.outer_radius, self.pressure1, self.material ,self.thrust, self.volume1, self.mass1, self.volume2, self.mass2)
@@ -65,14 +65,14 @@ class Structure():
     
     @property
     def mass_total(self)-> float:
-        if self.type == 'CBT':
+        if self.type == 'shared':
             return self._CBT.mass + self._EB.mass + self._ITS.mass 
         else: 
             return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
 
     @property
     def height_total(self) -> float:
-        if self.type == 'CBT':
+        if self.type == 'shated':
             return self._CBT.height + self._ITS_fwd.height +  self._EB.height 
         else:
             return self._tank_fwd.cylinder.height + self._tank_aft.cylinder.height + self._ITS_fwd.height +  self._ITS_aft.height + self._EB.height 
