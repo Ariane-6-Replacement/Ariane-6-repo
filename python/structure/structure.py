@@ -1,5 +1,6 @@
 from python.structure.Components.Tank_class import Tank
 from python.structure.Components.ITS_class import Shell
+from python.structure.Components.CBT_class import CBT
 
 class Structure():
     def __init__(self, outer_radius,material, pressure_ox, pressure_fuel, material3):
@@ -11,7 +12,8 @@ class Structure():
         self.material3 = material3 
 
         # self.material3 = material3
-    def calc(self, volume_ox, mass_ox, volume_fuel, mass_fuel, thrust):
+    def calc(self, type, volume_ox, mass_ox, volume_fuel, mass_fuel, thrust):
+        self.type = type
         self.thrust = thrust
         self.volume1 = volume_ox
         self.volume2 = volume_fuel
@@ -22,16 +24,38 @@ class Structure():
 
         self.input = "struc in"
         self.output = 4
-        if self.mass1 > self.mass2:
-            self._tank_fwd = Tank(*tank2)
-            self._tank_aft = Tank(*tank1)
-        else:
-            self._tank_fwd = Tank(*tank1)
-            self._tank_aft = Tank(*tank2)
+
+        if type == "DUAL":
             
-        self._ITS_fwd = Shell(self.outer_radius, self.material3, 0.5 + self._tank_fwd.dome_fwd.height, thrust)
-        self._ITS_aft = Shell(self.outer_radius, self.material3, 0.5 + self._tank_aft.dome_fwd.height + self._tank_fwd.dome_aft.height, thrust)
-        self._EB = Shell(self.outer_radius, self.material3, 2 + self._tank_aft.dome_aft.height, thrust)
+            tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.mass1]
+            tank2 =[self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
+            
+            if self.mass1 > self.mass2:
+
+                self._tank_fwd = Tank(*tank2)
+                self._tank_aft = Tank(*tank1)
+
+            else:
+
+                self._tank_fwd = Tank(*tank1)
+                self._tank_aft = Tank(*tank2)
+                
+            self._ITS_fwd = Shell(self.outer_radius,self.material3,1+self._tank_fwd.dome_fwd.height,self.thrust)
+            self._ITS_aft = Shell(self.outer_radius,self.material3,0.5+self._tank_aft.dome_fwd.height+self._tank_fwd.dome_aft.height,self.thrust)
+            self._EB = Shell(self.outer_radius,self.material3,2+self._tank_aft.dome_aft.height,self.thrust)
+        
+        
+        elif type == 'CBT':
+            
+            #NOTE: 1 - oxidizer, 2 - fuel, possibly add moment 
+            self._CBT = CBT(self.outer_radius, self.pressure1, self.material ,self.thrust, self.volume1, self.mass1, self.volume2, self.mass2)
+            self._ITS = Shell(self.outer_radius,self.material,1+self._CBT._dome_fwd.height,self.thrust)
+            self._EB = Shell(self.outer_radius,self.material,2+self._CBT._dome_aft.height,self.thrust)
+          
+
+
+
+          
 
     def mass_engine_structure(self, engine_number, thrust):
         return 0
@@ -40,12 +64,19 @@ class Structure():
         return 0
     
     @property
-    def mass_total_tank(self) -> float:
-        return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
+    def mass_total(self)-> float:
+        if self.type == 'CBT':
+            return self._CBT.mass + self._EB.mass + self._ITS.mass 
+        else: 
+            return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
 
     @property
     def height_total(self) -> float:
-        return self._tank_fwd.cylinder.height + self._tank_aft.cylinder.height + self._ITS_fwd.height +  self._ITS_aft.height + self._EB.height 
+        if self.type == 'CBT':
+            return self._CBT.height + self._ITS_fwd.height +  self._EB.height 
+        else:
+            return self._tank_fwd.cylinder.height + self._tank_aft.cylinder.height + self._ITS_fwd.height +  self._ITS_aft.height + self._EB.height 
+
 
 
 
