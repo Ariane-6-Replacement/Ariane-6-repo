@@ -8,15 +8,15 @@ import numpy as np
 def critical_stress(t,R, E):
     '''
     t - shell thickness
-    d - iso heigh
-    E -Young;s modulus of the grid material
-    E0 - modulus of the skin'''
+    R- radius 
+    E - Youngs modulus of the grid material
+    '''
     alpha = 1/3
     Beta = 16
     v = 1/3
     t_eq = t *Beta /(1+alpha)
     E_eq = E * (1+alpha)**2/Beta
-    t_weight = t* (1+3*alpha)
+    t_weight = t * (1+3*alpha)
     Ncr = 0.65/np.sqrt(3*(1-v**2)) * E_eq*t_eq**2/R*Beta
     sigma_x = Ncr/t_weight
     

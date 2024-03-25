@@ -11,5 +11,5 @@ def s_axial(t,R,FOSY,F):
     """
     Stress from the axial force
     """
-    s = F*FOSY / (2* R * np.pi * t)
+    s = F * FOSY / (2 * R * np.pi * t)
     return s
