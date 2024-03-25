@@ -23,6 +23,8 @@ def main():
         bulkhead = 0, # index in bulkhead options
         pressure_ox = 5,
         pressure_fuel = 5,
+        t_ox = 90,
+        t_fuel = 111,
         diameter = 5,
         of_ratio = 3.5,
     )

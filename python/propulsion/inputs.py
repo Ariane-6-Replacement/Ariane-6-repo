@@ -20,8 +20,7 @@ class Prometheus:
         self.name = "Prometheus"
         self.Thrust = 980e3
         self.cost = 1e6
-        self.mass_sea = 1385  # kg [source: paper: A viable and sustainable European path into space – for cargo and astronauts]
-        self.mass_vac = 1750  # kg [source: paper: A viable and sustainable European path into space – for cargo and astronauts]
+        self.mass_sea = 1100  # kg [source: paper: A viable and sustainable European path into space – for cargo and astronauts]
         #self.of_ratio = 3.5  # chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
         # self.of_ratio = 1.7 # wrong? https://aris-space.ch/introduction-to-prometheus/
         #self.Isp = self.get_Isp(of_ratio)
@@ -35,14 +34,13 @@ class Prometheus:
         self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
 
     def get_Isp(self, of_ratio):
-    #     """"
-    #     Lower O/F can mean less mass because LOX is heavy. Nominal: Isp = 360 for 100bar and O/F=3.5
-    #     assume Isp goes down with 10 for every 0.1 OF. chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
-    #     """
-    #     self.ISP = 360 - abs(3.5 - of_ratio) * 100
-    #     return  self.ISP
-        
+        """"
+        Lower O/F can mean less mass because LOX is heavy. Nominal: Isp = 360 for 100bar and O/F=3.5
+        assume Isp goes down with 10 for every 0.1 OF. chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
+        """
+
         self.Isp = 306.266 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
+        self.Isp = self.Isp - abs(3.5 - of_ratio) * 100
         return self.Isp
 
 
@@ -53,16 +51,16 @@ class Vinci:  # TODO add specs
 
 
 class Propellant:
-    def __init__(self):
+    def __init__(self,t_ox,t_fuel,p_ox,p_fuel):
         # FUEL = METHANE
 
         # pressure
-        self.pressure_ox = 8e5  # Pa
-        self.pressure_fuel = 8e5  # Pa
+        self.pressure_ox = p_ox  # Pa
+        self.pressure_fuel = p_fuel  # Pa
 
         # temperature
-        self.temperature_ox = 90  # K
-        self.temperature_fuel = 111  # K
+        self.temperature_ox = t_ox  # K
+        self.temperature_fuel = t_fuel  # K
 
         # Molar mass
         self.M_ox = 32.0 / 1000  # kg/mol
@@ -76,7 +74,8 @@ class Propellant:
 
         # Raptor Mixture Ratio: 3.8 kg LOX to 1kg Methane. [Source](https://en.wikipedia.org/wiki/Raptor_(rocket_engine)).
 
+
 # CHOOSE (so 'settings'/inputs can easily be imported by all files. For example, other engine choice will automatically be used by all files)
 engine = Prometheus()
 first_stage = FirstStage()
-propellant = Propellant()
+# propellant = Propellant()

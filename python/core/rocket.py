@@ -17,7 +17,7 @@ class Rocket():
         self.__dict__.update(**kwargs)
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
-        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio)
+        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox,self.pressure_fuel, self.t_ox,self.t_fuel)
         self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox, self.pressure_fuel, self.material_options[self.material_misc])
         self.trajectory = Trajectory(self.orbit_options[self.orbit], self.payload, self.cd)
 
@@ -42,7 +42,7 @@ class Rocket():
     def iterate(self):
 
         self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass, self.dv)
-        self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = self.propulsion.mass_volume(self.thrust, self.burntime)
+        self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = self.propulsion.mass_volume(self.thrust, self.burntime,self.t_fuel,self.t_ox,self.pressure_ox,self.pressure_fuel)
         self.mass_p = self.mass_ox + self.mass_fuel
         self.structure.calc(self.volume_ox, self.mass_ox, self.volume_fuel, self.mass_fuel, self.thrust)
         self.mass_t = self.structure.mass_total_tank
