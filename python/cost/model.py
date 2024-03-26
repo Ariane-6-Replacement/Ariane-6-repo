@@ -118,7 +118,7 @@ class CostModel():
         self.cost.total_lifetime_euros = self.man_years_to_million_euro_2022(self.cost.total_lifetime)
 
         # Man-years
-        if
+
         self.cost.per_launch = self.cost.total_lifetime / self.total_flights
 
         # Million euros
