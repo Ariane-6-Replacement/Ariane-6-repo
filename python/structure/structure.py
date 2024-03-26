@@ -61,13 +61,12 @@ class Structure():
         return 4000
     
     def mass_landing_gear(self, mass_e, mass_p, mass_t, mass_es):
-        return 5000
+        return 3000
     
     @property
     def mass_total(self)-> float:
         if self.type == 'shared':
-            # return self._CBT.mass + self._EB.mass + self._ITS.mass
-            return 0 
+            return self._CBT.mass + self._EB.mass + self._ITS.mass
         else: 
             return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
 
