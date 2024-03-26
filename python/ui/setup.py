@@ -52,6 +52,7 @@ class UI():
         
     def get_outputs(self):
         ui_outputs = {}
+
         for key, ui in self.labels.items():
             if hasattr(ui, 'var'):
                 var = ui.var
@@ -83,7 +84,7 @@ class UI():
 
         self.labels = {
             '0th_label': Label(self.root, "General properties", font=label_font),
-            'dv': LabelEntry(self.root, "Delta V total (m/s):", self.rocket.dv),
+            #'dv': LabelEntry(self.root, "Delta V total (m/s):", self.rocket.dv),
             'orbit': LabelCombobox(self.root, "Orbit:", self.rocket.orbit, self.rocket.orbit_options, state="readonly", width=17),
             'payload': LabelEntry(self.root, "Payload (kg):", self.rocket.payload),
             'cd': LabelEntry(self.root, "Drag Coefficient:", self.rocket.cd),
@@ -93,15 +94,14 @@ class UI():
             'dv_split_slider': LabelScale(self.root, "dV fraction stage 1:", padx=10, pady=10, from_=0, to_=1, orient="horizontal", length=150, command=lambda event: self.update_dv_split()),
             'dv_split': Entry(self.root, self.rocket.dv_split, range=[0, 1]),
             'engine': LabelCombobox(self.root, "Engine:", self.rocket.engine, self.rocket.engine_options, state="readonly", width=17),
-            'mf1': LabelEntry(self.root, "Inert mass fraction 1st stage:", self.rocket.mf1),
             'boostback': LabelCheckbutton(self.root, "Boostback:", self.rocket.boostback),
             'material_tank': LabelCombobox(self.root, "Material Tank:", self.rocket.material_tank, self.rocket.material_options, state="readonly", width=17),
             'material_misc': LabelCombobox(self.root, "Material Misc:", self.rocket.material_misc, self.rocket.material_options, state="readonly", width=17),
             'bulkhead': LabelCombobox(self.root, "Bulkhead:", self.rocket.bulkhead, self.rocket.bulkhead_options, state="readonly", width=17),
             'pressure_ox': LabelEntry(self.root, "Pressure OX (bar):", self.rocket.pressure_ox),
             'pressure_fuel': LabelEntry(self.root, "Pressure fuel (bar):", self.rocket.pressure_fuel),
-            'temperature_ox':  LabelEntry(self.root, "Temperature Ox (K):", self.rocket.t_ox),
-            'temperature_fuel': LabelEntry(self.root, "Temperature Fuel (K):", self.rocket.t_fuel),
+            'temperature_ox':  LabelEntry(self.root, "Temperature Ox (K):", self.rocket.temperature_ox),
+            'temperature_fuel': LabelEntry(self.root, "Temperature Fuel (K):", self.rocket.temperature_fuel),
 
             'diameter': LabelEntry(self.root, "Diameter (m):", self.rocket.diameter),
             'of_ratio': LabelEntry(self.root, "O/F ratio:", self.rocket.of_ratio),
@@ -122,32 +122,42 @@ class UI():
     def show_result(self):
         root = tk.Tk()
         root.title("Output Screen")
-
+        label_font = ('Helvetica', 10, 'bold')
+        ttk.Label(root, text="Parameter", font = label_font).grid(column=0, row=0, sticky='')
+        ttk.Label(root, text="Value", font=label_font).grid(column=1, row=0, sticky='e')
+        ttk.Label(root, text="Certainty", font=label_font).grid(column=2, row=0, sticky='')
         values = [
-            [f"--------first-stage properties---------","",""],
-            [f"Engine:", self.rocket.engine_options[self.rocket.engine], ""],
-            [f"Thrust:", f"{self.rocket.thrust / 10e6} MN ", "Margin 40%"],
-            [f"Engine Number:", f"{self.rocket.engine_number}",""],
-            [f"Delta V (first stage):", f"{self.rocket.dv} m/s", "Margin 40%"],
-            [f"Boostback:", f"{self.rocket.boostback}",""],
-            [f"-----------other properties------------","", ""],
-            [f"Orbit:", f"{self.rocket.orbit_options[self.rocket.orbit]}", ""],
+            [f"-----------General properties------------", "---------------", "---------------"],
+            [f"Orbit:", f"{self.rocket.orbit_options[self.rocket.orbit]}", "Input"],
             [f"Payload:", f"{self.rocket.payload} kg", "Input"],
             [f"Drag Coefficient:", f"{self.rocket.cd}", "Input"],
-            [f"---------propellant properties---------","",""],
-            [f"Pressure:", f"{self.rocket.pressure_ox} bar", "Margin 40%"],
-            [f"Temperature Ox:", f"{self.rocket.t_ox} K", "Input"],
-            [f"Temperature Fuel:", f"{self.rocket.t_fuel} K", "Input"],
-            [f"Propellant Mass:", f"{self.rocket.mass_p:.0f} kg", "Margin 40%"],
-            [f" O/F:", f"{self.rocket.of_ratio} ", "Input"],
+            [f"Delta V total:", f"{self.rocket.dv} m/s", "Margin 10%"],
 
-            [f"--------structural properties---------","",""],
-            [f"Structural Mass:", f"{self.rocket.mass_s:.0f} kg", "Margin 40%"],
+            [f"--------First-stage properties---------","---------------","---------------"],
+            [f"Engine:", self.rocket.engine_options[self.rocket.engine], "Input"],
+            [f"Boostback:", f"{self.rocket.boostback}", "Input"],
+            [f"Thrust:", f"{self.rocket.thrust / 10e6} MN ", "Margin 40%"],
+            [f"Number of Engines:", f"{self.rocket.engine_number}","Margin 40%"],
+            [f"Delta V first stage:", f"{self.rocket.dv*self.rocket.dv_split} m/s", "Margin 40%"],
+
+
+
+            [f"---------Propellant properties---------","---------------","---------------"],
+            [f"Pressure:", f"{self.rocket.pressure_ox} bar", "Input"],
+            [f"Temperature Ox:", f"{self.rocket.temperature_ox} K", "Input"],
+            [f"Temperature Fuel:", f"{self.rocket.temperature_fuel} K", "Input"],
+            [f" O/F Ratio:", f"{self.rocket.of_ratio} ", "Input"],
+            [f"Propellant Mass:", f"{self.rocket.mass_p:.0f} kg", "Margin 40%"],
+
+
+            [f"--------Structural properties---------","---------------","---------------"],
+
             [f"Material:", f"{self.rocket.material_options[self.rocket.material_tank]}", "Input"],
             [f"Bulkhead:", f"{self.rocket.bulkhead_options[self.rocket.bulkhead]}", "Input"],
+            [f"Structural Mass:", f"{self.rocket.mass_s:.0f} kg", "Margin 40%"],
             [f"1st Stage Mass:", f"{self.rocket.mass:.0f} kg", "Margin 40%"],
             [f"Upper Stage Mass:", f"{self.rocket.mass2:.0f} kg", "Margin 40%"],
-            [f"----------------cost-----------------","----------------","----------------"],
+            [f"----------------Cost-----------------","----------------","----------------"],
             [f"Total Lifetime Cost:", f"{self.rocket.lifetime_cost:.0f} million euros", "Margin 40%"],
             [f"Cost Per Launch:", f"{self.rocket.per_launch_cost:.0f} million euros", "Margin 40%"],
             #f"Estimated Cost: €{self.rocket.cost:.0f} "
@@ -155,8 +165,9 @@ class UI():
 
         # Dynamically create labels to display each value
         for i, value in enumerate(values):
-            ttk.Label(root, text=value[0]).grid(column=0, row=i, sticky='w')
-            ttk.Label(root, text=value[1]).grid(column=1, row=i, sticky='w')
+            i+=1
+            ttk.Label(root, text=value[0]).grid(column=0, row=i, sticky='')
+            ttk.Label(root, text=value[1]).grid(column=1, row=i, sticky='e')
             ttk.Label(root, text=value[2]).grid(column=2, row=i, sticky='w')
 
         fig = self.rocket.trajectory.fig
@@ -164,7 +175,7 @@ class UI():
         canvas_widget = canvas.get_tk_widget()
 
         # Place the canvas within the Tkinter window
-        canvas_widget.grid(column=0, row=len(values), sticky="nsew")
+        canvas_widget.grid(column=0, row=len(values)+1, columnspan = 3, sticky="")
 
         #iterate_button = ttk.Button(root, text="Iterate")
         #iterate_button.bind("<ButtonRelease-1>", lambda event: self.iterate_rocket())
