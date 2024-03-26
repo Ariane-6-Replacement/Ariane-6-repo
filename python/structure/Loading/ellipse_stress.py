@@ -5,7 +5,7 @@ Source: "Stresses in Shells" by Flugge
 """
 
 from math import sin, cos
-from python.structure.constants import FOSY
+from python.structure.constants import FOSU
 import numpy as np
 
 
@@ -42,5 +42,5 @@ def t_ellipsoid(r, h , p , s_yield):
     R2 = (r**4 * (h)**2 + h**4 * (r)**2)**(3/2) / (r**4 * h**4)
     A = R1/2
     B = R1 * (1-R1/(2*R2))
-    t = p * FOSY/ s_yield * np.sqrt(A**2 - A * B + B**2)
+    t = p * FOSU / s_yield * np.sqrt(A**2 - A * B + B**2)
     return round(t,4)

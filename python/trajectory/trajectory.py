@@ -16,7 +16,7 @@ class Trajectory():
         orbits_list = pd.DataFrame(data, columns=['name', 'abbreviation', 'inclination [deg]', 'altitude of perigee [km]', ' altitude of apogee [km]', 'argument of perigee [deg]', 'payload weight [kg]'])
 
     def thrust_burntime(self, mass, dv):
-        thrust = 19e6
+        thrust = 10e6
         burntime = 100 # placeholders
         x = np.array([1,2,3,4,5,6,7,8,9])
         y = x**0.5

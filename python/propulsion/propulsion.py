@@ -5,7 +5,7 @@ from python.propulsion.volume_mass_calculator import get_propellant_mass_volume
 import math
 
 class Propulsion():
-    def __init__(self, engine_name, of_ratio,p_ox,p_fuel,t_ox,t_fuel):
+    def __init__(self, engine_name, of_ratio,p_ox,p_fuel):
         # engine name
         self.engine_name = engine_name
         self.of_ratio = of_ratio
