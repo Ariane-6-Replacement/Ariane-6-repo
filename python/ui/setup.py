@@ -125,24 +125,24 @@ class UI():
         root.title("Output Screen")
 
         values = [
-            [f"--------first-stage properties---------","",""],
-            [f"Engine:", self.rocket.engine_options[self.rocket.engine], ""],
+            [f"--------first-stage properties---------","---------------","---------------"],
+            [f"Engine:", self.rocket.engine_options[self.rocket.engine], "Input"],
             [f"Thrust:", f"{self.rocket.thrust / 10e6} MN ", "Margin 40%"],
-            [f"Engine Number:", f"{self.rocket.engine_number}",""],
+            [f"Engine Number:", f"{self.rocket.engine_number}","Margin 40%"],
             [f"Delta V (first stage):", f"{self.rocket.dv} m/s", "Margin 40%"],
-            [f"Boostback:", f"{self.rocket.boostback}",""],
-            [f"-----------other properties------------","", ""],
-            [f"Orbit:", f"{self.rocket.orbit_options[self.rocket.orbit]}", ""],
+            [f"Boostback:", f"{self.rocket.boostback}","Input"],
+            [f"-----------other properties------------","---------------", "---------------"],
+            [f"Orbit:", f"{self.rocket.orbit_options[self.rocket.orbit]}", "Input"],
             [f"Payload:", f"{self.rocket.payload} kg", "Input"],
             [f"Drag Coefficient:", f"{self.rocket.cd}", "Input"],
-            [f"---------propellant properties---------","",""],
+            [f"---------propellant properties---------","---------------","---------------"],
             [f"Pressure:", f"{self.rocket.pressure_ox} bar", "Margin 40%"],
             [f"Temperature Ox:", f"{self.rocket.temperature_ox} K", "Input"],
             [f"Temperature Fuel:", f"{self.rocket.temperature_fuel} K", "Input"],
             [f"Propellant Mass:", f"{self.rocket.mass_p:.0f} kg", "Margin 40%"],
             [f" O/F:", f"{self.rocket.of_ratio} ", "Input"],
 
-            [f"--------structural properties---------","",""],
+            [f"--------structural properties---------","---------------","---------------"],
             [f"Structural Mass:", f"{self.rocket.mass_s:.0f} kg", "Margin 40%"],
             [f"Material:", f"{self.rocket.material_options[self.rocket.material_tank]}", "Input"],
             [f"Bulkhead:", f"{self.rocket.bulkhead_options[self.rocket.bulkhead]}", "Input"],
@@ -156,8 +156,8 @@ class UI():
 
         # Dynamically create labels to display each value
         for i, value in enumerate(values):
-            ttk.Label(root, text=value[0]).grid(column=0, row=i, sticky='w')
-            ttk.Label(root, text=value[1]).grid(column=1, row=i, sticky='w')
+            ttk.Label(root, text=value[0]).grid(column=0, row=i, sticky='')
+            ttk.Label(root, text=value[1]).grid(column=1, row=i, sticky='e')
             ttk.Label(root, text=value[2]).grid(column=2, row=i, sticky='w')
 
         fig = self.rocket.trajectory.fig
@@ -165,7 +165,7 @@ class UI():
         canvas_widget = canvas.get_tk_widget()
 
         # Place the canvas within the Tkinter window
-        canvas_widget.grid(column=0, row=len(values), sticky="nsew")
+        canvas_widget.grid(column=0, row=len(values), columnspan = 3, sticky="")
 
         #iterate_button = ttk.Button(root, text="Iterate")
         #iterate_button.bind("<ButtonRelease-1>", lambda event: self.iterate_rocket())
