@@ -124,38 +124,40 @@ class UI():
         root.title("Output Screen")
 
         values = [
-            f"--------first-stage properties---------",
-            f"Engine: {self.rocket.engine_options[self.rocket.engine]}",
-            f"Thrust: {self.rocket.thrust} N",
-            f"Engine Number: {self.rocket.engine_number}",
-            f"Delta V (first stage): {self.rocket.dv} m/s",
-            f"Boostback: {self.rocket.boostback}",
-            f"-----------other properties------------",
-            f"Orbit: {self.rocket.orbit_options[self.rocket.orbit]}",
-            f"Payload: {self.rocket.payload} kg",
-            f"Drag Coefficient: {self.rocket.cd}",
-            f"---------propellant properties---------",
-            f"Pressure: {self.rocket.pressure_ox} bar",
-            f"Temperature Ox: {self.rocket.t_ox} K",
-            f"Temperature Fuel: {self.rocket.t_fuel} K",
-            f"Propellant Mass: {self.rocket.mass_p:.0f} kg",
-            f" O/F: {self.rocket.of_ratio} ",
+            [f"--------first-stage properties---------","",""],
+            [f"Engine:", self.rocket.engine_options[self.rocket.engine], ""],
+            [f"Thrust:", f"{self.rocket.thrust / 10e6} MN ", "Margin 40%"],
+            [f"Engine Number:", f"{self.rocket.engine_number}",""],
+            [f"Delta V (first stage):", f"{self.rocket.dv} m/s", "Margin 40%"],
+            [f"Boostback:", f"{self.rocket.boostback}",""],
+            [f"-----------other properties------------","", ""],
+            [f"Orbit:", f"{self.rocket.orbit_options[self.rocket.orbit]}", ""],
+            [f"Payload:", f"{self.rocket.payload} kg", "Input"],
+            [f"Drag Coefficient:", f"{self.rocket.cd}", "Input"],
+            [f"---------propellant properties---------","",""],
+            [f"Pressure:", f"{self.rocket.pressure_ox} bar", "Margin 40%"],
+            [f"Temperature Ox:", f"{self.rocket.t_ox} K", "Input"],
+            [f"Temperature Fuel:", f"{self.rocket.t_fuel} K", "Input"],
+            [f"Propellant Mass:", f"{self.rocket.mass_p:.0f} kg", "Margin 40%"],
+            [f" O/F:", f"{self.rocket.of_ratio} ", "Input"],
 
-            f"--------structural properties---------",
-            f"Structural Mass: {self.rocket.mass_s:.0f} kg",
-            f"Material: {self.rocket.material_options[self.rocket.material_tank]}",
-            f"Bulkhead: {self.rocket.bulkhead_options[self.rocket.bulkhead]}",
-            f"1st Stage Mass: {self.rocket.mass:.0f} kg",
-            f"Upper Stage Mass: {self.rocket.mass2:.0f} kg",
-            f"----------------cost-----------------",
-            f"Total Lifetime Cost: {self.rocket.lifetime_cost:.0f} million euros",
-            f"Cost Per Launch: {self.rocket.per_launch_cost:.0f} million euros",
+            [f"--------structural properties---------","",""],
+            [f"Structural Mass:", f"{self.rocket.mass_s:.0f} kg", "Margin 40%"],
+            [f"Material:", f"{self.rocket.material_options[self.rocket.material_tank]}", "Input"],
+            [f"Bulkhead:", f"{self.rocket.bulkhead_options[self.rocket.bulkhead]}", "Input"],
+            [f"1st Stage Mass:", f"{self.rocket.mass:.0f} kg", "Margin 40%"],
+            [f"Upper Stage Mass:", f"{self.rocket.mass2:.0f} kg", "Margin 40%"],
+            [f"----------------cost-----------------","----------------","----------------"],
+            [f"Total Lifetime Cost:", f"{self.rocket.lifetime_cost:.0f} million euros", "Margin 40%"],
+            [f"Cost Per Launch:", f"{self.rocket.per_launch_cost:.0f} million euros", "Margin 40%"],
             #f"Estimated Cost: €{self.rocket.cost:.0f} "
         ]
 
         # Dynamically create labels to display each value
         for i, value in enumerate(values):
-            ttk.Label(root, text=value).grid(column=0, row=i, sticky='w')
+            ttk.Label(root, text=value[0]).grid(column=0, row=i, sticky='w')
+            ttk.Label(root, text=value[1]).grid(column=1, row=i, sticky='w')
+            ttk.Label(root, text=value[2]).grid(column=2, row=i, sticky='w')
 
         fig = self.rocket.trajectory.fig
         canvas = FigureCanvasTkAgg(fig, master=root)
