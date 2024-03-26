@@ -4,8 +4,8 @@ from python.structure.materials import materials as materials
 
 def main():
     rocket = Rocket(
-        dv = 10000,
-        orbit_options = ['LEO', 'MEO', 'GEO', 'HEO'],
+        orbit_options = ['LEO', 'GTO', 'GEO', "LTO"],
+        orbit_dv = [9256, 9256 + 2440, 9256 + 2440 + 1472, 9256 + 2440 +679],
         orbit = 0, # index in orbit options
         payload = 20000,
         cd = 0.2,
@@ -17,8 +17,8 @@ def main():
         mf1 = 0.05,
         boostback = False,
         material_options = list(materials.keys()),
-        material_tank = 0, # index in material options
-        material_misc = 0, # index in material options
+        material_tank = 3, # index in material options
+        material_misc = 3, # index in material options
         bulkhead_options = ["shared", "separate"],
         bulkhead = 0, # index in bulkhead options
         pressure_ox = 5,

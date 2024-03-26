@@ -15,12 +15,13 @@ class Rocket():
         self.__dict__.update(**kwargs)
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
+        self.dv = self.orbit_dv[self.orbit]
         self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox*10**5,self.pressure_fuel*10**5)
         self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox, self.pressure_fuel, self.material_options[self.material_misc])
         self.trajectory = Trajectory(self.orbit_options[self.orbit], self.payload, self.cd)
 
     def mass_estimation(self):
-        self.inert_mass_fractions = np.array([self.mf1, self.mf2])
+        self.inert_mass_fractions = np.array([self.mf2, self.mf2])
         self.ISPs = np.array([self.propulsion.Isp, self.isp2])
 
         # All outputs in tonnes
