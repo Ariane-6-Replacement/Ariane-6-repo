@@ -94,7 +94,7 @@ class UI():
             'dv_split_slider': LabelScale(self.root, "dV fraction stage 1:", padx=10, pady=10, from_=0, to_=1, orient="horizontal", length=150, command=lambda event: self.update_dv_split()),
             'dv_split': Entry(self.root, self.rocket.dv_split, range=[0, 1]),
             'engine': LabelCombobox(self.root, "Engine:", self.rocket.engine, self.rocket.engine_options, state="readonly", width=17),
-            'boostback': LabelCheckbutton(self.root, "Boostback:", self.rocket.boostback),
+            'reflights': LabelEntry(self.root, "Number of reflights:", self.rocket.reflights),
             'material_tank': LabelCombobox(self.root, "Material Tank:", self.rocket.material_tank, self.rocket.material_options, state="readonly", width=17),
             'material_misc': LabelCombobox(self.root, "Material Misc:", self.rocket.material_misc, self.rocket.material_options, state="readonly", width=17),
             'bulkhead': LabelCombobox(self.root, "Bulkhead:", self.rocket.bulkhead, self.rocket.bulkhead_options, state="readonly", width=17),
@@ -135,10 +135,10 @@ class UI():
 
             [f"--------First-stage properties---------","---------------","---------------"],
             [f"Engine:", self.rocket.engine_options[self.rocket.engine], "Input"],
-            [f"Boostback:", f"{self.rocket.boostback}", "Input"],
-            [f"Thrust:", f"{self.rocket.thrust / 10e6} MN ", "Margin 40%"],
+            [f"Number of reflights:", f"{self.rocket.reflights}", "Input"],
+            [f"Thrust:", f"{(self.rocket.thrust / 10e6):.1f} MN ", "Margin 40%"],
             [f"Number of Engines:", f"{self.rocket.engine_number}","Margin 40%"],
-            [f"Delta V first stage:", f"{self.rocket.dv*self.rocket.dv_split} m/s", "Margin 40%"],
+            [f"Delta V first stage:", f"{(self.rocket.dv*self.rocket.dv_split):.0f} m/s", "Margin 40%"],
 
 
 

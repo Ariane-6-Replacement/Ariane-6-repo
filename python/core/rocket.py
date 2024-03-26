@@ -16,6 +16,7 @@ class Rocket():
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
         self.dv = self.orbit_dv[self.orbit]
+        self.dv_1 = self.dv * self.dv_split
         self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox*10**5,self.pressure_fuel*10**5)
         self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox, self.pressure_fuel, self.material_options[self.material_misc])
         self.trajectory = Trajectory(self.orbit_options[self.orbit], self.payload, self.cd)
@@ -33,17 +34,18 @@ class Rocket():
         # Convert tonnes to kg
         self.mass, self.mass2 = self.wet_masses * 1000
         self.mass_prev = self.mass
+        self.mass_total = self.mass + self.mass2 + self.payload
     def cost_estimator(self):
         cm = CostModel()
 
-        cm.calculate(self.dry_masses, self.prop_masses)
+        cm.calculate(self.dry_masses, self.prop_masses, self.reflights)
         return cm.cost.total_lifetime_euros, cm.cost.per_launch_euros
     
     def iterate(self):
         e = 10e9
         i = 0
-        while e > 50000:
-            self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass, self.dv)
+        while e > 10000:
+            self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass_total, self.dv)
             self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = (
                 self.propulsion.mass_volume(self.thrust, self.burntime, self.temperature_fuel, self.temperature_ox,
                                             self.pressure_ox, self.pressure_fuel))
@@ -55,6 +57,7 @@ class Rocket():
             self.mass_lg = self.structure.mass_landing_gear(self.mass_e, self.mass_p, self.mass_t, self.mass_es)
             self.mass_s = self.mass_e + self.mass_es + self.mass_lg + self.mass_t
             self.mass = self.mass_p + self.mass_s
+            self.mass_total = self.mass + self.mass2 + self.payload
             e = np.abs(self.mass - self.mass_prev)
             i += 1
             self.mass_prev = self.mass
