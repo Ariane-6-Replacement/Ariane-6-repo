@@ -50,7 +50,7 @@ class Structure():
             #NOTE: 1 - oxidizer, 2 - fuel, possibly add moment 
             self._CBT = CBT(self.outer_radius, self.pressure1, self.material ,self.thrust, self.volume1, self.mass1, self.volume2, self.mass2)
             self._ITS = Shell(self.outer_radius,self.material,1+self._CBT._dome_fwd.height,self.thrust)
-            self._EB = Shell(self.outer_radius,self.material,2+self._CBT._dome_aft.height,self.thrust)
+            self._EB = Shell(self.outer_radius,self.material,3+self._CBT._dome_aft.height,self.thrust)
           
 
 
@@ -72,14 +72,33 @@ class Structure():
 
     @property
     def height_total(self) -> float:
-        if self.type == 'shated':
+        if self.type == 'shared':
             return self._CBT.height + self._ITS_fwd.height +  self._EB.height 
         else:
             return self._tank_fwd.cylinder.height + self._tank_aft.cylinder.height + self._ITS_fwd.height +  self._ITS_aft.height + self._EB.height 
 
 
+    @property
+    def cg(self)->float:
+        hengine =(0.6 * self._EB.height - 1.2)
+        hthrust = (0.6 * self._EB.height - 0.2)
+        hEB = self._EB.height * 0.5 
+        if self.type == 'shared':
+            ht1 = ( 0.5 * self._CBT._cylinder_aft.height + self._EB.height)
+            ht2 = (0.5 * self._CBT._cylinder_fwd.height + self._CBT._cylinder_aft.height + self._EB.height)
+            hITS = (0.5 * self._ITS.height + self._CBT._cylinder_fwd.height + self._CBT._cylinder_aft.height + self._EB.height)
+            temp = self.engine_mass * self.engine_number * hengine  + self.mass_engine_structure() * hthrust   + hEB* self._EB.mass + self._CBT._cylinder_aft.mass * ht1 *1.05 + self._CBT._cylinder_fwd.mass * ht2*1.08 + self._ITS.mass * hITS
+            cg = temp / (hengine + hthrust + hEB + ht1 + ht2 + hITS)
+            return cg
+        else: 
+            ht1 = (0.5 * self._CBT._cylinder_aft.height + self._EB.height)
+            hITS1 = (0.5 * self._ITS_aft.height + self._CBT._cylinder_aft.height + self._EB.height)
+            ht2= (0.5 * self._CBT._cylinder_fwd.height + self._ITS_aft.height + self._CBT._cylinder_aft.height + self._EB.height) 
+            hITS2 = ( 0.5 * self._ITS_fwd.height + self._CBT._cylinder_fwd.height + self._ITS_aft.height + self._CBT._cylinder_aft.height + self._EB.height)
+            temp = self.engine_mass * self.engine_number * hengine + self.mass_engine_structure() * hthrust  +  self._EB.mass * hEB  + self._tank_aft.cylinder.mass * ht1* 1.08 + self._ITS_aft.mass * hITS1 +  self._tank_fwd.cylinder.mass * 1.08 * ht2 + self._ITS_fwd.mass * hITS2
 
-
+            cg  = temp / (hengine + hthrust + hEB + ht1 + ht2 + hITS1 + hITS2)
+            return cg
 # if __name__ == "__main__":
 #     print("CALCULATING STRUCTURE")
 #     test = Structure(2.7,7E5,'2219',328, 440E3, 7E5, 273, 126E3, 20E6,'2195')
