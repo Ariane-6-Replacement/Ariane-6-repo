@@ -123,12 +123,15 @@ class UI():
     def show_result(self):
         root = tk.Tk()
         root.title("Output Screen")
-
+        label_font = ('Helvetica', 10, 'bold')
+        ttk.Label(root, text="Parameter", font = label_font).grid(column=0, row=0, sticky='')
+        ttk.Label(root, text="Value", font=label_font).grid(column=1, row=0, sticky='e')
+        ttk.Label(root, text="Certainty", font=label_font).grid(column=2, row=0, sticky='')
         values = [
             [f"--------first-stage properties---------","---------------","---------------"],
             [f"Engine:", self.rocket.engine_options[self.rocket.engine], "Input"],
             [f"Thrust:", f"{self.rocket.thrust / 10e6} MN ", "Margin 40%"],
-            [f"Engine Number:", f"{self.rocket.engine_number}","Margin 40%"],
+            [f"Number of Engines:", f"{self.rocket.engine_number}","Margin 40%"],
             [f"Delta V (first stage):", f"{self.rocket.dv} m/s", "Margin 40%"],
             [f"Boostback:", f"{self.rocket.boostback}","Input"],
             [f"-----------other properties------------","---------------", "---------------"],
@@ -156,6 +159,7 @@ class UI():
 
         # Dynamically create labels to display each value
         for i, value in enumerate(values):
+            i+=1
             ttk.Label(root, text=value[0]).grid(column=0, row=i, sticky='')
             ttk.Label(root, text=value[1]).grid(column=1, row=i, sticky='e')
             ttk.Label(root, text=value[2]).grid(column=2, row=i, sticky='w')
@@ -165,7 +169,7 @@ class UI():
         canvas_widget = canvas.get_tk_widget()
 
         # Place the canvas within the Tkinter window
-        canvas_widget.grid(column=0, row=len(values), columnspan = 3, sticky="")
+        canvas_widget.grid(column=0, row=len(values)+1, columnspan = 3, sticky="")
 
         #iterate_button = ttk.Button(root, text="Iterate")
         #iterate_button.bind("<ButtonRelease-1>", lambda event: self.iterate_rocket())
