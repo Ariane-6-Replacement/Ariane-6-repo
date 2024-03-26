@@ -15,7 +15,7 @@ class Rocket():
         self.__dict__.update(**kwargs)
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
-        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox,self.pressure_fuel, self.t_ox,self.t_fuel)
+        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox*10**5,self.pressure_fuel*10**5, self.t_ox,self.t_fuel)
         self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox, self.pressure_fuel, self.material_options[self.material_misc])
         self.trajectory = Trajectory(self.orbit_options[self.orbit], self.payload, self.cd)
 
