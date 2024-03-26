@@ -12,10 +12,12 @@ class Rocket():
         self.update_values(**kwargs)
 
     def update_values(self, **kwargs):
+        print(f"{kwargs}")
         self.__dict__.update(**kwargs)
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
-        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox,self.pressure_fuel, self.t_ox,self.t_fuel)
+
+        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox,self.pressure_fuel)
         self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox, self.pressure_fuel, self.material_options[self.material_misc])
         self.trajectory = Trajectory(self.orbit_options[self.orbit], self.payload, self.cd)
 
@@ -44,7 +46,7 @@ class Rocket():
         while e > 50000:
             self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass, self.dv)
             self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = (
-                self.propulsion.mass_volume(self.thrust, self.burntime, self.t_fuel, self.t_ox,
+                self.propulsion.mass_volume(self.thrust, self.burntime, self.temperature_fuel, self.temperature_ox,
                                             self.pressure_ox, self.pressure_fuel))
             self.mass_p = self.mass_ox + self.mass_fuel
             self.structure.calc(self.bulkhead_options[self.bulkhead], self.volume_ox, self.mass_ox, self.volume_fuel,

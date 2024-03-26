@@ -5,13 +5,14 @@ from python.propulsion.volume_mass_calculator import get_propellant_mass_volume
 import math
 
 class Propulsion():
-    def __init__(self, engine_name, of_ratio,p_ox,p_fuel,t_ox,t_fuel):
+    def __init__(self, engine_name, of_ratio,p_ox,p_fuel):
         # engine name
         self.engine_name = engine_name
         self.of_ratio = of_ratio
         self.Isp = engine.get_Isp(of_ratio)
     def mass_volume(self,thrust, burn_time,t_fuel,t_ox,p_ox,p_fuel):
         # engine number and mass
+        print(t_fuel)
         self.engine_number = math.ceil(thrust / engine.Thrust)
         self.total_engine_mass = engine.mass_sea * self.engine_number
 

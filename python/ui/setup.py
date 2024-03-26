@@ -52,6 +52,7 @@ class UI():
         
     def get_outputs(self):
         ui_outputs = {}
+
         for key, ui in self.labels.items():
             if hasattr(ui, 'var'):
                 var = ui.var
@@ -100,8 +101,8 @@ class UI():
             'bulkhead': LabelCombobox(self.root, "Bulkhead:", self.rocket.bulkhead, self.rocket.bulkhead_options, state="readonly", width=17),
             'pressure_ox': LabelEntry(self.root, "Pressure OX (bar):", self.rocket.pressure_ox),
             'pressure_fuel': LabelEntry(self.root, "Pressure fuel (bar):", self.rocket.pressure_fuel),
-            'temperature_ox':  LabelEntry(self.root, "Temperature Ox (K):", self.rocket.t_ox),
-            'temperature_fuel': LabelEntry(self.root, "Temperature Fuel (K):", self.rocket.t_fuel),
+            'temperature_ox':  LabelEntry(self.root, "Temperature Ox (K):", self.rocket.temperature_ox),
+            'temperature_fuel': LabelEntry(self.root, "Temperature Fuel (K):", self.rocket.temperature_fuel),
 
             'diameter': LabelEntry(self.root, "Diameter (m):", self.rocket.diameter),
             'of_ratio': LabelEntry(self.root, "O/F ratio:", self.rocket.of_ratio),
@@ -136,8 +137,8 @@ class UI():
             [f"Drag Coefficient:", f"{self.rocket.cd}", "Input"],
             [f"---------propellant properties---------","",""],
             [f"Pressure:", f"{self.rocket.pressure_ox} bar", "Margin 40%"],
-            [f"Temperature Ox:", f"{self.rocket.t_ox} K", "Input"],
-            [f"Temperature Fuel:", f"{self.rocket.t_fuel} K", "Input"],
+            [f"Temperature Ox:", f"{self.rocket.temperature_ox} K", "Input"],
+            [f"Temperature Fuel:", f"{self.rocket.temperature_fuel} K", "Input"],
             [f"Propellant Mass:", f"{self.rocket.mass_p:.0f} kg", "Margin 40%"],
             [f" O/F:", f"{self.rocket.of_ratio} ", "Input"],
 
