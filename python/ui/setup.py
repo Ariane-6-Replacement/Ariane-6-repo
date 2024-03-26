@@ -164,9 +164,9 @@ class UI():
         # Place the canvas within the Tkinter window
         canvas_widget.grid(column=0, row=len(values), sticky="nsew")
 
-        iterate_button = ttk.Button(root, text="Iterate")
-        iterate_button.bind("<ButtonRelease-1>", lambda event: self.iterate_rocket())
-        iterate_button.grid(column=0, row=len(values) + 1, pady=10)
+        #iterate_button = ttk.Button(root, text="Iterate")
+        #iterate_button.bind("<ButtonRelease-1>", lambda event: self.iterate_rocket())
+        #iterate_button.grid(column=0, row=len(values) + 1, pady=10)
 
         root.mainloop()
 

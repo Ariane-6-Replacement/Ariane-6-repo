@@ -4,7 +4,7 @@ from python.structure.materials import materials as materials
 
 def main():
     rocket = Rocket(
-        dv = 3000,
+        dv = 10000,
         orbit_options = ['LEO', 'MEO', 'GEO', 'HEO'],
         orbit = 0, # index in orbit options
         payload = 20000,
