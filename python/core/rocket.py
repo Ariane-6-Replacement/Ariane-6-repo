@@ -44,7 +44,7 @@ class Rocket():
         while e > 50000:
             self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass, self.dv)
             self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = (
-                self.propulsion.mass_volume(self.thrust, self.burntime, self.temperture_fuel, self.temperature_ox,
+                self.propulsion.mass_volume(self.thrust, self.burntime, self.temperature_fuel, self.temperature_ox,
                                             self.pressure_ox, self.pressure_fuel))
             self.mass_p = self.mass_ox + self.mass_fuel
             self.structure.calc(self.bulkhead_options[self.bulkhead], self.volume_ox, self.mass_ox, self.volume_fuel,
