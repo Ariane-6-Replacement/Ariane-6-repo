@@ -4,14 +4,14 @@ from python.structure.materials import materials as materials
 
 def main():
     rocket = Rocket(
-        dv = 3000,
+        dv = 10000,
         orbit_options = ['LEO', 'MEO', 'GEO', 'HEO'],
         orbit = 0, # index in orbit options
         payload = 20000,
         cd = 0.2,
         mf2 = 0.04,
         isp2 = 296,
-        dv_split = 0.5,
+        dv_split = 0.3,
         engine_options = ['Prometheus'],
         engine = 0, # index in engine options
         mf1 = 0.05,
