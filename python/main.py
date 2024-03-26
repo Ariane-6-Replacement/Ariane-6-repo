@@ -15,7 +15,7 @@ def main():
         engine_options = ['Prometheus'],
         engine = 0, # index in engine options
         mf1 = 0.05,
-        boostback = False,
+        reflights = 0,
         material_options = list(materials.keys()),
         material_tank = 3, # index in material options
         material_misc = 3, # index in material options

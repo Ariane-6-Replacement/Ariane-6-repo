@@ -79,10 +79,10 @@ class CostModel():
     def calculate(self,
                   dry_masses, # tonnes
                   prop_masses, # tonnes
+                  rocket_reflights,
                   launches_per_year = 11,
                   rocket_fleet_count = 5,
                   number_of_engines = 11,
-                  rocket_reflights = 15,
                   launch_site_capacity = 12,
                   engine_unit_cost = 1_000_000, # euros
                   engine_reflights = 15):
@@ -118,6 +118,7 @@ class CostModel():
         self.cost.total_lifetime_euros = self.man_years_to_million_euro_2022(self.cost.total_lifetime)
 
         # Man-years
+        if
         self.cost.per_launch = self.cost.total_lifetime / self.total_flights
 
         # Million euros
