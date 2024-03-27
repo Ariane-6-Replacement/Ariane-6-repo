@@ -85,10 +85,26 @@ x_suicide,z_suicide = x[suicideburn]/1000,z[suicideburn]/1000
 # vy = sm.to_km_list(vy)
 # vz = sm.to_km_list(vz)
 
-v_abs = np.empty([len(vx)])
 
+d = 5.4
+A = np.pi * d**2/4
+Cd = 1
+v_abs = np.empty([len(vx)])
+D_array = np.empty([len(vx)])
+gamma_array = np.empty([len(vx)])
+
+i = 0
+x_km = sm.to_km_list(x)
 for j in range(len(vx)):
-    v_abs[j] = sm.norm([vx[j],vy[j],vz[j]])
+    v_abs[j] = ((vx[j]**2+vz[j]**2))**0.5
+    D_array[j] = (0.5* pressure(z[j])*(vx[j]**2+vz[j]**2) * A * Cd)
+    gamma_array[j] = np.rad2deg(np.arctan2(vz[j],vx[j]))
+     
+    
+    if x_km[j] > 3 and not i==1:
+        vel = ((vx[j]**2+vz[j]**2))**0.5
+        print("vel 3km",vel )
+        i = 1
 
 print(v_abs[140])
 print("downrange:", x[140])
