@@ -32,9 +32,6 @@ Burn_alt = 3000 # [m]
 
 
 
-
-
-gammalist = []
 def equations_of_motion(state, t):
     # Unpack state variables
     x, y, z, vx, vy, vz = state 
@@ -61,12 +58,8 @@ def equations_of_motion(state, t):
     dvydt = 0  # Example: acceleration in y-direction 
     dvzdt = -9.81 + np.sin(-gamma)*D/Me # Example: constant acceleration in z-direction due to gravity
 
-    if z < Burn_alt:
-        dvzdt = -9.81 + np.sin(-gamma)*(D/Me + max_accel) 
-        dvxdt = -np.cos(gamma)*(D/Me + max_accel)
 
     # print(gamma)
-    gammalist.append(gamma)
     return [dxdt, dydt, dzdt, dvxdt, dvydt, dvzdt]
 
 # Define initial conditions
@@ -83,7 +76,10 @@ x, y, z, vx, vy, vz = solution.T
 
 
 hitground = np.where(z<0)[0][0]
+suicideburn = np.where(z<Burn_alt)[0][0]
 t,x, y, z, vx, vy, vz = t[:hitground],x[:hitground], y[:hitground], z[:hitground], vx[:hitground], vy[:hitground], vz[:hitground]
+
+x_suicide,z_suicide = x[suicideburn]/1000,z[suicideburn]/1000
 
 # vx = sm.to_km_list(vx)
 # vy = sm.to_km_list(vy)
@@ -117,6 +113,7 @@ axs[0, 1].legend()
 axs[1, 0].plot(sm.to_km_list(x), sm.to_km_list(z), label='z vs x')
 axs[1, 0].set_xlabel('Distance x (km)')
 axs[1, 0].set_ylabel('Distance z (km)')
+axs[1, 0].plot(x_suicide,z_suicide, marker='o', markersize=8, color='red')
 # axs[1, 0].set_xlim(0, 400e3)
 # axs[1, 0].set_ylim(0, 100e3)
 axs[1, 0].set_title('Trajectory (z vs x)')
