@@ -81,17 +81,21 @@ class CostModel():
                   prop_masses, # tonnes
                   rocket_reflights,
                   launches_per_year = 11,
-                  rocket_fleet_count = 5,
+                  lifetime = 20,
+                  #rocket_fleet_count = 5,
                   number_of_engines = 11,
                   launch_site_capacity = 12,
                   engine_unit_cost = 1_000_000, # euros
                   engine_reflights = 15):
         self.rockets_per_stage = np.array([1, 1])
-        self.total_flights = rocket_fleet_count * rocket_reflights
+        #self.total_flights = rocket_fleet_count * rocket_reflights
+        self.total_flights = launches_per_year * lifetime
+
         self.number_of_rocket_stages = np.sum(self.rockets_per_stage)
 
+        rocket_fleet_count = self.total_flights / (rocket_reflights + 1)
         self.development.calculate(dry_masses)
-
+        self.cost.development_cost_euros = self.man_years_to_million_euro_2022(self.development.cost.total)
         self.production.calculate(dry_masses,
                                   self.rockets_per_stage,
                                   self.number_of_rocket_stages,
@@ -110,10 +114,9 @@ class CostModel():
                                    launch_site_capacity)
 
         # Man-years
-        self.cost.total_lifetime =  self.development.cost.total + \
-                                     self.production.cost.total + \
+        self.cost.total_lifetime =   self.production.cost.total + \
                                      self.operational.cost.total
-        
+
         # Million euros
         self.cost.total_lifetime_euros = self.man_years_to_million_euro_2022(self.cost.total_lifetime)
 
