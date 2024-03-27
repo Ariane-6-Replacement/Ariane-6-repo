@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import plotting_functions as pf
 import sat_math_funcs as sm
 
-
 def pressure(h):
     # Taken from https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html
 
@@ -23,14 +22,23 @@ def pressure(h):
     rho = p / (0.2869 * (T + 273.1))
 
     return rho
-
-Me = 80e3
+M0 = 80e3
+Me = 25e3
 thrust = 1e6 
+m = 333  #mass flow [kg/s]
 Nengines = 3
 max_accel = Nengines*thrust/Me
 Burn_alt = 3000 # [m]
 
 
+T = thrust
+c_eff = T/m
+
+V = c_eff*np.log(M0/Me)
+
+def m0calc(V):
+    M0 = Me/np.e**(V/c_eff)
+    return M0
 
 
 
@@ -57,14 +65,16 @@ def equations_of_motion(state, t):
     dxdt = vx
     dydt = vy 
     dzdt = vz 
-    dvxdt = -np.cos(gamma)*D/Me # Example: acceleration in x-direction
+    dvxdt = -np.cos(gamma)*D/M0 # Example: acceleration in x-direction
     dvydt = 0  # Example: acceleration in y-direction 
-    dvzdt = -9.81 + np.sin(-gamma)*D/Me # Example: constant acceleration in z-direction due to gravity
+    dvzdt = -9.81 + np.sin(-gamma)*D/M0 # Example: constant acceleration in z-direction due to gravity
 
     if z < Burn_alt:
-        dvzdt = -9.81 + np.sin(-gamma)*(D/Me + max_accel) 
-        dvxdt = -np.cos(gamma)*(D/Me + max_accel)
-
+        M = M0-m*t
+        accel = thrust/M
+        dvzdt = -9.81 + np.sin(-gamma)*(D/Me + accel) 
+        dvxdt = -np.cos(gamma)*(D/Me + accel)
+       
     # print(gamma)
     gammalist.append(gamma)
     return [dxdt, dydt, dzdt, dvxdt, dvydt, dvzdt]
