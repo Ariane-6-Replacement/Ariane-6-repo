@@ -28,7 +28,7 @@ Me = 80e3
 thrust = 1e6 
 Nengines = 3
 max_accel = Nengines*thrust/Me
-Burn_alt = 3000 # [m]
+Burn_alt = 3080 # [m]
 
 
 
@@ -50,6 +50,7 @@ def equations_of_motion(state, t):
     gamma = np.arctan2(vz,vx)
     print(np.cos(gamma),np.sin(gamma))
 
+
     # Define derivatives of state variables
     dxdt = vx
     dydt = vy 
@@ -57,6 +58,11 @@ def equations_of_motion(state, t):
     dvxdt = -np.cos(gamma)*D/Me # Example: acceleration in x-direction
     dvydt = 0  # Example: acceleration in y-direction 
     dvzdt = -9.81 + np.sin(-gamma)*D/Me # Example: constant acceleration in z-direction due to gravity
+
+
+    if z < Burn_alt:
+        dvzdt = -9.81 + np.sin(-gamma)*(D/Me + max_accel)
+        dvxdt = -np.cos(gamma)*(D/Me + max_accel)
 
 
     # print(gamma)
@@ -75,11 +81,17 @@ solution = odeint(equations_of_motion, initial_state, t)
 x, y, z, vx, vy, vz = solution.T
 
 
-hitground = np.where(z<0)[0][0]
-suicideburn = np.where(z<Burn_alt)[0][0]
-t,x, y, z, vx, vy, vz = t[:hitground],x[:hitground], y[:hitground], z[:hitground], vx[:hitground], vy[:hitground], vz[:hitground]
+try:
+    hitground = np.where(z<0)[0][0]
+    t, x, y, z, vx, vy, vz = t[:hitground], x[:hitground], y[:hitground], z[:hitground], vx[:hitground], vy[
+                                                                                                         :hitground], vz[
+                                                                                                                      :hitground]
+except:
+    print("not landing")
 
-x_suicide,z_suicide = x[suicideburn]/1000,z[suicideburn]/1000
+
+suicideburn = np.where(z<Burn_alt)[0][0]
+x_suicide,z_suicide,vx_suicide, vz_suicide,t_suicide = x[suicideburn]/1000,z[suicideburn]/1000,vx[suicideburn]/1000,vz[suicideburn]/1000,t[suicideburn]
 
 # vx = sm.to_km_list(vx)
 # vy = sm.to_km_list(vy)
@@ -106,10 +118,11 @@ for j in range(len(vx)):
         print("vel 3km",vel )
         i = 1
 
-print(v_abs[140])
-print("downrange:", x[140])
+print(f"velocity at landing: {v_abs[-1]}")
+# print(v_abs[140])
+# print("downrange:", x[140])
 
-fig, axs = plt.subplots(2, 2, figsize=(10, 8))  # 2x2 grid of subplots
+fig, axs = plt.subplots(3, 2, figsize=(10, 8))  # 2x2 grid of subplots
 
 # Plot data on subplot 1
 axs[0, 0].plot(t, sm.to_km_list((vx**2 + vz**2)**0.5), label='Speed')
@@ -120,6 +133,7 @@ axs[0, 0].legend()
 
 # Plot data on subplot 2
 axs[0, 1].plot(t, sm.to_km_list(vx), label='vx')
+axs[0, 1].plot(t_suicide,vx_suicide, marker='o', markersize=6, color='red')
 axs[0, 1].set_xlabel('Time (s)')
 axs[0, 1].set_ylabel('Velocity x (km/s)')
 axs[0, 1].set_title('Velocity x vs Time')
@@ -129,19 +143,23 @@ axs[0, 1].legend()
 axs[1, 0].plot(sm.to_km_list(x), sm.to_km_list(z), label='z vs x')
 axs[1, 0].set_xlabel('Distance x (km)')
 axs[1, 0].set_ylabel('Distance z (km)')
-axs[1, 0].plot(x_suicide,z_suicide, marker='o', markersize=8, color='red')
-# axs[1, 0].set_xlim(0, 400e3)
-# axs[1, 0].set_ylim(0, 100e3)
+axs[1, 0].plot(x_suicide,z_suicide, marker='o', markersize=6, color='red')
 axs[1, 0].set_title('Trajectory (z vs x)')
 axs[1, 0].legend()
 
 # Plot data on subplot 4
 axs[1, 1].plot(t, sm.to_km_list(vz), label='vz')
+axs[1, 1].plot(t_suicide,vz_suicide, marker='o', markersize=6, color='red')
 axs[1, 1].set_xlabel('Time (s)')
 axs[1, 1].set_ylabel('Velocity z (km/s)')
 axs[1, 1].set_title('Velocity z vs Time')
 axs[1, 1].legend()
 
+axs[2, 1].plot(t, D_array/1e6, label='drag')
+axs[2, 1].set_xlabel('Time (s)')
+axs[2, 1].set_ylabel('Drag (MN)')
+axs[2, 1].set_title('Drag vs Time')
+axs[2, 1].legend()
 # Adjust layout
 plt.tight_layout()
 
