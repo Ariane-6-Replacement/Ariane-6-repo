@@ -39,13 +39,13 @@ class MassCalculator:
         wet_masses = np.array([])
         stages = dV_split.size
 
-        for i in np.flip(np.array(range(stages))):
-            dV_i = dV_split[i]
-            f_i = inert_mass_fractions[i]
-            wet_mass_i = MassCalculator.get_wet_mass_i(dV_i, I_sp[i], f_i, m_payload + np.sum(wet_masses))
-            wet_masses = np.append(wet_masses, wet_mass_i)
+        # for i in np.flip(np.array(range(stages))):
+            # dV_i = dV_split[i]
+         #    f_i = inert_mass_fractions[i]
+         # #   wet_mass_i = MassCalculator.get_wet_mass_i(dV_i, I_sp[i], f_i, m_payload + np.sum(wet_masses))
+        #    wet_masses = np.append(wet_masses, wet_mass_i)
 
-        wet_masses = np.zeros(len(dV_split))
+       # wet_masses = np.zeros(len(dV_split))
         for i in range(len(dV_split)):
             Vi = I_sp[i]*9.81
             Ri = np.exp(dV_split[i]/Vi)
