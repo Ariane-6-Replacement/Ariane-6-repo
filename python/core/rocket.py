@@ -37,8 +37,9 @@ class Rocket():
         self.mass_total = self.mass + self.mass2 + self.payload
     def cost_estimator(self):
         cm = CostModel()
-
-        cm.calculate(self.dry_masses, self.prop_masses, self.reflights)
+        self.prop_masses = np.array([self.prop_masses[0],self.mass_p / 1000])
+        self.dry_masses = np.array([self.mass2, self.mass]) / 1000
+        cm.calculate(self.dry_masses,self.prop_masses , self.reflights)
         return cm.cost.total_lifetime_euros, cm.cost.per_launch_euros, cm.cost.development_cost_euros
     
     def iterate(self):

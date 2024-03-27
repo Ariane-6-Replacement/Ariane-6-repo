@@ -80,7 +80,7 @@ class CostModel():
                   dry_masses, # tonnes
                   prop_masses, # tonnes
                   rocket_reflights,
-                  launches_per_year = 11,
+                  launches_per_year = 10,
                   lifetime = 20,
                   #rocket_fleet_count = 5,
                   number_of_engines = 11,
@@ -114,7 +114,7 @@ class CostModel():
                                    launch_site_capacity)
 
         # Man-years
-        self.cost.total_lifetime =   self.production.cost.total + \
+        self.cost.total_lifetime = self.production.cost.total + \
                                      self.operational.cost.total
 
         # Million euros
@@ -159,14 +159,15 @@ class DevelopmentModel():
             self.f3 = 0.75 # Previous relevant experience: 0.6 -> 0.9
 
         # Man-years
-        self.cost.cryogenic_expandable = 3140 * dry_masses[0] ** 0.21 * self.f1 * self.f2 * self.f3
+        # SET TO ZERO BECAUSE WE REUSE A6
+        self.cost.cryogenic_expandable = 3140 * dry_masses[0] ** 0.21 * self.f1 * self.f2 * self.f3 *0
 
         # Man-years
         self.cost.ballistic_reusable = 4080 * dry_masses[1:dry_masses.size] ** 0.21 * self.f1 * self.f2 * self.f3
 
         # Man-years
         self.cost.total = self.management_factor * (np.sum(self.cost.cryogenic_expandable) + np.sum(self.cost.ballistic_reusable))
-
+        print(self.cost.cryogenic_expandable, self.cost.ballistic_reusable, self.cost.total)
 
 
 class ProductionModel():
