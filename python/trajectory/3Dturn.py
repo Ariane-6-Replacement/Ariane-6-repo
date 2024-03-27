@@ -36,12 +36,13 @@ def equations_of_motion(state, t):
     # Define parameters (mass, gravitational constant, etc.)
     # You can define these according to your specific problem
     d = 5.4
-    rho = 101e3
+    #rho = 101e3
     rho = pressure(z)
-    Cd = 0.2
+    Cd = 500
     A = np.pi * d**2/4  
-    D = (0.5* rho*sm.norm([vx,vy,vz]) * A * Cd)
-
+    # D = (0.5* rho*sm.norm([vx,vy,vz]) * A * Cd)
+    D = (0.5* rho*(vx**2+vz**2)**0.5 * A * Cd)
+    #D = 0
 
     gamma = np.arctan2(vx,vz)
 
@@ -59,7 +60,7 @@ def equations_of_motion(state, t):
 initial_state = [0, 0, 100e3, 2.5e3, 0, 0]  # x,y,z,vx,vy,vz
 
 # Define time points for integration
-t = np.linspace(0, 200, 1000)  # Example: integrate from 0 to 10 seconds with 100 points
+t = np.linspace(0, 150, 1000)  # Example: integrate from 0 to 10 seconds with 100 points
 
 # Solve the equations of motion
 solution = odeint(equations_of_motion, initial_state, t)
@@ -76,15 +77,17 @@ v_abs = np.empty([len(vx)])
 for j in range(len(vx)):
     v_abs[j] = sm.norm([vx[j],vy[j],vz[j]])
 
-#print(v)
+print(v_abs[140])
+print("downrange:", x[140])
 def plot1():
-    fig, axs = pf.creatfig(1,1,(20,5))
-    #axs.plot(sm.to_km_list(x),v_abs)
+    fig, axs = pf.creatfig(1,1,(10,5))
+    # axs.plot(sm.to_km_list(x),v_abs)
     axs.plot(sm.to_km_list(x),sm.to_km_list(z))
+    # axs.plot(t,sm.to_km_list(z))
     axs.set_xlabel("downrange [km]")
     axs.set_ylabel("altitude [km]")
     plt.ylim(0,110)
-   
+    plt.xlim(0,500)
 
     plt.show()
 plot1()
