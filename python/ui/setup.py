@@ -84,7 +84,7 @@ class UI():
 
         self.labels = {
             '0th_label': Label(self.root, "General properties", font=label_font),
-            'dv': LabelEntry(self.root, "Delta V total (m/s):", self.rocket.dv),
+            #'dv': LabelEntry(self.root, "Delta V total (m/s):", self.rocket.dv),
             'orbit': LabelCombobox(self.root, "Orbit:", self.rocket.orbit, self.rocket.orbit_options, state="readonly", width=17),
             'payload': LabelEntry(self.root, "Payload (kg):", self.rocket.payload),
             'cd': LabelEntry(self.root, "Drag Coefficient:", self.rocket.cd),
@@ -94,8 +94,7 @@ class UI():
             'dv_split_slider': LabelScale(self.root, "dV fraction stage 1:", padx=10, pady=10, from_=0, to_=1, orient="horizontal", length=150, command=lambda event: self.update_dv_split()),
             'dv_split': Entry(self.root, self.rocket.dv_split, range=[0, 1]),
             'engine': LabelCombobox(self.root, "Engine:", self.rocket.engine, self.rocket.engine_options, state="readonly", width=17),
-            'mf1': LabelEntry(self.root, "Inert mass fraction 1st stage:", self.rocket.mf1),
-            'boostback': LabelCheckbutton(self.root, "Boostback:", self.rocket.boostback),
+            'reflights': LabelEntry(self.root, "Number of reflights:", self.rocket.reflights),
             'material_tank': LabelCombobox(self.root, "Material Tank:", self.rocket.material_tank, self.rocket.material_options, state="readonly", width=17),
             'material_misc': LabelCombobox(self.root, "Material Misc:", self.rocket.material_misc, self.rocket.material_options, state="readonly", width=17),
             'bulkhead': LabelCombobox(self.root, "Bulkhead:", self.rocket.bulkhead, self.rocket.bulkhead_options, state="readonly", width=17),
@@ -128,30 +127,37 @@ class UI():
         ttk.Label(root, text="Value", font=label_font).grid(column=1, row=0, sticky='e')
         ttk.Label(root, text="Certainty", font=label_font).grid(column=2, row=0, sticky='')
         values = [
-            [f"--------first-stage properties---------","---------------","---------------"],
-            [f"Engine:", self.rocket.engine_options[self.rocket.engine], "Input"],
-            [f"Thrust:", f"{self.rocket.thrust / 10e6} MN ", "Margin 40%"],
-            [f"Number of Engines:", f"{self.rocket.engine_number}","Margin 40%"],
-            [f"Delta V (first stage):", f"{self.rocket.dv} m/s", "Margin 40%"],
-            [f"Boostback:", f"{self.rocket.boostback}","Input"],
-            [f"-----------other properties------------","---------------", "---------------"],
+            [f"-----------General properties------------", "---------------", "---------------"],
             [f"Orbit:", f"{self.rocket.orbit_options[self.rocket.orbit]}", "Input"],
             [f"Payload:", f"{self.rocket.payload} kg", "Input"],
             [f"Drag Coefficient:", f"{self.rocket.cd}", "Input"],
-            [f"---------propellant properties---------","---------------","---------------"],
-            [f"Pressure:", f"{self.rocket.pressure_ox} bar", "Margin 40%"],
+            [f"Delta V total:", f"{self.rocket.dv} m/s", "Margin 10%"],
+
+            [f"--------First-stage properties---------","---------------","---------------"],
+            [f"Engine:", self.rocket.engine_options[self.rocket.engine], "Input"],
+            [f"Number of reflights:", f"{self.rocket.reflights}", "Input"],
+            [f"Thrust:", f"{(self.rocket.thrust / 10e6):.1f} MN ", "Margin 40%"],
+            [f"Number of Engines:", f"{self.rocket.engine_number}","Margin 40%"],
+            [f"Delta V first stage:", f"{(self.rocket.dv*self.rocket.dv_split):.0f} m/s", "Margin 40%"],
+
+
+
+            [f"---------Propellant properties---------","---------------","---------------"],
+            [f"Pressure:", f"{self.rocket.pressure_ox} bar", "Input"],
             [f"Temperature Ox:", f"{self.rocket.temperature_ox} K", "Input"],
             [f"Temperature Fuel:", f"{self.rocket.temperature_fuel} K", "Input"],
+            [f" O/F Ratio:", f"{self.rocket.of_ratio} ", "Input"],
             [f"Propellant Mass:", f"{self.rocket.mass_p:.0f} kg", "Margin 40%"],
-            [f" O/F:", f"{self.rocket.of_ratio} ", "Input"],
 
-            [f"--------structural properties---------","---------------","---------------"],
-            [f"Structural Mass:", f"{self.rocket.mass_s:.0f} kg", "Margin 40%"],
+
+            [f"--------Structural properties---------","---------------","---------------"],
+
             [f"Material:", f"{self.rocket.material_options[self.rocket.material_tank]}", "Input"],
             [f"Bulkhead:", f"{self.rocket.bulkhead_options[self.rocket.bulkhead]}", "Input"],
+            [f"Structural Mass:", f"{self.rocket.mass_s:.0f} kg", "Margin 40%"],
             [f"1st Stage Mass:", f"{self.rocket.mass:.0f} kg", "Margin 40%"],
             [f"Upper Stage Mass:", f"{self.rocket.mass2:.0f} kg", "Margin 40%"],
-            [f"----------------cost-----------------","----------------","----------------"],
+            [f"----------------Cost-----------------","----------------","----------------"],
             [f"Total Lifetime Cost:", f"{self.rocket.lifetime_cost:.0f} million euros", "Margin 40%"],
             [f"Cost Per Launch:", f"{self.rocket.per_launch_cost:.0f} million euros", "Margin 40%"],
             #f"Estimated Cost: €{self.rocket.cost:.0f} "
