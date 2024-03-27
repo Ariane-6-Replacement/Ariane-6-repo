@@ -56,10 +56,10 @@ class Rocket():
             self.mass_p = self.mass_ox + self.mass_fuel
             self.structure.calc(self.bulkhead_options[self.bulkhead], self.volume_ox, self.mass_ox, self.volume_fuel,
                                 self.mass_fuel, self.thrust, self.mass_e, self.engine_number)
-            #self.mass_t = self.structure.mass_total #Returns mass of the tank/s ITS/s and engine bay
+            self.mass_t = self.structure.mass_total #Returns mass of the tank/s ITS/s and engine bay
             self.mass_es = self.structure.mass_engine_structure(self.engine_number, self.thrust)
-            #self.mass_lg = self.structure.mass_landing_gear(self.mass_e, self.mass_p, self.mass_t, self.mass_es)
-            self.mass_s = self.mass_e + self.mass_es #+ self.mass_lg #+ self.mass_t
+            self.mass_lg = self.structure.mass_landing_gear(self.mass_e, self.mass_p, self.mass_t, self.mass_es)
+            self.mass_s = self.mass_e + self.mass_es + self.mass_lg + self.mass_t
             self.mass = self.mass_p + self.mass_s
             self.mass_total = self.mass + self.mass2 + self.payload
             e = np.abs(self.mass - self.mass_prev)
