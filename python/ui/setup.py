@@ -158,7 +158,8 @@ class UI():
             [f"1st Stage Mass:", f"{self.rocket.mass:.0f} kg", "Margin 40%"],
             [f"Upper Stage Mass:", f"{self.rocket.mass2:.0f} kg", "Margin 40%"],
             [f"----------------Cost-----------------","----------------","----------------"],
-            [f"Total Lifetime Cost:", f"{self.rocket.lifetime_cost:.0f} million euros", "Margin 40%"],
+           # [f"Total Lifetime Cost:", f"{self.rocket.lifetime_cost:.0f} million euros", "Margin 40%"],
+            [f"Development Cost:", f"{self.rocket.development_cost:.0f} million euros", "Margin 40%"],
             [f"Cost Per Launch:", f"{self.rocket.per_launch_cost:.0f} million euros", "Margin 40%"],
             #f"Estimated Cost: €{self.rocket.cost:.0f} "
         ]

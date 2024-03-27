@@ -37,9 +37,10 @@ class Rocket():
         self.mass_total = self.mass + self.mass2 + self.payload
     def cost_estimator(self):
         cm = CostModel()
-
-        cm.calculate(self.dry_masses, self.prop_masses, self.reflights)
-        return cm.cost.total_lifetime_euros, cm.cost.per_launch_euros
+        self.prop_masses = np.array([self.prop_masses[0],self.mass_p / 1000])
+        self.dry_masses = np.array([self.dry_masses[0], self.mass_s]) / 1000
+        cm.calculate(self.dry_masses,self.prop_masses , self.reflights)
+        return cm.cost.total_lifetime_euros, cm.cost.per_launch_euros, cm.cost.development_cost_euros
     
     def iterate(self):
         e = 10e9
@@ -65,4 +66,4 @@ class Rocket():
             if i >= 100:
                 print(f"Non convergence!")
                 break
-        self.lifetime_cost, self.per_launch_cost = self.cost_estimator()
+        self.lifetime_cost, self.per_launch_cost, self.development_cost = self.cost_estimator()

@@ -80,23 +80,27 @@ class CostModel():
                   dry_masses, # tonnes
                   prop_masses, # tonnes
                   rocket_reflights,
-                  launches_per_year = 11,
-                  rocket_fleet_count = 5,
+                  launches_per_year = 10,
+                  lifetime = 20,
+                  #rocket_fleet_count = 5,
                   number_of_engines = 11,
                   launch_site_capacity = 12,
                   engine_unit_cost = 1_000_000, # euros
                   engine_reflights = 15):
         self.rockets_per_stage = np.array([1, 1])
-        self.total_flights = rocket_fleet_count * rocket_reflights
+        #self.total_flights = rocket_fleet_count * rocket_reflights
+        self.total_flights = launches_per_year * lifetime
+
         self.number_of_rocket_stages = np.sum(self.rockets_per_stage)
 
+        rocket_fleet_count = self.total_flights / (rocket_reflights + 1)
         self.development.calculate(dry_masses)
-
+        self.cost.development_cost_euros = self.man_years_to_million_euro_2022(self.development.cost.total)
         self.production.calculate(dry_masses,
                                   self.rockets_per_stage,
                                   self.number_of_rocket_stages,
                                   rocket_fleet_count,
-                                  learning_factor=0.86)
+                                  learning_factor=1.00)
 
         self.operational.calculate(prop_masses,
                                    self.total_flights,
@@ -110,10 +114,9 @@ class CostModel():
                                    launch_site_capacity)
 
         # Man-years
-        self.cost.total_lifetime =  self.development.cost.total + \
-                                     self.production.cost.total + \
+        self.cost.total_lifetime = self.production.cost.total + \
                                      self.operational.cost.total
-        
+
         # Million euros
         self.cost.total_lifetime_euros = self.man_years_to_million_euro_2022(self.cost.total_lifetime)
 
@@ -134,8 +137,8 @@ class DevelopmentModel():
     
     def calculate(self,
                   dry_masses, # tonnes
-                  system_nature="new",
-                  team_experience="none"):
+                  system_nature="similar",
+                  team_experience="some_related"):
         self.management_factor = 1.1
         self.f1 = 1 # Technical Difficulty Factor
         self.f2 = 1 # Tech Quality Factor (from graph)
@@ -156,14 +159,15 @@ class DevelopmentModel():
             self.f3 = 0.75 # Previous relevant experience: 0.6 -> 0.9
 
         # Man-years
-        self.cost.cryogenic_expandable = 3140 * dry_masses[0] ** 0.21 * self.f1 * self.f2 * self.f3
+        # SET TO ZERO BECAUSE WE REUSE A6
+        self.cost.cryogenic_expandable = 3140 * dry_masses[0] ** 0.21 * self.f1 * self.f2 * self.f3 * 000000000
 
         # Man-years
         self.cost.ballistic_reusable = 4080 * dry_masses[1:dry_masses.size] ** 0.21 * self.f1 * self.f2 * self.f3
 
         # Man-years
         self.cost.total = self.management_factor * (np.sum(self.cost.cryogenic_expandable) + np.sum(self.cost.ballistic_reusable))
-
+        print(self.cost.cryogenic_expandable, self.cost.ballistic_reusable, self.cost.total)
 
 
 class ProductionModel():
@@ -257,6 +261,6 @@ class OperationalModel():
         # Man-years
         self.cost.indirect_operations = (40 * launch_site_capacity ** 0.34 / launches_per_year ** 0.55) * total_flights
 
-        self.cost.total = self.cost.technical_system_management  + self.cost.prelaunch_operations  + \
+        self.cost.total = self.cost.technical_system_management + self.cost.prelaunch_operations + \
                           self.cost.launch_and_mission_operations + self.cost.propellant + \
                           self.cost.refurbishment + self.cost.indirect_operations
