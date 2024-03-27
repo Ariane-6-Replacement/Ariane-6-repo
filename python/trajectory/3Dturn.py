@@ -82,32 +82,32 @@ print("downrange:", x[140])
 fig, axs = plt.subplots(2, 2, figsize=(10, 8))  # 2x2 grid of subplots
 
 # Plot data on subplot 1
-axs[0, 0].plot(t, (vx**2 + vz**2)**0.5, label='Speed')
+axs[0, 0].plot(t, sm.to_km_list((vx**2 + vz**2)**0.5), label='Speed')
 axs[0, 0].set_xlabel('Time (s)')
-axs[0, 0].set_ylabel('Speed (m/s)')
+axs[0, 0].set_ylabel('Speed (km/s)')
 axs[0, 0].set_title('Speed vs Time')
 axs[0, 0].legend()
 
 # Plot data on subplot 2
-axs[0, 1].plot(t, vx, label='vx')
+axs[0, 1].plot(t, sm.to_km_list(vx), label='vx')
 axs[0, 1].set_xlabel('Time (s)')
-axs[0, 1].set_ylabel('Velocity x (m/s)')
+axs[0, 1].set_ylabel('Velocity x (km/s)')
 axs[0, 1].set_title('Velocity x vs Time')
 axs[0, 1].legend()
 
 # Plot data on subplot 3
-axs[1, 0].plot(x, z, label='z vs x')
-axs[1, 0].set_xlabel('Distance x (m)')
-axs[1, 0].set_ylabel('Distance z (m)')
-axs[1, 0].set_xlim(0, 400e3)
-axs[1, 0].set_ylim(0, 100e3)
+axs[1, 0].plot(sm.to_km_list(x), sm.to_km_list(z), label='z vs x')
+axs[1, 0].set_xlabel('Distance x (km)')
+axs[1, 0].set_ylabel('Distance z (km)')
+axs[1, 0].set_xlim(0, 400)
+axs[1, 0].set_ylim(0, 100)
 axs[1, 0].set_title('Trajectory (z vs x)')
 axs[1, 0].legend()
 
 # Plot data on subplot 4
-axs[1, 1].plot(t, vz, label='vz')
+axs[1, 1].plot(t, sm.to_km_list(vz), label='vz')
 axs[1, 1].set_xlabel('Time (s)')
-axs[1, 1].set_ylabel('Velocity z (m/s)')
+axs[1, 1].set_ylabel('Velocity z (km/s)')
 axs[1, 1].set_title('Velocity z vs Time')
 axs[1, 1].legend()
 
