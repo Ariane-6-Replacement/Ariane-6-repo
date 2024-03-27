@@ -137,8 +137,8 @@ class DevelopmentModel():
     
     def calculate(self,
                   dry_masses, # tonnes
-                  system_nature="new",
-                  team_experience="none"):
+                  system_nature="similar",
+                  team_experience="some_related"):
         self.management_factor = 1.1
         self.f1 = 1 # Technical Difficulty Factor
         self.f2 = 1 # Tech Quality Factor (from graph)
@@ -261,6 +261,6 @@ class OperationalModel():
         # Man-years
         self.cost.indirect_operations = (40 * launch_site_capacity ** 0.34 / launches_per_year ** 0.55) * total_flights
 
-        self.cost.total = self.cost.technical_system_management  + self.cost.prelaunch_operations  + \
+        self.cost.total = self.cost.technical_system_management + self.cost.prelaunch_operations + \
                           self.cost.launch_and_mission_operations + self.cost.propellant + \
                           self.cost.refurbishment + self.cost.indirect_operations
