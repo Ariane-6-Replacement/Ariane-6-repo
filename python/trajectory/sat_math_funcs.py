@@ -255,6 +255,13 @@ def to_meters_list(input_tuple):
     list1 = [float(i) for i in list1]
     return list1
 
+def to_km_list(input_tuple):
+    
+    list1 = list(tuple(i / 1000 for i in input_tuple))
+    list1 = [float(i) for i in list1]
+    return list1
+
+
 
 def differance_data(a,b):
     c = a-b

@@ -100,8 +100,8 @@ class UI():
             'bulkhead': LabelCombobox(self.root, "Bulkhead:", self.rocket.bulkhead, self.rocket.bulkhead_options, state="readonly", width=17),
             'pressure_ox': LabelEntry(self.root, "Pressure OX (bar):", self.rocket.pressure_ox),
             'pressure_fuel': LabelEntry(self.root, "Pressure fuel (bar):", self.rocket.pressure_fuel),
-            'temperature_ox':  LabelEntry(self.root, "Temperature Ox (K):", self.rocket.temperature_ox),
-            'temperature_fuel': LabelEntry(self.root, "Temperature Fuel (K):", self.rocket.temperature_fuel),
+            'temperature_ox (80-90K)':  LabelEntry(self.root, "Temperature Ox (K):", self.rocket.temperature_ox),
+            'temperature_fuel (95-111K)': LabelEntry(self.root, "Temperature Fuel (K):", self.rocket.temperature_fuel),
 
             'diameter': LabelEntry(self.root, "Diameter (m):", self.rocket.diameter),
             'of_ratio': LabelEntry(self.root, "O/F ratio:", self.rocket.of_ratio),
@@ -158,7 +158,8 @@ class UI():
             [f"1st Stage Mass:", f"{self.rocket.mass:.0f} kg", "Margin 40%"],
             [f"Upper Stage Mass:", f"{self.rocket.mass2:.0f} kg", "Margin 40%"],
             [f"----------------Cost-----------------","----------------","----------------"],
-            [f"Total Lifetime Cost:", f"{self.rocket.lifetime_cost:.0f} million euros", "Margin 40%"],
+           # [f"Total Lifetime Cost:", f"{self.rocket.lifetime_cost:.0f} million euros", "Margin 40%"],
+            [f"Development Cost:", f"{self.rocket.development_cost:.0f} million euros", "Margin 40%"],
             [f"Cost Per Launch:", f"{self.rocket.per_launch_cost:.0f} million euros", "Margin 40%"],
             #f"Estimated Cost: €{self.rocket.cost:.0f} "
         ]
