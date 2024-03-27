@@ -100,7 +100,7 @@ class CostModel():
                                   self.rockets_per_stage,
                                   self.number_of_rocket_stages,
                                   rocket_fleet_count,
-                                  learning_factor=0.86)
+                                  learning_factor=1.00)
 
         self.operational.calculate(prop_masses,
                                    self.total_flights,
@@ -160,7 +160,7 @@ class DevelopmentModel():
 
         # Man-years
         # SET TO ZERO BECAUSE WE REUSE A6
-        self.cost.cryogenic_expandable = 3140 * dry_masses[0] ** 0.21 * self.f1 * self.f2 * self.f3 *0
+        self.cost.cryogenic_expandable = 3140 * dry_masses[0] ** 0.21 * self.f1 * self.f2 * self.f3 * 000000000
 
         # Man-years
         self.cost.ballistic_reusable = 4080 * dry_masses[1:dry_masses.size] ** 0.21 * self.f1 * self.f2 * self.f3
