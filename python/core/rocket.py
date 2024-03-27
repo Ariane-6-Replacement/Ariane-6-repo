@@ -35,7 +35,7 @@ class Rocket():
         self.dry_masses  = MassCalculator.get_dry_masses(self.wet_masses, self.inert_mass_fractions)
 
         # Convert tonnes to kg
-        self.mass2, self.mass = self.wet_masses * 1000
+        self.mass2, self.mass = self.wet_masses
         self.mass_prev = self.mass
         self.mass_total = self.mass + self.mass2 + self.payload
     def cost_estimator(self):
@@ -55,7 +55,7 @@ class Rocket():
                                             self.pressure_ox, self.pressure_fuel))
             self.mass_p = self.mass_ox + self.mass_fuel
             self.structure.calc(self.bulkhead_options[self.bulkhead], self.volume_ox, self.mass_ox, self.volume_fuel,
-                                self.mass_fuel, self.thrust)
+                                self.mass_fuel, self.thrust, self.mass_e, self.engine_number)
             self.mass_t = self.structure.mass_total #Returns mass of the tank/s ITS/s and engine bay
             self.mass_es = self.structure.mass_engine_structure(self.engine_number, self.thrust)
             self.mass_lg = self.structure.mass_landing_gear(self.mass_e, self.mass_p, self.mass_t, self.mass_es)
