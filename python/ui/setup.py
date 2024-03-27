@@ -101,8 +101,8 @@ class UI():
             'bulkhead': LabelCombobox(self.root, "Bulkhead:", self.rocket.bulkhead, self.rocket.bulkhead_options, state="readonly", width=17),
             'pressure_ox': LabelEntry(self.root, "Pressure OX (bar):", self.rocket.pressure_ox),
             'pressure_fuel': LabelEntry(self.root, "Pressure fuel (bar):", self.rocket.pressure_fuel),
-            'temperature_ox':  LabelEntry(self.root, "Temperature Ox (K):", self.rocket.temperature_ox),
-            'temperature_fuel': LabelEntry(self.root, "Temperature Fuel (K):", self.rocket.temperature_fuel),
+            'temperature_ox (80-90K)':  LabelEntry(self.root, "Temperature Ox (K):", self.rocket.temperature_ox),
+            'temperature_fuel (95-111K)': LabelEntry(self.root, "Temperature Fuel (K):", self.rocket.temperature_fuel),
 
             'diameter': LabelEntry(self.root, "Diameter (m):", self.rocket.diameter),
             'of_ratio': LabelEntry(self.root, "O/F ratio:", self.rocket.of_ratio),
