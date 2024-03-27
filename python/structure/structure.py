@@ -12,13 +12,15 @@ class Structure():
         self.material3 = material3 
 
         # self.material3 = material3
-    def calc(self, type, volume_ox, mass_ox, volume_fuel, mass_fuel, thrust):
+    def calc(self, type, volume_ox, mass_ox, volume_fuel, mass_fuel, thrust, engine_mass, engine_number):
         self.type = type
         self.thrust = thrust
         self.volume1 = volume_ox
         self.volume2 = volume_fuel
         self.mass1 = mass_ox
         self.mass2 = mass_fuel
+        self.engine_mass = engine_mass
+        self.engine_number = engine_number 
         tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.mass1]
         tank2 = [self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
 
