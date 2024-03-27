@@ -24,6 +24,16 @@ def pressure(h):
 
     return rho
 
+Me = 80e3
+thrust = 1e6 
+Nengines = 3
+max_accel = Nengines*thrust/Me
+Burn_alt = 3000 # [m]
+
+
+
+
+
 gammalist = []
 def equations_of_motion(state, t):
     # Unpack state variables
@@ -47,9 +57,13 @@ def equations_of_motion(state, t):
     dxdt = vx
     dydt = vy 
     dzdt = vz 
-    dvxdt = -np.cos(gamma)*D/80e3 # Example: acceleration in x-direction
+    dvxdt = -np.cos(gamma)*D/Me # Example: acceleration in x-direction
     dvydt = 0  # Example: acceleration in y-direction 
-    dvzdt = -9.81 + np.sin(-gamma)*D/80e3 # Example: constant acceleration in z-direction due to gravity
+    dvzdt = -9.81 + np.sin(-gamma)*D/Me # Example: constant acceleration in z-direction due to gravity
+
+    if z < Burn_alt:
+        dvzdt = -9.81 + np.sin(-gamma)*(D/Me + max_accel) 
+        dvxdt = -np.cos(gamma)*(D/Me + max_accel)
 
     # print(gamma)
     gammalist.append(gamma)
