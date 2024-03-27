@@ -17,22 +17,25 @@ class Rocket():
         #self.control = Control()
         self.dv = self.orbit_dv[self.orbit]
         self.dv_1 = self.dv * self.dv_split
-        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox*10**5,self.pressure_fuel*10**5)
-        self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox, self.pressure_fuel, self.material_options[self.material_misc])
+        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox*10**5,
+                                     self.pressure_fuel*10**5)
+        self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox,
+                                   self.pressure_fuel, self.material_options[self.material_misc])
         self.trajectory = Trajectory(self.orbit_options[self.orbit], self.payload, self.cd)
 
     def mass_estimation(self):
         self.inert_mass_fractions = np.array([self.mf2, self.mf2])
-        self.ISPs = np.array([self.propulsion.Isp, self.isp2])
+        self.ISPs = np.array([self.isp2, self.propulsion.Isp])
 
         # All outputs in tonnes
 
-        self.wet_masses = MassCalculator.get_wet_masses(self.dv, self.dv_split, self.inert_mass_fractions, self.ISPs, self.payload)
+        self.wet_masses = MassCalculator.get_wet_masses(self.dv, 1 - self.dv_split, self.inert_mass_fractions,
+                                                        self.ISPs, self.payload)
         self.prop_masses = MassCalculator.get_propellant_masses(self.wet_masses, self.inert_mass_fractions)
         self.dry_masses  = MassCalculator.get_dry_masses(self.wet_masses, self.inert_mass_fractions)
 
         # Convert tonnes to kg
-        self.mass, self.mass2 = self.wet_masses * 1000
+        self.mass2, self.mass = self.wet_masses * 1000
         self.mass_prev = self.mass
         self.mass_total = self.mass + self.mass2 + self.payload
     def cost_estimator(self):

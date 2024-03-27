@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
 import numpy as np
 
 class Label():
@@ -181,7 +182,7 @@ class UI():
         #iterate_button = ttk.Button(root, text="Iterate")
         #iterate_button.bind("<ButtonRelease-1>", lambda event: self.iterate_rocket())
         #iterate_button.grid(column=0, row=len(values) + 1, pady=10)
-
+        plt.close()
         root.mainloop()
 
     def update_dv_split(self):

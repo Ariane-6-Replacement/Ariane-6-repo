@@ -45,9 +45,14 @@ class MassCalculator:
             wet_mass_i = MassCalculator.get_wet_mass_i(dV_i, I_sp[i], f_i, m_payload + np.sum(wet_masses))
             wet_masses = np.append(wet_masses, wet_mass_i)
 
+        wet_masses = np.zeros(len(dV_split))
+        for i in range(len(dV_split)):
+            Vi = I_sp[i]*9.81
+            Ri = np.exp(dV_split[i]/Vi)
+            wet_masses[i] = (m_payload + wet_masses[i-1]) * (Ri-1) / (1-Ri*inert_mass_fractions[i])
         # Convert to tonnes
-        return np.flip(wet_masses / 1000)
-
+        #return np.flip(wet_masses / 1000)
+        return wet_masses
     @staticmethod
     def get_propellant_masses(wet_masses, inert_mass_fractions):
         assert wet_masses.size == inert_mass_fractions.size, "Please provide arrays with equal lengths"
@@ -167,7 +172,6 @@ class DevelopmentModel():
 
         # Man-years
         self.cost.total = self.management_factor * (np.sum(self.cost.cryogenic_expandable) + np.sum(self.cost.ballistic_reusable))
-        print(self.cost.cryogenic_expandable, self.cost.ballistic_reusable, self.cost.total)
 
 
 class ProductionModel():
