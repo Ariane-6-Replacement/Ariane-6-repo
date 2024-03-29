@@ -1,6 +1,7 @@
 from python.structure.Components.Tank_class import Tank
 from python.structure.Components.ITS_class import Shell
 from python.structure.Components.CBT_class import CBT
+from python.structure.Components.landing_gear_class import LG
 
 class Structure():
     def __init__(self, outer_radius,material, pressure_ox, pressure_fuel, material3):
@@ -62,8 +63,7 @@ class Structure():
     def mass_engine_structure(self, engine_number, thrust):
         return 4000
     
-    def mass_landing_gear(self, mass_e, mass_p, mass_t, mass_es):
-        return 3000
+
     
     @property
     def mass_total(self)-> float:
@@ -101,6 +101,10 @@ class Structure():
 
             cg  = temp / (hengine + hthrust + hEB + ht1 + ht2 + hITS1 + hITS2)
             return cg
+        
+    @property
+    def mass_landing_gear(self):
+        return LG(self.outer_radius, self.mass_total, self.cg,).mass
 # if __name__ == "__main__":
 #     print("CALCULATING STRUCTURE")
 #     test = Structure(2.7,7E5,'2219',328, 440E3, 7E5, 273, 126E3, 20E6,'2195')
