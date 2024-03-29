@@ -59,8 +59,8 @@ class Structure():
 
 
           
-
-    def mass_engine_structure(self, engine_number, thrust):
+    @property
+    def mass_engine_structure(self):
         return 4000
     
 
