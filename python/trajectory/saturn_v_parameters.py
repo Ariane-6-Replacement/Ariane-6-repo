@@ -5,7 +5,8 @@ burntime = 152 # s
 # First stage mass at beginning of ascent
 M0_1 = 2_776_100 # kg
 # First stage mass at end of ascent
-M0 = 80e3
+M0_2 = 80e3
+
 number_of_engines_ascent = 1
 number_of_engines_descent = 1
 diameter = 10.1
