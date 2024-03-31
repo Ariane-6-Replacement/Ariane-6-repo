@@ -20,6 +20,7 @@ def pressure(h):
         p = 22.65 * np.exp(1.73 - 0.000157 * h)
 
     rho = p / (0.2869 * (T + 273.1))
+    
 
     return rho
 M0 = 80e3
@@ -29,7 +30,7 @@ m = 333  #mass flow [kg/s]
 Nengines = 3
 max_accel = Nengines*thrust/Me
 Burn_alt = 3080 # [m]
-
+burntime = 30
 
 T = thrust
 c_eff = T/m
@@ -44,43 +45,70 @@ def equations_of_motion(state, t):
     # Unpack state variables
     x, y, z, vx, vy, vz = state 
     
+
     # Define parameters (mass, gravitational constant, etc.)
     # You can define these according to your specific problem
     d = 5.4
-    #rho = 101e3
+    # rho = 101e3
     rho = pressure(z)
     Cd = 1
     A = np.pi * d**2/4  
     # D = (0.5* rho*sm.norm([vx,vy,vz]) * A * Cd)
     D = (0.5* rho*(vx**2+vz**2) * A * Cd)
-    #D = 0
+    # D = 0
 
     gamma = np.arctan2(vz,vx)
-    print(np.cos(gamma),np.sin(gamma))
+    # print(np.cos(gamma),np.sin(gamma))
 
 
-    # Define derivatives of state variables
-    dxdt = vx
-    dydt = vy 
-    dzdt = vz 
-    dvxdt = -np.cos(gamma)*D/M0 # Example: acceleration in x-direction
-    dvydt = 0  # Example: acceleration in y-direction 
-    dvzdt = -9.81 + np.sin(-gamma)*D/M0 # Example: constant acceleration in z-direction due to gravity
-
-    if z < Burn_alt:
-        M = M0-m*t
-        accel = thrust/M
-        dvzdt = -9.81 + np.sin(-gamma)*(D/Me + accel) 
-        dvxdt = -np.cos(gamma)*(D/Me + accel)
+   
+    dvzdt = 0
+    dvxdt = 0
+    if  t < burntime :
+        print("burning")
+        
+        MT = 700e3
+        accel = 9*thrust/MT
+        TWR = 9*thrust/(MT*9.81)
+        # print("TWR:",TWR)
+        # M = MT-m*t
+        dvxdt += np.cos(gamma)*accel
+        dvzdt += np.sin(gamma)*accel
+        print("zaccel:",dvzdt)
+    
+    if z < Burn_alt and vz<0:
+        #M = M0-m*t
+        accel = thrust/M0
+        # dvzdt = -9.81 + np.sin(-gamma)*(D/Me + accel) 
+        # dvxdt = -np.cos(gamma)*(D/Me + accel)
+        dvxdt -= np.cos(gamma)*accel
+        dvzdt -= np.sin(gamma)*accel
        
     # print(gamma)
-    return [dxdt, dydt, dzdt, dvxdt, dvydt, dvzdt]
+    
+
+    # Define derivatives of state variables
+    # dxdt = vx
+    # dydt = vy 
+    # dzdt = vz 
+    dvxdt += -np.cos(gamma)*D/M0 # Example: acceleration in x-direction
+    dvydt = 0  # Example: acceleration in y-direction 
+    dvzdt += -9.81 + np.sin(-gamma)*D/M0 # Example: constant acceleration in z-direction due to gravity
+
+
+
+
+    # print("x:",x,"y:",y,"z:",z,"vx:",vx,"vy:",vy,"vz:",vz,"gamma:",gamma, "drag:",D,"rho:",rho)   
+    # return [dxdt, dydt, dzdt, dvxdt, dvydt, dvzdt]
+    return [vx, vy, vz, dvxdt, dvydt, dvzdt]
 
 # Define initial conditions
-initial_state = [0, 0, 55e3,1600*2**0.5/2, 0, 1600*2**0.5/2]   # x,y,z,vx,vy,vz
+# initial_state = [0, 0, 55e3,1600*2**0.5/2, 0, 1600*2**0.5/2]  # x,y,z,vx,vy,vz
+# initial_state = [0, 0, 100,1600*2**0.5/2, 0, 1600*2**0.5/2]  # x,y,z,vx,vy,vz
+initial_state = [0, 0, 0,0, 0, 10]  # x,y,z,vx,vy,vz
 
 # Define time points for integration
-t = np.linspace(0, 300, 50000)  # Example: integrate from 0 to 10 seconds with 100 points
+t = np.linspace(0, 10000, 50000)  # Example: integrate from 0 to 10 seconds with 100 points
 
 # Solve the equations of motion
 solution = odeint(equations_of_motion, initial_state, t)
@@ -169,6 +197,14 @@ axs[2, 1].set_ylabel('Drag (MN)')
 axs[2, 1].set_title('Drag vs Time')
 axs[2, 1].legend()
 # Adjust layout
+
+axs[2, 0].plot(t, gamma_array, label='gamma')
+axs[2, 0].set_xlabel('Time (s)')
+axs[2, 0].set_ylabel('Gamma')
+axs[2, 0].set_title('Gamma vs Time')
+axs[2, 0].legend()
+
+
 plt.tight_layout()
 
 # Show the plot
