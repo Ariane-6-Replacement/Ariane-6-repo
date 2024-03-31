@@ -3,228 +3,192 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 import plotting_functions as pf
 import sat_math_funcs as sm
+from elysium_parameters import thrust, burntime, M0_1, M0, number_of_engines_ascent, number_of_engines_descent, diameter, Cd_ascent, Cd_descent, A, burn_alt, gravity_turn_alt, kick_angle, gamma_change_time, mass_flowrate
+#from saturn_v_parameters import thrust, burntime, M0_1, M0, number_of_engines_ascent, number_of_engines_descent, diameter, Cd_ascent, Cd_descent, A, burn_alt, gravity_turn_alt, kick_angle, gamma_change_time, mass_flowrate
 
-def pressure(h):
+g_0 = 9.81 # [m / s^2]
+
+class Trajectory():
+    def __init__(self):
+        self.kick_time = 0
+        self.mass = M0_1
+
     # Taken from https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html
+    def get_density(self, h):
+        if h < 11_000:
+            T = 15.04 - 0.00649 * h
+            p = 101.29 * ((T + 273.1) / 288.08) ** 5.256
+        elif h < 25_000:
+            T = -56.46
+            p = 22.65 * np.exp(1.73 - 0.000157 * h)
+        else:
+            T = -131.21 + 0.00299 * h
+            p = 2.488 * ((T + 273.1) / 216.6) ** -11.388
 
-    if h < 11000:
-        T = 15.04 - 0.00649 * h
-        p = 101.29 * ((T + 273.1) / 288.08) ** 5.256
+        rho = p / (0.2869 * (T + 273.1))
+        return rho
 
-    elif h > 25000:  # Changed to elif
-        T = -131.21 + 0.00299 * h
-        p = 2.488 * ((T + 273.1) / 216.6) ** (-11.388)
-
-    else:
-        T = -56.46
-        p = 22.65 * np.exp(1.73 - 0.000157 * h)
-
-    rho = p / (0.2869 * (T + 273.1))
+    def get_drag(self, rho, velocity_x, velocity_z, A, Cd):
+        drag = 0.5 * rho * (velocity_x ** 2 + velocity_z ** 2) * A * Cd
+        return drag # 0
     
+    def get_gamma(self, velocity_z, velocity_x):
+        return np.arctan2(velocity_z, velocity_x)
 
-    return rho
-M0 = 80e3
-Me = 25e3
-thrust = 1e6 
-m = 333  #mass flow [kg/s]
-Nengines = 3
-max_accel = Nengines*thrust/Me
-Burn_alt = 3080 # [m]
-burntime = 30
+    def equations_of_motion(self, state, t):
+        x, y, z, velocity_x, velocity_y, velocity_z = state 
+        rho = self.get_density(z) # 101e3
 
-T = thrust
-c_eff = T/m
+        # ascending = velocity_z >= 0
 
-V = c_eff*np.log(M0/Me)
+        # Cd = 0
+        # if ascending:
+        #     Cd = Cd_ascent
+        # else:
+        #     Cd = Cd_descent
 
-def m0calc(V):
-    M0 = Me/np.e**(V/c_eff)
-    return M0
+        D = self.get_drag(rho, velocity_x, velocity_z, A, Cd_ascent)
+        #print("Drag:",D)
+        #print("z:", z, "rho:",rho)
+        # D = 0
 
-def equations_of_motion(state, t):
-    # Unpack state variables
-    x, y, z, vx, vy, vz = state 
+        gamma = self.get_gamma(velocity_z, velocity_x)
+
+        accel_x = 0
+        accel_y = 0
+        accel_z = 0
+
+        #mass = M0_1
+        thrust_x = 0
+        thrust_z = 0
+
+        number_of_engines = 1
+
+        if z >= gravity_turn_alt and self.kick_time == 0:
+            self.kick_time = t
+
+        if z >= gravity_turn_alt and t <= self.kick_time + gamma_change_time:
+            gamma = kick_angle
+
+        if t < burntime:
+            number_of_engines = number_of_engines_ascent
+        # elif z < burn_alt and not ascending: 
+        #     number_of_engines = number_of_engines_descent
+
+        total_thrust = number_of_engines * thrust
+
+        if t < burntime:
+            self.mass = M0_1 - mass_flowrate * t
+            thrust_x = np.cos(gamma) * total_thrust / self.mass
+            thrust_z = np.sin(gamma) * total_thrust / self.mass
     
-
-    # Define parameters (mass, gravitational constant, etc.)
-    # You can define these according to your specific problem
-    d = 5.4
-    # rho = 101e3
-    rho = pressure(z)
-    Cd = 1
-    A = np.pi * d**2/4  
-    # D = (0.5* rho*sm.norm([vx,vy,vz]) * A * Cd)
-    D = (0.5* rho*(vx**2+vz**2) * A * Cd)
-    # D = 0
-
-    gamma = np.arctan2(vz,vx)
-    # print(np.cos(gamma),np.sin(gamma))
-
-
-   
-    dvzdt = 0
-    dvxdt = 0
-    if  t < burntime :
-        print("burning")
+        # # elif z < burn_alt and not ascending:
+        # #     total_thrust = number_of_engines_descent * -thrust
+        # #     mass = M0
+        # #     thrust_x = np.cos(gamma) * total_thrust / mass
+        # #     thrust_z = np.sin(gamma) * total_thrust / mass
         
-        MT = 700e3
-        accel = 9*thrust/MT
-        TWR = 9*thrust/(MT*9.81)
-        # print("TWR:",TWR)
-        # M = MT-m*t
-        dvxdt += np.cos(gamma)*accel
-        dvzdt += np.sin(gamma)*accel
-        print("zaccel:",dvzdt)
-    
-    if z < Burn_alt and vz<0:
-        #M = M0-m*t
-        accel = thrust/M0
-        # dvzdt = -9.81 + np.sin(-gamma)*(D/Me + accel) 
-        # dvxdt = -np.cos(gamma)*(D/Me + accel)
-        dvxdt -= np.cos(gamma)*accel
-        dvzdt -= np.sin(gamma)*accel
-       
-    # print(gamma)
-    
-
-    # Define derivatives of state variables
-    # dxdt = vx
-    # dydt = vy 
-    # dzdt = vz 
-    dvxdt += -np.cos(gamma)*D/M0 # Example: acceleration in x-direction
-    dvydt = 0  # Example: acceleration in y-direction 
-    dvzdt += -9.81 + np.sin(-gamma)*D/M0 # Example: constant acceleration in z-direction due to gravity
+        # accel_x += thrust_x
+        # accel_z += thrust_z
+            
+        drag_x = -np.cos(gamma) * D / self.mass
+        drag_z = -np.sin(gamma) * D / self.mass
 
 
+        # if D != 0:
+        #     accel_x += 
+        accel_x += thrust_x + drag_x
+        accel_z += -g_0 + thrust_z + drag_z 
 
+        # print("t:", t, "z:", z, "velocity_z", velocity_z, "mass:", self.mass)
 
-    # print("x:",x,"y:",y,"z:",z,"vx:",vx,"vy:",vy,"vz:",vz,"gamma:",gamma, "drag:",D,"rho:",rho)   
-    # return [dxdt, dydt, dzdt, dvxdt, dvydt, dvzdt]
-    return [vx, vy, vz, dvxdt, dvydt, dvzdt]
+        return [velocity_x, velocity_y, velocity_z, accel_x, accel_y, accel_z]
 
-# Define initial conditions
-# initial_state = [0, 0, 55e3,1600*2**0.5/2, 0, 1600*2**0.5/2]  # x,y,z,vx,vy,vz
-# initial_state = [0, 0, 100,1600*2**0.5/2, 0, 1600*2**0.5/2]  # x,y,z,vx,vy,vz
-initial_state = [0, 0, 0,0, 0, 10]  # x,y,z,vx,vy,vz
+    def run(self):
 
-# Define time points for integration
-t = np.linspace(0, 10000, 50000)  # Example: integrate from 0 to 10 seconds with 100 points
+        # Define initial conditions
+        # initial_state = [0, 0, 55e3,1600*2**0.5/2, 0, 1600*2**0.5/2]  # x,y,z,vx,vy,vz
+        # initial_state = [0, 0, 100,1600*2**0.5/2, 0, 1600*2**0.5/2]  # x,y,z,vx,vy,vz
+        initial_state = [0, 0, 0, 0, 0, 3]  # x,y,z,vx,vy,vz
 
-# Solve the equations of motion
-solution = odeint(equations_of_motion, initial_state, t)
+        # Define time points for integration
+        t = np.linspace(0, 700.5, 5000)  # Example: integrate from 0 to 10 seconds with 100 points
 
-# Extract position and velocity from the solution
-x, y, z, vx, vy, vz = solution.T
+        # Solve the equations of motion
+        solution = odeint(self.equations_of_motion, initial_state, t)
+        print("Finished")
 
+        # Extract position and velocity from the solution
+        x, y, z, vx, vy, vz = solution.T
 
-try:
-    hitground = np.where(z<0)[0][0]
-    t, x, y, z, vx, vy, vz = t[:hitground], x[:hitground], y[:hitground], z[:hitground], vx[:hitground], vy[
-                                                                                                         :hitground], vz[
-                                                                                                                      :hitground]
-except:
-    print("not landing")
+        fig, axs = plt.subplots(3, 3, figsize=(10, 8))  # 2x2 grid of subplots
 
+        self.drags = np.zeros_like(vx)
+        self.gammas = np.zeros_like(vx)
 
-suicideburn = np.where(z<Burn_alt)[0][0]
-x_suicide,z_suicide,vx_suicide, vz_suicide,t_suicide = x[suicideburn]/1000,z[suicideburn]/1000,vx[suicideburn]/1000,vz[suicideburn]/1000,t[suicideburn]
+        for j in range(len(vx)):
+            self.drags[j] = self.get_drag(self.get_density(z[j]), vx[j], vz[j], A, Cd_ascent)
+            self.gammas[j] = np.rad2deg(self.get_gamma(vz[j], vx[j]))
 
-# vx = sm.to_km_list(vx)
-# vy = sm.to_km_list(vy)
-# vz = sm.to_km_list(vz)
+        axs[0, 0].plot(t, x / 1000, label='x vs time')
+        axs[0, 0].set_xlabel('Time (s)')
+        axs[0, 0].set_ylabel('Pos x (km)')
+        axs[0, 0].set_title('Pos (x vs time)')
+        axs[0, 0].set_xscale('linear')
+        axs[0, 0].set_yscale('linear')
+        axs[0, 0].legend()
 
+        axs[0, 1].plot(t, z / 1000, label='z vs time')
+        axs[0, 1].set_xlabel('Time (s)')
+        axs[0, 1].set_ylabel('Pos z (km)')
+        axs[0, 1].set_title('Pos (z vs time)')
+        axs[0, 1].set_xscale('linear')
+        axs[0, 1].set_yscale('linear')
+        axs[0, 1].legend()
 
-d = 5.4
-A = np.pi * d**2/4
-Cd = 1
-v_abs = np.empty([len(vx)])
-D_array = np.empty([len(vx)])
-gamma_array = np.empty([len(vx)])
+        axs[1, 0].plot(t, vx / 1000, label='vx')
+        axs[1, 0].set_xlabel('Time (s)')
+        axs[1, 0].set_ylabel('Velocity x (km/s)')
+        axs[1, 0].set_title('Velocity x vs Time')
+        axs[1, 0].set_xscale('linear')
+        axs[1, 0].set_yscale('linear')
+        axs[1, 0].legend()
 
-i = 0
-x_km = sm.to_km_list(x)
-for j in range(len(vx)):
-    v_abs[j] = ((vx[j]**2+vz[j]**2))**0.5
-    D_array[j] = (0.5* pressure(z[j])*(vx[j]**2+vz[j]**2) * A * Cd)
-    gamma_array[j] = np.rad2deg(np.arctan2(vz[j],vx[j]))
-     
-    
-    if x_km[j] > 3 and not i==1:
-        vel = ((vx[j]**2+vz[j]**2))**0.5
-        print("vel 3km",vel )
-        i = 1
+        axs[1, 1].plot(t, vz / 1000, label='vz')
+        axs[1, 1].set_xlabel('Time (s)')
+        axs[1, 1].set_ylabel('Velocity z (km/s)')
+        axs[1, 1].set_title('Velocity z vs Time')
+        axs[1, 1].set_xscale('linear')
+        axs[1, 1].set_yscale('linear')
+        axs[1, 1].legend()
 
-print(f"velocity at landing: {v_abs[-1]}")
-# print(v_abs[140])
-# print("downrange:", x[140])
+        axs[0, 2].plot(t, self.drags / 1e6, label='drag')
+        axs[0, 2].set_xlabel('Time (s)')
+        axs[0, 2].set_ylabel('Drag (MN)')
+        axs[0, 2].set_title('Drag vs Time')
+        axs[0, 2].set_xscale('linear')
+        axs[0, 2].set_yscale('linear')
+        axs[0, 2].legend()
 
-fig, axs = plt.subplots(3, 2, figsize=(10, 8))  # 2x2 grid of subplots
+        axs[1, 2].plot(t, self.gammas, label='gamma')
+        axs[1, 2].set_xlabel('Time (s)')
+        axs[1, 2].set_ylabel('Gamma')
+        axs[1, 2].set_ylim(-100, 100)
+        axs[1, 2].set_title('Gamma vs Time')
+        axs[1, 2].set_xscale('linear')
+        axs[1, 2].set_yscale('linear')
+        axs[1, 2].legend()
 
-# Plot data on subplot 1
-axs[0, 0].plot(t, sm.to_km_list((vx**2 + vz**2)**0.5), label='Speed')
-axs[0, 0].set_xlabel('Time (s)')
-axs[0, 0].set_ylabel('Speed (km/s)')
-axs[0, 0].set_title('Speed vs Time')
-axs[0, 0].legend()
+        axs[2, 0].plot(x / 1000, z / 1000, label='x')
+        axs[2, 0].set_xlabel('Distance x (km)')
+        axs[2, 0].set_ylabel('Distance z (km)')
+        axs[2, 0].set_title('Z vs X')
+        axs[2, 0].set_xscale('linear')
+        axs[2, 0].set_yscale('linear')
+        axs[2, 0].legend()
 
-# Plot data on subplot 2
-axs[0, 1].plot(t, sm.to_km_list(vx), label='vx')
-axs[0, 1].plot(t_suicide,vx_suicide, marker='o', markersize=6, color='red')
-axs[0, 1].set_xlabel('Time (s)')
-axs[0, 1].set_ylabel('Velocity x (km/s)')
-axs[0, 1].set_title('Velocity x vs Time')
-axs[0, 1].legend()
+        plt.tight_layout()
+        plt.show()
 
-# Plot data on subplot 3
-axs[1, 0].plot(sm.to_km_list(x), sm.to_km_list(z), label='z vs x')
-axs[1, 0].set_xlabel('Distance x (km)')
-axs[1, 0].set_ylabel('Distance z (km)')
-axs[1, 0].plot(x_suicide,z_suicide, marker='o', markersize=6, color='red')
-axs[1, 0].set_title('Trajectory (z vs x)')
-axs[1, 0].legend()
-
-# Plot data on subplot 4
-axs[1, 1].plot(t, sm.to_km_list(vz), label='vz')
-axs[1, 1].plot(t_suicide,vz_suicide, marker='o', markersize=6, color='red')
-axs[1, 1].set_xlabel('Time (s)')
-axs[1, 1].set_ylabel('Velocity z (km/s)')
-axs[1, 1].set_title('Velocity z vs Time')
-axs[1, 1].legend()
-
-axs[2, 1].plot(t, D_array/1e6, label='drag')
-axs[2, 1].set_xlabel('Time (s)')
-axs[2, 1].set_ylabel('Drag (MN)')
-axs[2, 1].set_title('Drag vs Time')
-axs[2, 1].legend()
-# Adjust layout
-
-axs[2, 0].plot(t, gamma_array, label='gamma')
-axs[2, 0].set_xlabel('Time (s)')
-axs[2, 0].set_ylabel('Gamma')
-axs[2, 0].set_title('Gamma vs Time')
-axs[2, 0].legend()
-
-
-plt.tight_layout()
-
-# Show the plot
-plt.show()
-
-
-
-
-# def plot1():
-#     fig, axs = pf.creatfig(1,1,(10,5))
-#     # axs.plot(sm.to_km_list(x),v_abs)
-#     axs.plot(sm.to_km_list(x),sm.to_km_list(z))
-#     # axs.plot(t,sm.to_km_list(z))
-#     axs.set_xlabel("downrange [km]")
-#     axs.set_ylabel("altitude [km]")
-#     plt.ylim(0,110)
-#     plt.xlim(0,500)
-#
-#     plt.show()
-# plot1()
-# pass
-
-# Now x, y, z, vx, vy, vz contain the positions and velocities at each time step
+trajectory = Trajectory()
+trajectory.run()
