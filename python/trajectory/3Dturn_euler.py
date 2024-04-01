@@ -3,15 +3,20 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 import plotting_functions as pf
 import sat_math_funcs as sm
-from elysium_parameters import thrust, burntime, M0_1, M0, number_of_engines_ascent, number_of_engines_descent, diameter, Cd_ascent, Cd_descent, A, burn_alt, gravity_turn_alt, kick_angle, gamma_change_time, mass_flowrate
-#from saturn_v_parameters import thrust, burntime, M0_1, M0, number_of_engines_ascent, number_of_engines_descent, diameter, Cd_ascent, Cd_descent, A, burn_alt, gravity_turn_alt, kick_angle, gamma_change_time, mass_flowrate
+from elysium_parameters import thrust, burntime, M0_1, number_of_engines_ascent, number_of_engines_descent, diameter, Cd_ascent, Cd_descent, A, burn_alt, gravity_turn_alt, kick_angle, gamma_change_time, mass_flowrate, M_empty, struct_coeff_2nd_stage, I_sp_1, I_sp_2, delta_V_landing
+#from saturn_v_parameters import thrust, burntime, M0_1, number_of_engines_ascent, number_of_engines_descent, diameter, Cd_ascent, Cd_descent, A, burn_alt, gravity_turn_alt, kick_angle, gamma_change_time, mass_flowrate
 
 g_0 = 9.81 # [m / s^2]
+R_earth = 6_371e3 # [m]
+mu_earth = 3.986_004_418e14 # [m^3 / s^-2]
 
 class Trajectory():
     def __init__(self):
         self.kick_time = 0
         self.mass = M0_1
+        self.orbits = {
+            'LEO': 300e3
+        }
 
     # Taken from https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html
     def get_density(self, h):
@@ -35,8 +40,41 @@ class Trajectory():
     def get_gamma(self, velocity_z, velocity_x):
         return np.arctan2(velocity_z, velocity_x)
     
-    def get_speed(self):
-        return np.sqrt(self.velocity_x ** 2 + self.velocity_z ** 2)
+    def get_landing_propellant(self, I_sp_1, delta_V_landing):
+        M_prop_land = np.exp(delta_V_landing / (I_sp_1 * g_0)) * M_empty - M_empty
+        return M_prop_land
+    
+    def get_speed(self, velocity_x, velocity_z):
+        return np.sqrt(velocity_x ** 2 + velocity_z ** 2)
+    
+    def delta_V_circularize(self, r_1, r_2):
+        return np.sqrt(mu_earth / r_2) * (1 - np.sqrt(2 * r_1 / (r_1 + r_2)))
+
+    def delta_V_circular_to_elliptical(self, r_1, r_2):
+        return np.sqrt(mu_earth / r_1) * (np.sqrt(2 * r_2 / (r_1 + r_2)) - 1)
+
+    def delta_V_circular_to_circular(self, r_1, r_2):
+        delta_V_1 = self.delta_V_circular_to_elliptical(r_1, r_2)
+        delta_V_2 = self.delta_V_circularize(r_1, r_2)
+        return delta_V_1 + delta_V_2
+    
+    def get_delta_V_total(self, pos_z, speed):
+        altitude = R_earth + pos_z
+        v_c1 = np.sqrt(mu_earth / (altitude + R_earth))
+        delta_V_circ = v_c1 - speed
+
+        available_delta_v = g_0 * I_sp_2 * np.log(1 / (1 - struct_coeff_2nd_stage))
+
+        print("Available Delta V:", available_delta_v)
+
+        GTO_p = R_earth + 250e3 # [m]
+        GTO_a = R_earth + 22_500e3 # [m]
+
+        required_delta_V = delta_V_circ + self.delta_V_circular_to_circular(altitude, GTO_p) + self.delta_V_circular_to_elliptical(GTO_p, GTO_a)
+
+        print("Required Delta V:", required_delta_V)
+
+        return required_delta_V
 
     def setup(self):
         self.pos_x = 0
@@ -45,6 +83,11 @@ class Trajectory():
         self.velocity_z = 3
         self.accel_x = 0
         self.accel_z = 0
+        self.M_prop_land = self.get_landing_propellant(I_sp_1, delta_V_landing)
+
+        print("Propellant available for landing:", self.M_prop_land)
+
+        self.landing_burn_start_time = 0
 
         self.pos_xs = np.array([])
         self.pos_zs = np.array([])
@@ -92,21 +135,31 @@ class Trajectory():
             number_of_engines = number_of_engines_ascent
         elif self.pos_z < burn_alt and not ascending: 
             number_of_engines = number_of_engines_descent
+            if self.landing_burn_start_time == 0:
+               self.landing_burn_start_time = t
 
         total_thrust = number_of_engines * thrust
 
         if t < burntime:
-            self.mass = M0_1 - mass_flowrate * t
+            self.mass = M0_1 - number_of_engines * mass_flowrate * t
             self.thrust_x = np.cos(gamma) * total_thrust / self.mass
             self.thrust_z = np.sin(gamma) * total_thrust / self.mass
 
         if not ascending:
-            self.mass = 80e3 # kg
+            burn_start_mass = M_empty + self.M_prop_land
+            self.mass = burn_start_mass # kg
             if self.pos_z < burn_alt:
-                # TODO: Decrease mass when doing burn
-                #self.mass =
-                self.thrust_x = -np.cos(gamma) * total_thrust / self.mass
-                self.thrust_z = -np.sin(gamma) * total_thrust / self.mass
+                burn_time_so_far = t - self.landing_burn_start_time
+                fuel_burned = number_of_engines * mass_flowrate * burn_time_so_far
+                fuel_burned = np.clip(fuel_burned, 0, self.M_prop_land)
+
+                self.mass = burn_start_mass - fuel_burned
+
+                propellant_available = fuel_burned < self.M_prop_land
+
+                if propellant_available:
+                    self.thrust_x = -np.cos(gamma) * total_thrust / self.mass
+                    self.thrust_z = -np.sin(gamma) * total_thrust / self.mass
 
         drag_x = -np.cos(gamma) * drag_force / self.mass
         drag_z = -np.sin(gamma) * drag_force / self.mass
@@ -120,7 +173,7 @@ class Trajectory():
         self.pos_x += self.velocity_x * dt
         self.pos_z += self.velocity_z * dt
 
-        speed = self.get_speed()
+        speed = self.get_speed(self.velocity_x, self.velocity_z)
 
         self.pos_xs = np.append(self.pos_xs, self.pos_x)
         self.pos_zs = np.append(self.pos_zs, self.pos_z)
@@ -148,7 +201,7 @@ class Trajectory():
 
         times = np.array([])
 
-        t_max = 500
+        t_max = 600
         t = 0
 
         while t < t_max:
@@ -159,6 +212,19 @@ class Trajectory():
                 break
 
         print("Finished")
+
+        apogee_index = np.argmax(self.pos_zs)
+
+        apogee_z = self.pos_zs[apogee_index]
+        apogee_velocity_x = self.velocity_xs[apogee_index]
+        apogee_velocity_z = self.velocity_zs[apogee_index]
+        apogee_speed = self.get_speed(apogee_velocity_x, apogee_velocity_z)
+        delta_V_total = self.get_delta_V_total(apogee_z, apogee_speed)
+
+        print("Final Velocity Z:", self.velocity_zs[-1])
+        print("Final Z:", self.pos_zs[-1])
+        print("Final Mass:", self.masses[-1])
+        print("Propellant Mass Remaining:", self.masses[-1] - M_empty)
 
         fig, axs = plt.subplots(3, 5, figsize=(10, 8))  # 2x2 grid of subplots
 

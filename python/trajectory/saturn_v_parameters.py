@@ -15,10 +15,10 @@ Cd_ascent = 0.2
 Cd_descent = 1
 
 A = np.pi * diameter ** 2 / 4
-burn_alt = 3080 # meters
+burn_alt = 3_080 # meters
 gravity_turn_alt = 10e3 # meters
 
 kick_angle = np.radians(80)
 gamma_change_time = 10 # seconds
 
-mass_flowrate = 12895 # kg / s
+mass_flowrate = 12_895 # kg / s
