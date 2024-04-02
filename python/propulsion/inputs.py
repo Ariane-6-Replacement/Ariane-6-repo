@@ -63,7 +63,15 @@ class Merlin1D:
         self.turbopump_overall_power = 10e6  # MW
         self.diameter_truss_structure = 3.35
         self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
+    def get_Isp(self, of_ratio):
+        """"
+        Lower O/F can mean less mass because LOX is heavy. Nominal: Isp = 360 for 100bar and O/F=3.5
+        assume Isp goes down with 10 for every 0.1 OF. chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
+        """
 
+        self.Isp = 306.266 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
+        self.Isp = self.Isp - abs(3.5 - of_ratio) * 100
+        return self.Isp
 
 class Propellant:
     def __init__(self,t_ox,t_fuel,p_ox,p_fuel):

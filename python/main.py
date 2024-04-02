@@ -12,7 +12,7 @@ def main():
         mf2 = 0.04,
         isp2 = 296,
         dv_split = 0.3,
-        engine_options = ['Prometheus'],
+        engine_options = ['Prometheus', 'Merlin1D'],
         engine = 0, # index in engine options
         engine_number = 9,
         mf1 = 0.05,
