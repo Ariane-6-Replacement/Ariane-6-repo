@@ -89,7 +89,7 @@ class Structure():
             ht1 = ( 0.5 * self._CBT._cylinder_aft.height + self._EB.height)
             ht2 = (0.5 * self._CBT._cylinder_fwd.height + self._CBT._cylinder_aft.height + self._EB.height)
             hITS = (0.5 * self._ITS.height + self._CBT._cylinder_fwd.height + self._CBT._cylinder_aft.height + self._EB.height)
-            temp = self.engine_mass * self.engine_number * hengine  + self.mass_engine_structure() * hthrust   + hEB* self._EB.mass + self._CBT._cylinder_aft.mass * ht1 *1.05 + self._CBT._cylinder_fwd.mass * ht2*1.08 + self._ITS.mass * hITS
+            temp = self.engine_mass * self.engine_number * hengine  + self.mass_engine_structure * hthrust   + hEB* self._EB.mass + self._CBT._cylinder_aft.mass * ht1 *1.05 + self._CBT._cylinder_fwd.mass * ht2*1.08 + self._ITS.mass * hITS
             cg = temp / (hengine + hthrust + hEB + ht1 + ht2 + hITS)
             return cg
         else: 
