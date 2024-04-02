@@ -38,7 +38,7 @@ class CBT:
   @property
   def mass(self)-> float:
       return (self._dome_fwd.mass + self._dome_aft.mass + self._dome_mid.mass  +
-               self._cylinder_aft.mass + self._cylinder_fwd.mass + self._cylinder_aft.insulation + self._cylinder_fwd.insulation)*Km
+               self._cylinder_aft.mass + self._cylinder_fwd.mass + self._cylinder_aft.insulation + self._cylinder_fwd.insulation +  1.123 * 4 *np.pi * self.outer_radius**2)*Km
 
   @property
   def height(self) -> float:

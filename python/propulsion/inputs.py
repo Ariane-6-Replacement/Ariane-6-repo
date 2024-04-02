@@ -32,7 +32,7 @@ class Prometheus:
         self.turbopump_overall_power = 10e6  # MW
         self.diameter_truss_structure = 3.35
         self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
-
+        self.cost = 1000000
     def get_Isp(self, of_ratio):
         """"
         Lower O/F can mean less mass because LOX is heavy. Nominal: Isp = 360 for 100bar and O/F=3.5
@@ -49,6 +49,30 @@ class Vinci:  # TODO add specs
     def __init__(self):
         pass
 
+class Merlin1D:
+    def __init__(self):
+
+        self.name = "Merlin1D"
+        self.Thrust = 845e3
+        self.cost = 1e6
+        self.mass_sea = 470
+        self.exit_diameter = 1.1  # m
+        self.exit_area = math.pi * self.exit_diameter ** 2 / 4
+        self.OF_ratio = 2.36
+        self.p_exit = 40000  # pa
+        self.turbopump_overall_power = 10e6  # MW
+        self.diameter_truss_structure = 3.35
+        self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
+        self.cost = 1000000
+    def get_Isp(self, of_ratio):
+        """"
+        Lower O/F can mean less mass because LOX is heavy. Nominal: Isp = 360 for 100bar and O/F=3.5
+        assume Isp goes down with 10 for every 0.1 OF. chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
+        """
+
+        self.Isp = 282 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
+        #self.Isp = self.Isp - abs(2.34 - of_ratio) * 100
+        return self.Isp
 
 class Propellant:
     def __init__(self,t_ox,t_fuel,p_ox,p_fuel):
