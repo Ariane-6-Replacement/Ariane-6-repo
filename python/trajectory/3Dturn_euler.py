@@ -5,7 +5,7 @@ g_0 = 9.81 # [m / s^2]
 R_earth = 6_371e3 # [m]
 mu_earth = 3.986_004_418e14 # [m^3 / s^-2]
 
-simulation_timestep = 10 # seconds
+simulation_timestep = 0.01# seconds
 simulation_time = 900 # seconds
 
 class Trajectory():
@@ -93,11 +93,11 @@ class Trajectory():
         self.number_of_engines_ascent = number_of_engines_ascent
         self.number_of_engines_landing = number_of_engines_landing
         self.number_of_engines_reentry = number_of_engines_reentry
-        
+       
         self.thrust = thrust
         self.I_sp_1 = I_sp_1
         self.I_sp_2 = I_sp_2
-
+        self.iniate_landing_burn = False 
         self.mass_flowrate = self.thrust / (g_0 * self.I_sp_1)
 
         self.kick_angle = kick_angle
@@ -123,7 +123,7 @@ class Trajectory():
         self.m_second_stage = self.m_second_stage_structural + self.m_second_stage_propellant + self.m_second_stage_payload
         
         self.m_total = self.m_first_stage + self.m_second_stage
-        
+        self.mass = self.m_total
         self.delta_V_first_stage = self.I_sp_1 * g_0 * np.log(self.m_total / (self.m_total - self.m_first_stage_propellant))
         self.delta_V_second_stage = self.I_sp_2 * g_0 * np.log(self.m_second_stage / (self.m_second_stage - self.m_second_stage_propellant))
         
@@ -182,7 +182,19 @@ class Trajectory():
         drag_force = self.get_drag(rho, self.velocity_x, self.velocity_z, self.area, Cd)
         gamma = self.get_gamma(self.velocity_z, self.velocity_x)
 
-        landing = not before_apogee and self.pos_z < self.landing_burn_alt
+
+        
+        impact_time = (np.sqrt(2*g_0*self.pos_z + self.velocity_z**2)+self.velocity_z)/g_0
+        land_accel = self.number_of_engines_landing*self.thrust/(self.m_first_stage_structural + self.m_prop_landing)
+        deccel_time = -self.velocity_z/(land_accel-g_0)
+        
+        
+        if deccel_time - 5.3 > impact_time and self.pos_z<10e3 and not before_apogee and not self.iniate_landing_burn :
+             self.iniate_landing_burn  = True
+             print( " deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
+            
+
+        landing = not before_apogee and self.iniate_landing_burn 
         reentering = not before_apogee and self.pos_z < self.reentry_burn_alt
 
         if landing:
@@ -210,24 +222,24 @@ class Trajectory():
         if in_gravity_turn and t <= self.kick_time + self.gamma_change_time:
             gamma = self.kick_angle
 
-        mass = self.m_total
+       
         total_thrust = 0
 
         if ascending:
-            mass = self.m_total - ascent_fuel_burned
+            self.mass = self.m_total - ascent_fuel_burned
             total_thrust = self.number_of_engines_ascent * self.thrust
         elif landing and landing_fuel_available:
-            mass = self.m_first_stage_structural + self.m_prop_landing - landing_fuel_burned
+            self.mass = self.m_first_stage_structural + self.m_prop_landing - landing_fuel_burned
             total_thrust = -self.number_of_engines_landing * self.thrust
         elif reentering and reentry_fuel_available:
-            mass = self.m_first_stage_structural + self.m_prop_landing + self.m_prop_reentry - reentry_fuel_burned
+            self.mass = self.m_first_stage_structural + self.m_prop_landing + self.m_prop_reentry - reentry_fuel_burned
             total_thrust = -self.number_of_engines_reentry * self.thrust
 
-        self.thrust_x = np.cos(gamma) * total_thrust / mass
-        self.thrust_z = np.sin(gamma) * total_thrust / mass
+        self.thrust_x = np.cos(gamma) * total_thrust / self.mass
+        self.thrust_z = np.sin(gamma) * total_thrust / self.mass
 
-        drag_x = -np.cos(gamma) * drag_force / mass
-        drag_z = -np.sin(gamma) * drag_force / mass
+        drag_x = -np.cos(gamma) * drag_force / self.mass
+        drag_z = -np.sin(gamma) * drag_force / self.mass
 
         self.accel_x = self.thrust_x + drag_x
         self.accel_z = self.get_g(self.pos_z) + self.thrust_z + drag_z
@@ -251,7 +263,7 @@ class Trajectory():
         self.rhos = np.append(self.rhos, rho)
         self.drags = np.append(self.drags, drag_force)
         self.gammas = np.append(self.gammas, np.rad2deg(gamma))
-        self.masses = np.append(self.masses, mass)
+        self.masses = np.append(self.masses, self.mass)
         self.speeds = np.append(self.speeds, speed)
 
         if self.pos_x > self.max_barge_distance:
@@ -278,8 +290,10 @@ class Trajectory():
                 # print("AP over")
                 return False
                 
-        
+        if self.velocity_z>-5 and self.pos_z<10e3 and not before_apogee:
+            return True
         self.counter += 1
+
         return True
 
     def run(self):
