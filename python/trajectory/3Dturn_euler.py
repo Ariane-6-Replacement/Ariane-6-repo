@@ -146,13 +146,13 @@ class Trajectory():
         self.accel_x = 0
         self.accel_z = 0
 
-        print("First Stage Delta V:", self.delta_V_first_stage / 1e3, "km / s")
-        print("Second Stage Delta V:", self.delta_V_second_stage / 1e3, "km / s")
-        print("Total Delta V:", (self.delta_V_first_stage + self.delta_V_second_stage) / 1e3, "km / s")
-        print("Burntime:", self.burntime, "s")
-        print("Propellant available for ascent:", self.m_first_stage_propellant / 1e3, "t")
-        print("Propellant available for re-entry:", self.m_prop_reentry / 1e3, "t")
-        print("Propellant available for landing:", self.m_prop_landing / 1e3, "t")
+        # print("First Stage Delta V:", self.delta_V_first_stage / 1e3, "km / s")
+        # print("Second Stage Delta V:", self.delta_V_second_stage / 1e3, "km / s")
+        # print("Total Delta V:", (self.delta_V_first_stage + self.delta_V_second_stage) / 1e3, "km / s")
+        # print("Burntime:", self.burntime, "s")
+        # print("Propellant available for ascent:", self.m_first_stage_propellant / 1e3, "t")
+        # print("Propellant available for re-entry:", self.m_prop_reentry / 1e3, "t")
+        # print("Propellant available for landing:", self.m_prop_landing / 1e3, "t")
 
         self.pos_xs = np.array([])
         self.pos_zs = np.array([])
@@ -437,14 +437,14 @@ elif trajectory == "ElysiumOptimize":
     print("Running Elysium Optimize...")
     elysium_optimal = Trajectory()
     for N_engines_ascent in [9, 11]:
-        for first_stage_mass in range(300e3, 700e3, 10e3):
-            for kick_angle in range(45, 85, 1):
-                for second_stage_propellant in range(30e3, 90e3, 10e3):
-                    for turn_altitude in range(10, 10_000, 1000):
+        for first_stage_mass in np.arange(300e3, 700e3, 10e3):
+            for kick_angle in np.arange(45, 85, 1):
+                for second_stage_propellant in np.arange(30e3, 90e3, 10e3):
+                    for turn_altitude in np.arange(10, 10_000, 1000):
                         for N_engines_landing in [3, 1]:
-                            for delta_V_landing in range(200, 1000, 100):
-                                for delta_V_reentry in range(1000, 2000, 200):
-                                    for landing_burn_alt in range(100, 5000, 100):
+                            for delta_V_landing in np.arange(200, 1000, 100):
+                                for delta_V_reentry in np.arange(1000, 2000, 200):
+                                    for landing_burn_alt in np.arange(100, 5000, 100):
                                         elysium_optimal.setup(
                                             number_of_engines_ascent=N_engines_ascent,
                                             number_of_engines_landing=N_engines_landing,
