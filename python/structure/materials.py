@@ -46,5 +46,17 @@ materials = {
         'youngs_modulus': 69E9,
         'shear_modulus': 26E9,
         'poisson_ratio': 0.33
+    },
+    '7075': {
+        'name': '7075-T6',
+        'type': 'metal',
+        'yield_stress': 490E6, 
+        'shear_stress': 350E6,
+        'bearing_stress': 0,
+        'density': 2810,
+        'thermal_expansion_coeff': 22.0,
+        'youngs_modulus': 71.7E9,
+        'shear_modulus': 26.9E9,
+        'poisson_ratio': 0.33
     }
 }
