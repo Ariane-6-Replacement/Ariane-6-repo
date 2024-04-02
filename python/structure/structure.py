@@ -62,6 +62,7 @@ class Structure():
     @property
     def mass_total(self)-> float:
         if self.type == 'shared':
+            print(f'CBT {self._CBT._cylinder_aft.height} {self._CBT._cylinder_fwd.height}; Radius: {self.outer_radius}; Mass: {self._CBT.mass_f}  {self._CBT.mass_ox}; Volume {self._CBT.volume_f}, {self._CBT.volume_ox}')
             return self._CBT.mass + self._EB.mass + self._ITS.mass
         else: 
             return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
@@ -69,12 +70,13 @@ class Structure():
     @property
     def height_total(self) -> float:
         if self.type == 'shared':
-            return self._CBT.height + self._ITS_fwd.height +  self._EB.height 
+            return self._CBT.height + self._ITS.height +  self._EB.height 
         else:
             return self._tank_fwd.cylinder.height + self._tank_aft.cylinder.height + self._ITS_fwd.height +  self._ITS_aft.height + self._EB.height 
-
+    
     @property
     def cg(self)->float:
+        print(f'height_total {self.height_total}')
         hengine =(0.6 * self._EB.height - 1.2)
         hthrust = (0.6 * self._EB.height - 0.2)
         hEB = self._EB.height * 0.5 
