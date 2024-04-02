@@ -5,7 +5,7 @@ g_0 = 9.81 # [m / s^2]
 R_earth = 6_371e3 # [m]
 mu_earth = 3.986_004_418e14 # [m^3 / s^-2]
 
-simulation_timestep = 0.01 # seconds
+simulation_timestep = 10 # seconds
 simulation_time = 900 # seconds
 
 class Trajectory():
@@ -255,12 +255,13 @@ class Trajectory():
         self.speeds = np.append(self.speeds, speed)
 
         if self.pos_x > self.max_barge_distance:
+            # print("barge overshot")
             return False
 
-        below_ground = self.pos_z < 0
+        # below_ground = self.pos_z < 0
 
-        if below_ground:
-            return False
+        # if below_ground:
+        #     return False
     
         # Previous position was apogee
         if not before_apogee and not self.apogee_check:
@@ -271,9 +272,12 @@ class Trajectory():
             apogee_speed = self.get_speed(apogee_velocity_x, apogee_velocity_z)
             required_delta_V = self.get_required_second_stage_delta_V(apogee_z, apogee_speed)
             if required_delta_V > self.delta_V_second_stage:
+                # print("DeltaV")
                 return False
             if apogee_z > self.max_apogee:
+                # print("AP over")
                 return False
+                
         
         self.counter += 1
         return True
@@ -301,15 +305,16 @@ class Trajectory():
             success = self.iterate(t, dt)
             if not success:
                 return False
+                pass
 
         # print("Finished")
 
         #apogee_index = np.argmax(self.pos_zs)
 
-        landing_velocity = self.velocity_zs[-1]
+        # landing_velocity = self.velocity_zs[-1]
 
-        if abs(landing_velocity) > 5:
-            return False
+        # if abs(landing_velocity) > 5:
+            # return False
         
         return True
 
@@ -437,48 +442,44 @@ elif trajectory == "ElysiumOptimize":
     print("Running Elysium Optimize...")
     elysium_optimal = Trajectory()
     for N_engines_ascent in [9, 11]:
-        for first_stage_mass in np.arange(300e3, 700e3, 10e3):
+        # print("engines")
+        for first_stage_mass in np.arange(400e3,700e3, 10e3):
+            # print("M1")
             for kick_angle in np.arange(45, 85, 1):
+                # print("kick_angle")
                 for second_stage_propellant in np.arange(30e3, 90e3, 10e3):
-                    for turn_altitude in np.arange(10, 10_000, 1000):
-                        for N_engines_landing in [3, 1]:
-                            for delta_V_landing in np.arange(200, 1000, 100):
-                                for delta_V_reentry in np.arange(1000, 2000, 200):
-                                    for landing_burn_alt in np.arange(100, 5000, 100):
-                                        elysium_optimal.setup(
-                                            number_of_engines_ascent=N_engines_ascent,
-                                            number_of_engines_landing=N_engines_landing,
-                                            number_of_engines_reentry=3,
-                                            thrust=1_000_000, # newtons
-                                            I_sp_1=306, # seconds
-                                            I_sp_2=457, # seconds
-                                            kick_angle=np.radians(kick_angle), # radians
-                                            gamma_change_time=10, # seconds
-                                            m_first_stage_total=first_stage_mass,
-                                            m_first_stage_structural_frac=0.0578,
-                                            m_second_stage_structural=9.272e3, # kg
-                                            m_second_stage_propellant=second_stage_propellant, # kg
-                                            m_second_stage_payload=11.5e3, # kg
-                                            delta_V_landing=delta_V_landing, # m / s
-                                            delta_V_reentry=delta_V_reentry, # m / s
-                                            Cd_ascent=0.3,
-                                            Cd_descent=1.0,
-                                            diameter=5.4, # meters
-                                            reentry_burn_alt=55_000, # meters
-                                            landing_burn_alt=landing_burn_alt, # meters
-                                            gravity_turn_alt=turn_altitude # meters
-                                        )
-                                        success = elysium_optimal.run()
-                                        if success:
-                                            print("number_of_engines_ascent:", N_engines_ascent,
-                                                  ", m_first_stage_total:",first_stage_mass,
-                                                  ", kick_angle:", kick_angle,
-                                                  ", m_second_stage_propellant:", second_stage_propellant,
-                                                  ", gravity_turn_alt:", turn_altitude,
-                                                  ", number_of_engines_landing:", N_engines_landing,
-                                                  ", delta_V_landing:", delta_V_landing,
-                                                  ", delta_V_reentry:", delta_V_reentry,
-                                                  ", landing_burn_alt:", landing_burn_alt)
+                    # print("secondstage")
+
+                    elysium_optimal.setup(
+                        
+                        number_of_engines_ascent=N_engines_ascent,
+                        number_of_engines_landing=3,
+                        number_of_engines_reentry=3,
+                        thrust=1_000_000, # newtons
+                        I_sp_1=306, # seconds
+                        I_sp_2=457, # seconds
+                        kick_angle=np.radians(kick_angle), # radians
+                        gamma_change_time=10, # seconds
+                        m_first_stage_total=first_stage_mass,
+                        m_first_stage_structural_frac=0.0578,
+                        m_second_stage_structural=9.272e3, # kg
+                        m_second_stage_propellant=second_stage_propellant, # kg
+                        m_second_stage_payload=11.5e3, # kg
+                        delta_V_landing=500, # m / s
+                        delta_V_reentry=1500, # m / s
+                        Cd_ascent=0.3,
+                        Cd_descent=1.0,
+                        diameter=5.4, # meters
+                        reentry_burn_alt=55_000, # meters
+                        landing_burn_alt=5e3, # meters
+                        gravity_turn_alt=10e3# meters
+                    )
+                    success = elysium_optimal.run()
+                    if success:
+                        print("number_of_engines_ascent:", N_engines_ascent,
+                                ", m_first_stage_total:",first_stage_mass,
+                                ", kick_angle:", kick_angle,
+                                ", m_second_stage_propellant:", second_stage_propellant)
 
 elif trajectory == "Falcon 9":
     print("running Falcon9")
