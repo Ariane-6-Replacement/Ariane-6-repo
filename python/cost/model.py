@@ -36,7 +36,7 @@ class MassCalculator:
         assert dV_split.size == inert_mass_fractions.size, "Please provide arrays with equal lengths"
         assert dV_split.size == I_sp.size, "Please provide arrays with equal lengths"
 
-        wet_masses = np.array([])
+        wet_masses = np.zeros(len(dV_split))
         stages = dV_split.size
 
         # for i in np.flip(np.array(range(stages))):
