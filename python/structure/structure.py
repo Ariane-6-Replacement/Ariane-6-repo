@@ -101,7 +101,7 @@ class Structure():
     @property
     def mass_landing_gear(self):
         lgmass = LG(self.outer_radius, self.mass_total, self.cg,).mass_gear
-        print(f"landing gear mass: {lgmass:.0f} kg")
+        #print(f"landing gear mass: {lgmass:.0f} kg")
 
         return lgmass
     

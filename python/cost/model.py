@@ -31,12 +31,15 @@ class MassCalculator:
 
     # Returns wet masses of each stage (starting with first stage) in tonnes.
     @staticmethod
-    def get_wet_masses(dV, dV_frac, inert_mass_fractions, I_sp, m_payload):
-        dV_split = np.array([dV * dV_frac, (1 - dV_frac) * dV])
-        assert dV_split.size == inert_mass_fractions.size, "Please provide arrays with equal lengths"
-        assert dV_split.size == I_sp.size, "Please provide arrays with equal lengths"
+    def get_wet_masses(dV1, dV2, inert_mass_fractions, Isp, m_payload, reflights):
 
-        wet_masses = np.zeros(len(dV_split))
+        
+        dV_split = np.array([dV2, dV1])
+        print(dV_split)
+        assert dV_split.size == inert_mass_fractions.size, "Please provide arrays with equal lengths"
+        assert dV_split.size == Isp.size, "Please provide arrays with equal lengths"
+
+        wet_masses = np.array([m_payload,0,0])
         stages = dV_split.size
 
         # for i in np.flip(np.array(range(stages))):
@@ -46,13 +49,13 @@ class MassCalculator:
         #    wet_masses = np.append(wet_masses, wet_mass_i)
 
        # wet_masses = np.zeros(len(dV_split))
-        for i in range(len(dV_split)):
-            Vi = I_sp[i]*9.81
-            Ri = np.exp(dV_split[i]/Vi)
-            wet_masses[i] = (m_payload + wet_masses[i-1]) * (Ri-1) / (1-Ri*inert_mass_fractions[i])
+        for i in range(1,len(wet_masses)):
+            Vi = Isp[i-1]*9.81
+            Ri = np.exp(dV_split[i-1]/Vi)
+            wet_masses[i] = np.sum(wet_masses[0:i]) * (Ri-1) / (1-Ri*inert_mass_fractions[i-1])
 
-
-        return wet_masses
+        wet_masses2 = np.array([np.sum(wet_masses[0:2]), wet_masses[2]])
+        return wet_masses2
     @staticmethod
     def get_propellant_masses(wet_masses, inert_mass_fractions):
         assert wet_masses.size == inert_mass_fractions.size, "Please provide arrays with equal lengths"
