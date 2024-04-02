@@ -14,7 +14,7 @@ class Trajectory():
 
     # Taken from https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html
     def get_density(self, h):
-        if h < 11_000:
+        if h < 11_000:  
             T = 15.04 - 0.00649 * h
             p = 101.29 * ((T + 273.1) / 288.08) ** 5.256
         elif h < 25_000:
@@ -83,8 +83,8 @@ class Trajectory():
               I_sp_2,
               kick_angle,
               gamma_change_time,
-              m_first_stage_structural,
-              m_first_stage_propellant,
+              m_first_stage_total,
+              m_first_stage_structural_frac,
               m_second_stage_structural,
               m_second_stage_propellant,
               m_second_stage_payload,
@@ -107,19 +107,26 @@ class Trajectory():
         self.mass_flowrate = self.thrust / (g_0 * self.I_sp_1)
         self.kick_angle = kick_angle
         self.gamma_change_time = gamma_change_time
+
+        self.m_first_stage_structural= m_first_stage_total * m_first_stage_structural_frac # kg
+        self.m_prop_landing = self.get_propellant(self.I_sp_1, delta_V_landing, 0)
+        self.m_prop_reentry = self.get_propellant(self.I_sp_1, delta_V_reentry, self.m_prop_landing)
         
-        self.m_first_stage_structural = m_first_stage_structural
-        self.m_first_stage_propellant = m_first_stage_propellant
+
+        
+        self.m_first_stage_propellant= m_first_stage_total-self.m_first_stage_structural-self.m_prop_landing-self.m_prop_reentry# kg
         self.m_second_stage_structural = m_second_stage_structural
         self.m_second_stage_propellant = m_second_stage_propellant
+        print("first stage prop:" ,self.m_first_stage_propellant)
         self.m_second_stage_payload = m_second_stage_payload
-        self.burntime = m_first_stage_propellant / (self.mass_flowrate * self.number_of_engines_ascent)
+        self.burntime = self.m_first_stage_propellant / (self.mass_flowrate * self.number_of_engines_ascent)
+
+ 
         
         self.m_second_stage = self.m_second_stage_structural + self.m_second_stage_propellant + self.m_second_stage_payload
         self.m_first_stage = self.m_first_stage_propellant + self.m_first_stage_structural
         
-        self.m_prop_landing = self.get_propellant(self.I_sp_1, delta_V_landing, 0)
-        self.m_prop_reentry = self.get_propellant(self.I_sp_1, delta_V_reentry, self.m_prop_landing)
+       
         
         self.mass = self.m_first_stage + self.m_second_stage + self.m_prop_landing + self.m_prop_reentry
         
@@ -275,7 +282,7 @@ class Trajectory():
         self.masses = np.append(self.masses, self.mass)
         self.speeds = np.append(self.speeds, speed)
 
-        if self.pos_z < 0 or not ascending and abs(self.velocity_z) < 0.1:
+        if self.pos_z < 0: #and not ascending and abs(self.velocity_z) < 0.1
             return False
         return True
 
@@ -380,6 +387,8 @@ class Trajectory():
         axs[0, 4].set_title('Z pos vs X pos')
 
         axs[1, 4].plot(times, self.speeds / 1000)
+        ax2 = axs[1, 4].twinx()
+        ax2.plot(times, self.pos_zs / 1000, color= "purple")
         axs[1, 4].set_xlabel('Time (s)')
         axs[1, 4].set_ylabel('Speed (km/s)')
         axs[1, 4].set_title('Speed vs Time')
@@ -392,30 +401,55 @@ class Trajectory():
         plt.tight_layout()
         plt.show()
 
-elysium_trajectory = Trajectory()
+trajectory = Trajectory()
 
-elysium_trajectory.setup(
-    number_of_engines_ascent=9,
+# trajectory.setup(
+#     number_of_engines_ascent=9,
+#     number_of_engines_landing=1,
+#     number_of_engines_reentry=3,
+#     thrust=1_000_000, # newtons
+#     I_sp_1=306, # seconds
+#     I_sp_2=457, # seconds
+#     kick_angle=np.radians(45), # radians
+#     gamma_change_time=10, # seconds
+#     m_first_stage_total = 390e3,
+#     m_first_stage_structural_frac= 0.0578,
+#     m_second_stage_structural=9.272e3, # kg
+#     m_second_stage_propellant=75e3, # kg
+#     m_second_stage_payload=11.5e3, # kg
+#     delta_V_landing=200, # m / s
+#     delta_V_reentry=1_300, # m / s
+#     Cd_ascent=0.3,
+#     Cd_descent=1.0,
+#     diameter=5.4, # meters
+#     reentry_burn_alt=55_000, # meters
+#     landing_burn_alt=1_000, # meters
+#     gravity_turn_alt=10_000 # meters
+# )
+
+
+trajectory.setup(
+    number_of_engines_ascent=9*1,
     number_of_engines_landing=1,
     number_of_engines_reentry=3,
-    thrust=1_000_000, # newtons
-    I_sp_1=306, # seconds
-    I_sp_2=457, # seconds
-    kick_angle=np.radians(45), # radians
-    gamma_change_time=10, # seconds
-    m_first_stage_structural=40e3, # kg
-    m_first_stage_propellant=650e3, # kg
-    m_second_stage_structural=9.272e3, # kg
-    m_second_stage_propellant=40e3, # kg
-    m_second_stage_payload=11.5e3, # kg
+    thrust=800_000, # newtons
+    I_sp_1=283, # seconds
+    I_sp_2=348, # seconds
+    kick_angle=np.radians(71), # radians
+    gamma_change_time=7.5, # seconds
+    m_first_stage_total = 421e3,
+    m_first_stage_structural_frac= 0.0578,
+    m_second_stage_structural=3.9e3, # kg
+    m_second_stage_propellant=92e3, # kg
+    m_second_stage_payload=4.8e3, # kg
     delta_V_landing=200, # m / s
     delta_V_reentry=1_300, # m / s
     Cd_ascent=0.3,
     Cd_descent=1.0,
-    diameter=5.4, # meters
+    diameter=3.7, # meters
     reentry_burn_alt=55_000, # meters
     landing_burn_alt=1_000, # meters
-    gravity_turn_alt=10_000 # meters
+    gravity_turn_alt=1.5e3 # meters
 )
 
-elysium_trajectory.run()
+trajectory.run()
