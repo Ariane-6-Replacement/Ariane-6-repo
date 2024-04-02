@@ -97,6 +97,8 @@ class Trajectory():
               landing_burn_alt,
               gravity_turn_alt):
         
+
+        self.printflag = 0
         self.number_of_engines_ascent = number_of_engines_ascent
         self.number_of_engines_landing = number_of_engines_landing
         self.number_of_engines_reentry = number_of_engines_reentry
@@ -178,7 +180,9 @@ class Trajectory():
         self.masses = np.array([])
         self.speeds = np.array([])
 
+    
     def iterate(self, t, dt):
+       
         rho = self.get_density(self.pos_z)
 
         ascending = self.velocity_z >= 0
@@ -210,6 +214,7 @@ class Trajectory():
                 number_of_engines = self.number_of_engines_landing
                 if self.landing_burn_start_time == 0:
                     self.landing_burn_start_time = t
+                    
             elif self.pos_z < self.reentry_burn_alt:
                 number_of_engines = self.number_of_engines_reentry
                 if self.reentry_burn_start_time == 0:
@@ -219,14 +224,21 @@ class Trajectory():
 
 
         
-        suicide_burn_time = (np.sqrt(2*g_0*self.pos_z + self.velocity_z**2)+self.velocity_z)/g_0
-        land_accel = self.number_of_engines_landing*self.thrust/(self.mass*0.65)
-        deccel_time = self.velocity_z/(land_accel-g_0)
+        impact_time = (np.sqrt(2*g_0*self.pos_z + self.velocity_z**2)+self.velocity_z)/g_0
+        land_accel = self.number_of_engines_landing*self.thrust/(self.mass)
+        deccel_time = -self.velocity_z/(land_accel-g_0)
         iniate_landing_burn = False 
-        if deccel_time <suicide_burn_time + 5:
+        
+        if deccel_time > impact_time and self.pos_z<10e3 and not ascending:
              iniate_landing_burn = True
+             
+             if self.printflag == 0:
+                print( " deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
+                self.printflag = 1
              if self.landing_burn_start_time == 0:
                     self.landing_burn_start_time = t
+                    
+                    
 
         if t < self.burntime:
             m_first_stage_propellant_burned = number_of_engines * self.mass_flowrate * t
@@ -240,17 +252,20 @@ class Trajectory():
             landing = self.pos_z < self.landing_burn_alt
             
             if iniate_landing_burn:
-                burn_time_so_far = t - self.landing_burn_start_time
-                if burn_time_so_far < 1:
-                    print("landing alt:", self.pos_z)
+                # print("Burning at :", self.pos_z)
+                burn_time_so_far = t - self.landing_burn_start_time-22
+                #print(burn_time_so_far)
+                # if burn_time_so_far < 1:
+                #     # print("landing alt:", self.pos_z)
                 fuel_burned = number_of_engines * self.mass_flowrate * burn_time_so_far
                 fuel_burned = np.clip(fuel_burned, 0, self.m_prop_landing)
 
                 self.mass = self.m_first_stage_structural + self.m_prop_landing - fuel_burned
 
                 propellant_available = fuel_burned < self.m_prop_landing
-
                 if propellant_available:
+                    
+                    # print("landing burn at ", self.velocity_z, "at alt", self.pos_z)
                     self.thrust_x = -np.cos(gamma) * total_thrust / self.mass
                     self.thrust_z = -np.sin(gamma) * total_thrust / self.mass
                     
@@ -432,19 +447,19 @@ if trajectory == "Elysium":
         I_sp_2=457, # seconds
         kick_angle=np.radians(45), # radians
         gamma_change_time=10, # seconds
-        m_first_stage_total = 700e3,
+        m_first_stage_total = 500e3,
         m_first_stage_structural_frac= 0.0578,
         m_second_stage_structural=9.272e3, # kg
         m_second_stage_propellant=85e3, # kg
         m_second_stage_payload=11.5e3, # kg
-        delta_V_landing=2500, # m / s
+        delta_V_landing=500, # m / s
         delta_V_reentry=1_500, # m / s
         Cd_ascent=0.3,
         Cd_descent=1.0,
         diameter=5.4, # meters  
         reentry_burn_alt=55_000, # meters
         landing_burn_alt=5000, # meters
-        gravity_turn_alt=10_000 # meters
+        gravity_turn_alt=10_000, # meters
     )
     elysium_trajectory.run()
 elif trajectory == "Falcon 9":
