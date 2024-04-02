@@ -1,7 +1,7 @@
 import numpy as np
 
 thrust = 1_000_000 # newtons
-burntime = 140.3 # s
+burntime = 100 # s
 # First stage mass at beginning of ascent
 M0_1 = 700e3 # kg
 # Empty mass
