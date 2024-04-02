@@ -124,7 +124,7 @@ class Trajectory():
         
         self.m_total = self.m_first_stage + self.m_second_stage
         self.mass = self.m_total
-        self.delta_V_first_stage = self.I_sp_1 * g_0 * np.log(self.m_total / (self.m_total - self.m_first_stage_propellant))
+        self.delta_V_first_stage = self.I_sp_1 * g_0 * np.log(self.m_total / (self.m_total - self.m_first_stage_propellant ))
         self.delta_V_second_stage = self.I_sp_2 * g_0 * np.log(self.m_second_stage / (self.m_second_stage - self.m_second_stage_propellant))
         
         self.Cd_ascent = Cd_ascent
@@ -146,13 +146,16 @@ class Trajectory():
         self.accel_x = 0
         self.accel_z = 0
 
-        # print("First Stage Delta V:", self.delta_V_first_stage / 1e3, "km / s")
-        # print("Second Stage Delta V:", self.delta_V_second_stage / 1e3, "km / s")
-        # print("Total Delta V:", (self.delta_V_first_stage + self.delta_V_second_stage) / 1e3, "km / s")
-        # print("Burntime:", self.burntime, "s")
-        # print("Propellant available for ascent:", self.m_first_stage_propellant / 1e3, "t")
-        # print("Propellant available for re-entry:", self.m_prop_reentry / 1e3, "t")
-        # print("Propellant available for landing:", self.m_prop_landing / 1e3, "t")
+
+
+        print("First Stage Delta V:", self.delta_V_first_stage / 1e3, "km / s")
+        print("Second Stage Delta V:", self.delta_V_second_stage / 1e3, "km / s")
+        print("Total Delta V:", (self.delta_V_first_stage + self.delta_V_second_stage) / 1e3, "km / s")
+        print("Burntime:", self.burntime, "s")
+        print("Propellant available for ascent:", self.m_first_stage_propellant / 1e3, "t")
+        print("Propellant available for re-entry:", self.m_prop_reentry / 1e3, "t")
+        print("Propellant available for landing:", self.m_prop_landing / 1e3, "t")
+        print("TWR:", self.thrust*self.number_of_engines_ascent/(g_0*self.m_total))
 
         self.pos_xs = np.array([])
         self.pos_zs = np.array([])
@@ -283,6 +286,7 @@ class Trajectory():
             apogee_velocity_z = self.velocity_zs[self.counter]
             apogee_speed = self.get_speed(apogee_velocity_x, apogee_velocity_z)
             required_delta_V = self.get_required_second_stage_delta_V(apogee_z, apogee_speed)
+            print("Required Second Stage Delta V:", required_delta_V)
             if required_delta_V > self.delta_V_second_stage:
                 # print("DeltaV")
                 return False
@@ -332,7 +336,7 @@ class Trajectory():
         
         # return True
 
-        #print("Required Second Stage Delta V:", required_delta_V)
+       
 
         #print("Final Velocity Z:", self.velocity_zs[-1])
         #print("Final Z:", self.pos_zs[-1])
