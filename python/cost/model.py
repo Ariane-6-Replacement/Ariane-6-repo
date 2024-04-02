@@ -50,8 +50,8 @@ class MassCalculator:
             Vi = I_sp[i]*9.81
             Ri = np.exp(dV_split[i]/Vi)
             wet_masses[i] = (m_payload + wet_masses[i-1]) * (Ri-1) / (1-Ri*inert_mass_fractions[i])
-        # Convert to tonnes
-        #return np.flip(wet_masses / 1000)
+
+
         return wet_masses
     @staticmethod
     def get_propellant_masses(wet_masses, inert_mass_fractions):
