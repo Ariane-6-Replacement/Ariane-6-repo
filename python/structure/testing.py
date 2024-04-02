@@ -44,7 +44,7 @@ class Structure():
                 
             self._ITS_fwd = Shell(self.outer_radius,self.material3,2+self._tank_fwd.dome_fwd.height,self.thrust)
             self._ITS_aft = Shell(self.outer_radius,self.material3,1+self._tank_aft.dome_fwd.height+self._tank_fwd.dome_aft.height,self.thrust)
-            self._EB = Shell(self.outer_radius,self.material3,2+self._tank_aft.dome_aft.height,self.thrust)
+            self._EB = Shell(self.outer_radius,self.material3,3+self._tank_aft.dome_aft.height,self.thrust)
         
         
         elif type == 'shared':
@@ -56,7 +56,7 @@ class Structure():
           
     @property
     def mass_engine_structure(self):
-        return 4000
+        return 0
     
     @property
     def mass_total(self)-> float:
@@ -68,7 +68,7 @@ class Structure():
     @property
     def height_total(self) -> float:
         if self.type == 'shared':
-            return self._CBT.height + self._ITS_fwd.height +  self._EB.height 
+            return self._CBT.height + self._ITS.height +  self._EB.height 
         else:
             return self._tank_fwd.cylinder.height + self._tank_aft.cylinder.height + self._ITS_fwd.height +  self._ITS_aft.height + self._EB.height 
 
@@ -82,18 +82,25 @@ class Structure():
             ht1 = ( 0.5 * self._CBT._cylinder_aft.height + self._EB.height)
             ht2 = (0.5 * self._CBT._cylinder_fwd.height + self._CBT._cylinder_aft.height + self._EB.height)
             hITS = (0.5 * self._ITS.height + self._CBT._cylinder_fwd.height + self._CBT._cylinder_aft.height + self._EB.height)
-            temp = self.engine_mass * self.engine_number * hengine  + self.mass_engine_structure() * hthrust   + hEB* self._EB.mass + self._CBT._cylinder_aft.mass * ht1 *1.05 + self._CBT._cylinder_fwd.mass * ht2*1.08 + self._ITS.mass * hITS
-            cg = temp / (hengine + hthrust + hEB + ht1 + ht2 + hITS)
+            e1 = self._CBT._dome_aft.mass * (self._EB.height - 0.67 * self._CBT._dome_aft.height) + (self._EB.height + self._CBT._cylinder_aft.height - 0.67 * self._CBT._dome_aft.height) * self._CBT._dome_mid.mass  + (self._EB.height + self._CBT._cylinder_aft.height + self._CBT._cylinder_fwd.height+ 0.23 * self._CBT._dome_aft.height) * self._CBT._dome_fwd.mass
+            temp = self.engine_mass * self.engine_number * hengine  + self.mass_engine_structure * hthrust   + hEB* self._EB.mass + self._CBT._cylinder_aft.mass * ht1  + self._CBT._cylinder_fwd.mass * ht2*1.08 + self._ITS.mass * hITS + e1
+            cg = temp / (self.engine_mass*self.engine_number + self.mass_engine_structure + self.mass_total)
             return cg
-        else: 
-            ht1 = (0.5 * self._CBT._cylinder_aft.height + self._EB.height)
-            hITS1 = (0.5 * self._ITS_aft.height + self._CBT._cylinder_aft.height + self._EB.height)
-            ht2= (0.5 * self._CBT._cylinder_fwd.height + self._ITS_aft.height + self._CBT._cylinder_aft.height + self._EB.height) 
-            hITS2 = ( 0.5 * self._ITS_fwd.height + self._CBT._cylinder_fwd.height + self._ITS_aft.height + self._CBT._cylinder_aft.height + self._EB.height)
-            temp = self.engine_mass * self.engine_number * hengine + self.mass_engine_structure() * hthrust  +  self._EB.mass * hEB  + self._tank_aft.cylinder.mass * ht1* 1.08 + self._ITS_aft.mass * hITS1 +  self._tank_fwd.cylinder.mass * 1.08 * ht2 + self._ITS_fwd.mass * hITS2
+        elif self.type == 'separate': 
+            ht1 = (0.5 * self._tank_aft._cylinder.height + self._EB.height)
+            hITS1 = (0.5 * self._ITS_aft.height + self._tank_aft._cylinder.height + self._EB.height)
+            ht2= (0.5 * self._tank_fwd._cylinder.height + self._ITS_aft.height + self._tank_aft._cylinder.height + self._EB.height) 
+            hITS2 = ( 0.5 * self._ITS_fwd.height + self._tank_fwd._cylinder.height + self._ITS_aft.height + self._tank_aft._cylinder.height + self._EB.height)
+            e1 = self._tank_aft._dome_aft.mass * (self._EB.height - 0.67 * self._tank_aft._dome_aft.height) + (self._EB.height + self._tank_aft.cylinder.height + 0.23 * self._tank_aft._dome_aft.height) * self._tank_aft._dome_fwd.mass  + (self._EB.height + self._tank_aft._cylinder.height + self._ITS_aft.height - 0.67 * self._tank_aft._dome_aft.height) * self._tank_fwd._dome_aft.mass + (self._EB.height + self._tank_aft.cylinder.height + self._ITS_aft.height + self._tank_fwd.cylinder.height + 0.23 * self._tank_aft._dome_aft.height) * self._tank_fwd._dome_fwd.mass 
 
-            cg  = temp / (hengine + hthrust + hEB + ht1 + ht2 + hITS1 + hITS2)
+            temp = self.engine_mass * self.engine_number * hengine + self.mass_engine_structure * hthrust  +  self._EB.mass * hEB  + self._tank_aft.cylinder.mass * ht1* 1.08 + self._ITS_aft.mass * hITS1 +  self._tank_fwd.cylinder.mass * 1.08 * ht2 + self._ITS_fwd.mass * hITS2 + e1
+
+            cg  = temp / (self.engine_mass*self.engine_number + self.mass_engine_structure + self.mass_total)
             return cg
+        else:
+            raise ValueError
+        
+            
         
     @property
     def mass_landing_gear(self):
@@ -101,26 +108,36 @@ class Structure():
     
 if __name__ == "__main__":
     print("CALCULATING STRUCTURE")
-    # test = Structure(2.7,7E5,'2219',328, 440E3, 7E5, 273, 126E3, 20E6,'2195')
+    test = Structure(2.5,'2195',7E5,7E5,'2195','shared',140, 60E3, 180, 200E3, 1E6,1000,9)
     #Ariane 5
     # test = Structure(2.7,3E5,'2219',120, 130E3, 3E5, 390, 25E3, 20E6,'2219')
 
-    test =Structure(2.7,'2219',3E5,3E5,'2219', 'separate', 120,130E3,390, 25E3,14.1E6,1500,1)
+    # test =Structure(2.7,'2219',3E5,3E5,'2219', 'separate', 120,130E3,390, 25E3,14.1E6,1500,1)
     # test =Structure(2.7,'2219',3E5,3E5,'2219', 'separate', 120,130E3,390, 25E3,14.1E6,1500,1)
 
     print('DONE')
     print('#####################OUTPUT##############')
-    print('Mass:',test.mass_total+1200)
+    print(f'CG: {test.cg}')
+    print('Mass:',test.mass_total)
     print('Height: ', test.height_total)
-    print('#############TANK FWD####################')
-    print('Tank mass:', test._tank_fwd.mass,'height: ',test._tank_fwd.height)
-    print('Cylinder mass: ',test._tank_fwd.cylinder.mass,' heigh:',test._tank_fwd.cylinder.height,' thickenss:',test._tank_fwd.cylinder.thickness)
-    print('Dome mass aft: ',test._tank_fwd.dome_aft.mass,'heigh: ',test._tank_fwd.dome_aft.height,'thickness: ',test._tank_fwd.dome_aft.thickness)
-    print('ITS 1 height:',test._ITS_fwd.height,'mass: ',test._ITS_fwd.mass )
-    print('#############TANK AFT####################')
-    print('Tank mass:', test._tank_aft.mass,'height: ',test._tank_aft.height)
-    print('Cylinder mass: ',test._tank_aft.cylinder.mass,' heigh:',test._tank_aft.cylinder.height,' thickenss:',test._tank_aft.cylinder.thickness)
-    print('Dome mass aft: ',test._tank_aft.dome_aft.mass,'heigh: ',test._tank_aft.dome_aft.height,'thickness: ',test._tank_aft.dome_aft.thickness)
-    print('ITS 2 height:',test._ITS_aft.height,'mass: ',test._ITS_aft.mass )
+    # print('#############TANK FWD####################')
+    # print('Tank mass:', test._tank_fwd.mass,'height: ',test._tank_fwd.height)
+    # print('Cylinder mass: ',test._tank_fwd.cylinder.mass,' heigh:',test._tank_fwd.cylinder.height,' thickenss:',test._tank_fwd.cylinder.thickness)
+    # print('Dome mass aft: ',test._tank_fwd.dome_aft.mass,'heigh: ',test._tank_fwd.dome_aft.height,'thickness: ',test._tank_fwd.dome_aft.thickness)
+    # print('ITS 1 height:',test._ITS_fwd.height,'mass: ',test._ITS_fwd.mass )
+    # print('#############TANK AFT####################')
+    # print('Tank mass:', test._tank_aft.mass,'height: ',test._tank_aft.height)
+    # print('Cylinder mass: ',test._tank_aft.cylinder.mass,' heigh:',test._tank_aft.cylinder.height,' thickenss:',test._tank_aft.cylinder.thickness)
+    # print('Dome mass aft: ',test._tank_aft.dome_aft.mass,'heigh: ',test._tank_aft.dome_aft.height,'thickness: ',test._tank_aft.dome_aft.thickness)
+    # print('ITS 2 height:',test._ITS_aft.height,'mass: ',test._ITS_aft.mass )
     print('#############Engine Bay####################')
     print('EB height:',test._EB.height,'mass: ',test._EB.mass )
+    print(f'ITS {test._ITS.mass}')
+    print(f'CBT {test._CBT.mass}')
+
+
+    print(f'cylinder fwd {test._CBT._cylinder_fwd.mass}')
+    print(f'cylinder aft {test._CBT._cylinder_aft.mass}')
+    print(f'dome fwd {test._CBT._dome_fwd.mass}')
+    print(f'dome mid {test._CBT._dome_mid.mass}')
+    print(f'dome aft {test._CBT._dome_aft.mass}')

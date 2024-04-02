@@ -35,13 +35,11 @@ class MassCalculator:
 
         
         dV_split = np.array([dV2, dV1])
-        print(dV_split)
         assert dV_split.size == inert_mass_fractions.size, "Please provide arrays with equal lengths"
         assert dV_split.size == Isp.size, "Please provide arrays with equal lengths"
 
         wet_masses = np.array([m_payload,0,0])
-        stages = dV_split.size
-
+        print(f'dv:{dV_split}')
         # for i in np.flip(np.array(range(stages))):
             # dV_i = dV_split[i]
          #    f_i = inert_mass_fractions[i]
@@ -53,7 +51,6 @@ class MassCalculator:
             Vi = Isp[i-1]*9.81
             Ri = np.exp(dV_split[i-1]/Vi)
             wet_masses[i] = np.sum(wet_masses[0:i]) * (Ri-1) / (1-Ri*inert_mass_fractions[i-1])
-
         wet_masses2 = np.array([np.sum(wet_masses[0:2]), wet_masses[2]])
         return wet_masses2
     @staticmethod
@@ -110,6 +107,7 @@ class CostModel():
                                   rocket_fleet_count,
                                   engine_cost,
                                   engine_number,
+                                  rocket_reflights,
                                   learning_factor=1.00)
 
         self.operational.calculate(prop_masses,
@@ -122,7 +120,8 @@ class CostModel():
                                    rocket_reflights,
                                    engine_reflights,
                                    launch_site_capacity)
-
+        self.cost.production_euro = self.man_years_to_million_euro_2022(self.production.cost.total_unit)
+        self.cost.operational_euro = self.man_years_to_million_euro_2022(self.operational.cost.total) / self.total_flights
         # Man-years
         self.cost.total_lifetime = self.production.cost.total + \
                                      self.operational.cost.total
@@ -132,11 +131,10 @@ class CostModel():
 
         # Man-years
 
-        self.cost.per_launch = self.cost.total_lifetime / self.total_flights
+        #self.cost.per_launch = self.cost.total_lifetime / self.total_flights
 
         # Million euros
-        self.cost.per_launch_euros = self.man_years_to_million_euro_2022(self.cost.per_launch)
-
+        self.cost.per_launch_euros = self.cost.production_euro + self.cost.operational_euro
 
 
 class DevelopmentModel():
@@ -192,12 +190,14 @@ class ProductionModel():
                   rocket_fleet_count,
                   engine_cost,
                   number_engines,
+                  reflights,
                   learning_factor):
         # Man-years
-        self.cost.unit = 5.0 * rockets_per_stage * learning_factor * dry_masses ** 0.46
+        self.cost.core = 4 *(5.0 * learning_factor * dry_masses[1] ** 0.46 + number_engines * engine_cost) / (reflights + 1)
+        self.cost.upper = 4 * 5.0 * learning_factor * dry_masses[0] ** 0.46
 
         # Man-years
-        self.cost.total_unit = 1.02 ** number_of_rocket_stages * np.sum(self.cost.unit) #+ number_engines * engine_cost
+        self.cost.total_unit = 1.02 * (self.cost.core + self.cost.upper)
 
         # Man-years
         self.cost.total = rocket_fleet_count * self.cost.total_unit 
