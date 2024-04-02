@@ -174,9 +174,9 @@ class Structure():
             hITS2 = ( 0.5 * self._ITS_fwd.height + self._tank_fwd._cylinder.height + self._ITS_aft.height + self._tank_aft._cylinder.height + self._EB.height)
             e1 = self._tank_aft._dome_aft.mass * (self._EB.height - 0.67 * self._tank_aft._dome_aft.height) + (self._EB.height + self._tank_aft.cylinder.height + 0.23 * self._tank_aft._dome_aft.height) * self._tank_aft._dome_fwd.mass  + (self._EB.height + self._tank_aft._cylinder.height + self._ITS_aft.height - 0.67 * self._tank_aft._dome_aft.height) * self._tank_fwd._dome_aft.mass + (self._EB.height + self._tank_aft.cylinder.height + self._ITS_aft.height + self._tank_fwd.cylinder.height + 0.23 * self._tank_aft._dome_aft.height) * self._tank_fwd._dome_fwd.mass 
 
-            temp = self.engine_mass * self.engine_number * hengine + self.mass_engine_structure * hthrust  +  self._EB.mass * hEB  + self._tank_aft.cylinder.mass * ht1* 1.08 + self._ITS_aft.mass * hITS1 +  self._tank_fwd.cylinder.mass * 1.08 * ht2 + self._ITS_fwd.mass * hITS2 + e1
+            temp = self.engine_mass * self.engine_number * hengine + self.mass_engine_structure * hthrust + self._EB.mass * hEB  + self._tank_aft.cylinder.mass * ht1* 1.08 + self._ITS_aft.mass * hITS1 +  self._tank_fwd.cylinder.mass * 1.08 * ht2 + self._ITS_fwd.mass * hITS2 + e1
 
-            cg  = temp / (self.engine_mass*self.engine_number + self.mass_engine_structure + self.mass_total)
+            cg = temp / (self.engine_mass*self.engine_number + self.mass_engine_structure + self.mass_total)
             return cg
         else:
             raise ValueError
@@ -186,6 +186,10 @@ class Structure():
     @property
     def mass_landing_gear(self):
         return LG(self.outer_radius, self.mass_total, self.cg,).mass_gear
+        lgmass = LG(self.outer_radius, self.mass_total, self.cg).mass_gear
+        print(f"landing gear mass: {lgmass} kg")
+
+        return lgmass
     
 # if __name__ == "__main__":
 #     print("CALCULATING STRUCTURE")

@@ -51,7 +51,6 @@ class MassCalculator:
             Vi = Isp[i-1]*9.81
             Ri = np.exp(dV_split[i-1]/Vi)
             wet_masses[i] = np.sum(wet_masses[0:i]) * (Ri-1) / (1-Ri*inert_mass_fractions[i-1])
-
         wet_masses2 = np.array([np.sum(wet_masses[0:2]), wet_masses[2]])
         return wet_masses2
     @staticmethod
@@ -194,8 +193,8 @@ class ProductionModel():
                   reflights,
                   learning_factor):
         # Man-years
-        self.cost.core = (5.0 * learning_factor * dry_masses[1] ** 0.46 + number_engines * engine_cost) / (reflights + 1)
-        self.cost.upper = 5.0 * learning_factor * dry_masses[0] ** 0.46
+        self.cost.core = 4 *(5.0 * learning_factor * dry_masses[1] ** 0.46 + number_engines * engine_cost) / (reflights + 1)
+        self.cost.upper = 4 * 5.0 * learning_factor * dry_masses[0] ** 0.46
 
         # Man-years
         self.cost.total_unit = 1.02 * (self.cost.core + self.cost.upper)

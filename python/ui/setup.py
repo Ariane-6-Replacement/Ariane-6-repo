@@ -159,8 +159,8 @@ class UI():
             [f"Bulkhead:", f"{self.rocket.bulkhead_options[self.rocket.bulkhead]}", "Input"],
             [f"Structural Mass:", f"{self.rocket.mass_s:.0f} kg", "Margin 40%"],
             [f"1st Stage Mass:", f"{(self.rocket.mass/1000):.0f} T", "Margin 40%"],
-            [f"Upper Stage Mass:", f"{(self.rocket.mass2/1000):.0f} kg", "Margin 40%"],
-            [f"Total Mass:", f"{((self.rocket.mass2+self.rocket.mass)/1000):.0f} kg", "Margin 40%"],
+            [f"Upper Stage Mass:", f"{(self.rocket.mass2/1000):.0f} T", "Margin 40%"],
+            [f"Total Mass:", f"{((self.rocket.mass2+self.rocket.mass)/1000):.0f} T", "Margin 40%"],
 
             [f"----------------Cost-----------------","----------------","----------------"],
            # [f"Total Lifetime Cost:", f"{self.rocket.lifetime_cost:.0f} million euros", "Margin 40%"],
