@@ -70,7 +70,7 @@ class Merlin1D:
         assume Isp goes down with 10 for every 0.1 OF. chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.eucass.eu/doi/EUCASS2017-537.pdf
         """
 
-        self.Isp = 306.266 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
+        self.Isp = 282 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
         self.Isp = self.Isp - abs(3.5 - of_ratio) * 100
         return self.Isp
 

@@ -140,7 +140,7 @@ class UI():
             [f"Number of reflights:", f"{self.rocket.reflights}", "Input"],
             [f"Thrust:", f"{(self.rocket.thrust / 10e6):.1f} MN ", "Margin 40%"],
             [f"Number of Engines:", f"{self.rocket.engine_number}","Margin 40%"],
-            [f"Delta V first stage:", f"{(self.rocket.dv*self.rocket.dv_split):.0f} m/s", "Margin 40%"],
+            [f"Delta V first stage:", f"{(self.rocket.dv_1):.0f} m/s", "Margin 40%"],
 
 
 
@@ -163,6 +163,8 @@ class UI():
             [f"----------------Cost-----------------","----------------","----------------"],
            # [f"Total Lifetime Cost:", f"{self.rocket.lifetime_cost:.0f} million euros", "Margin 40%"],
             [f"Development Cost:", f"{self.rocket.development_cost:.0f} million euros", "Margin 40%"],
+            [f"Production cost per Launch:", f"{self.rocket.production_cost:.0f} million euros", "Margin 40%"],
+            [f"Operational cost per Launch:", f"{self.rocket.operational_cost:.0f} million euros", "Margin 40%"],
             [f"Cost Per Launch:", f"{self.rocket.per_launch_cost:.0f} million euros", "Margin 40%"],
             #f"Estimated Cost: €{self.rocket.cost:.0f} "
         ]
