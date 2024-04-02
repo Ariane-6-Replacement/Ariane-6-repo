@@ -6,7 +6,7 @@ class LG:
                  cg: float):
 
         self.outer_radius = outer_radius
-        self.mass = self.mass()
+        self.mass = mass
         self.cg = cg
 
     @property
@@ -19,10 +19,14 @@ class LG:
         Lfp = 0.1
         Dh = 2.0 # Analyzing landing gear from Falcon 9 
         H0 = self.cg + 1.8 + Dh
-        alpha = 17 # Ask Thomas for source deg
+        alpha = 23# Ask Thomas for source deg
         I = self.mass * (self.outer_radius)**2 
+        
         while np.sqrt(2*Lfp**2+H0**2) * (1 - np.cos(np.radians(alpha))) * 1/(1+(self.mass + (2*Lfp**2+H0**2))/I) > np.sqrt(H0**2 + Lfp**2) - H0:
+            print(f'Left {np.sqrt(2*Lfp**2+H0**2) * (1 - np.cos(np.radians(alpha))) * 1/(1+(self.mass + (2*Lfp**2+H0**2))/I) }')
+            print(f'Right {np.sqrt(H0**2 + Lfp**2) - H0}')
             Lfp+=0.1
+            print(f'Left2 {np.sqrt(2*Lfp**2+H0**2) * (1 - np.cos(np.radians(alpha))) * 1/(1+(self.mass + (2*Lfp**2+H0**2))/I) }')
         return Lfp
 
 
@@ -39,7 +43,6 @@ class LG:
         hH - height of the primary strut with respect to the lander
         Ls - length of the secondary strut
         drop_h - vertical stroke limit '''
-        Lfp = 0.1
         Dh = 2.0 # Analyzing landing gear from Falcon 9 
         x = self.Lfp - self.outer_radius
         ys = 1.8 + Dh
@@ -58,13 +61,13 @@ class LG:
 
         # #SHADY SHIT as fuck 
         # S_s_max = 0.2 * Ls
-
+        #print(f'Lp {Lp}, Ls {Ls}')
         return Lp, Ls
 
 
     @property
-    def mass(self) -> float:
-        rho= 13.91187 * 1.2 
+    def mass_gear(self) -> float:
+        rho= 13.91187 * 1.2
 
 
         mass_p = rho * self.LG_geometry[0]
@@ -74,9 +77,6 @@ class LG:
     
 # test bit 
 # if __name__ == "__main__":
-#     H0 = 6.5
-#     alpha = 40
 #     mass = 330000
-#     I = 2500000
-#     test = LG(2.7,mass, 10)
-#     print(f'Lg.mass {test}')
+#     test = LG(2.7,mass, 15)
+#     print(f'Lg.mass {test.Lfp}')

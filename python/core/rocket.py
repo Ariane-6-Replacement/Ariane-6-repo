@@ -17,7 +17,14 @@ class Rocket():
         #self.control = Control()
         self.dv = self.orbit_dv[self.orbit]
         self.dv_1 = self.dv * self.dv_split
-        self.propulsion = Propulsion(self.engine_options[self.engine], self.of_ratio, self.pressure_ox*10**5,
+        if self.engine_options[self.engine_index] == "Prometheus":
+            from python.propulsion.inputs import Prometheus
+            self.engine = Prometheus()
+        elif self.engine_options[self.engine_index] == "Merlin1D":
+            from python.propulsion.inputs import Merlin1D
+            self.engine = Merlin1D()
+
+        self.propulsion = Propulsion(self.engine, self.of_ratio, self.pressure_ox*10**5,
                                      self.pressure_fuel*10**5)
         self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox,
                                    self.pressure_fuel, self.material_options[self.material_misc])
@@ -42,7 +49,7 @@ class Rocket():
         cm = CostModel()
         self.prop_masses = np.array([self.prop_masses[0],self.mass_p / 1000])
         self.dry_masses = np.array([self.dry_masses[0], self.mass_s]) / 1000
-        cm.calculate(self.dry_masses,self.prop_masses , self.reflights)
+        cm.calculate(self.dry_masses,self.prop_masses , self.reflights, self.engine.cost, self.engine_number)
         return cm.cost.total_lifetime_euros, cm.cost.per_launch_euros, cm.cost.development_cost_euros
     
     def iterate(self):

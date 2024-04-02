@@ -5,15 +5,9 @@ from python.propulsion.volume_mass_calculator import get_propellant_mass_volume
 import math
 
 class Propulsion():
-    def __init__(self, engine_name, of_ratio,p_ox,p_fuel):
+    def __init__(self, engine, of_ratio,p_ox,p_fuel):
         # engine name
-        self.engine_name = engine_name
-        if engine_name == "Prometheus":
-            from python.propulsion.inputs import Prometheus
-            self.engine = Prometheus()
-        elif engine_name == "Merlin1D":
-            from python.propulsion.inputs import Merlin1D
-            self.engine = Merlin1D()
+        self.engine = engine
 
         self.of_ratio = of_ratio
         self.Isp = self.engine.get_Isp(of_ratio=of_ratio)
