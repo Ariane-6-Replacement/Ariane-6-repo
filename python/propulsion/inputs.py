@@ -41,7 +41,6 @@ class Prometheus:
 
         self.Isp = 306.266 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
         self.Isp = self.Isp - abs(3.5 - of_ratio) * 100
-        print(f"Isp: {self.Isp}")
         return self.Isp
 
 
@@ -73,7 +72,6 @@ class Merlin1D:
 
         self.Isp = 282 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
         self.Isp = self.Isp - abs(3.5 - of_ratio) * 100
-        print(f"Isp: {self.Isp}")
         return self.Isp
 
 class Propellant:

@@ -51,7 +51,11 @@ class Rocket():
         self.prop_masses = np.array([self.prop_masses[0],self.mass_p / 1000])
         self.dry_masses = np.array([self.dry_masses[0], self.mass_s]) / 1000
         cm.calculate(self.dry_masses,self.prop_masses , self.reflights, self.engine.cost, self.engine_number)
-        return cm.cost.total_lifetime_euros, cm.cost.per_launch_euros, cm.cost.development_cost_euros
+        self.total_lifetime_cost = cm.cost.total_lifetime_euros
+        self.per_launch_cost = cm.cost.per_launch_euros
+        self.development_cost = cm.cost.development_cost_euros
+        self.operational_cost = cm.cost.operational_euro
+        self.production_cost = cm.cost.production_euro
     
     def iterate(self):
         e = 10e9
@@ -77,4 +81,4 @@ class Rocket():
             if i >= 100:
                 print(f"Non convergence!")
                 break
-        self.lifetime_cost, self.per_launch_cost, self.development_cost = self.cost_estimator()
+        self.cost_estimator()

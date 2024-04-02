@@ -11,7 +11,7 @@ def main():
         cd = 0.2,
         mf2 = 0.04,
         isp2 = 296,
-        dv_split = 0.3,
+        dv_split = 0.5,
         engine_options = ['Prometheus', 'Merlin1D'],
         engine_index = 0, # index in engine options
         engine_number = 9,
