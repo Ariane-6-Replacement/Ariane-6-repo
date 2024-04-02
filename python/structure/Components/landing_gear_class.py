@@ -7,7 +7,6 @@ class LG:
 
         self.outer_radius = outer_radius
         self.mass = mass
-
         self.cg = cg
         print(f'mass {self.mass}, cg {self.cg}')
     @property
