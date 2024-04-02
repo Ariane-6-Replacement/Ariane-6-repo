@@ -123,7 +123,7 @@ class Structure():
                 self._tank_fwd = Tank(*tank1)
                 self._tank_aft = Tank(*tank2)
                 
-            self._ITS_fwd = Shell(self.outer_radius,self.material3,2+self._tank_fwd.dome_fwd.height,self.thrust)
+            self._ITS_fwd = Shell(self.outer_radius,self.material3,2.5+self._tank_fwd.dome_fwd.height,self.thrust)
             self._ITS_aft = Shell(self.outer_radius,self.material3,1+self._tank_aft.dome_fwd.height+self._tank_fwd.dome_aft.height,self.thrust)
             self._EB = Shell(self.outer_radius,self.material3,3+self._tank_aft.dome_aft.height,self.thrust)
     
@@ -132,7 +132,7 @@ class Structure():
         
             #NOTE: 1 - oxidizer, 2 - fuel, possibly add moment 
             self._CBT = CBT(self.outer_radius, self.pressure1, self.material ,self.thrust, self.volume1, self.mass1, self.volume2, self.mass2)
-            self._ITS = Shell(self.outer_radius,self.material,2+self._CBT._dome_fwd.height,self.thrust)
+            self._ITS = Shell(self.outer_radius,self.material,2.5+self._CBT._dome_fwd.height,self.thrust)
             self._EB = Shell(self.outer_radius,self.material,3+self._CBT._dome_aft.height,self.thrust)
           
     @property

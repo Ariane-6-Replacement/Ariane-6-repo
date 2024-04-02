@@ -19,7 +19,7 @@ class LG:
         Lfp = 0.1
         Dh = 2.0 # Analyzing landing gear from Falcon 9 
         H0 = self.cg + 2.0 + Dh
-        alpha = 35# Ask Thomas for source deg
+        alpha = 23# Ask Thomas for source deg
         I = self.mass * (self.outer_radius)**2 
         
         while np.sqrt(2*Lfp**2+H0**2) * (1 - np.cos(np.radians(alpha))) * 1/(1+(self.mass + (2*Lfp**2+H0**2))/I) > np.sqrt(H0**2 + Lfp**2) - H0:
