@@ -1,9 +1,6 @@
 import numpy as np
-from scipy.integrate import odeint
 import matplotlib.pyplot as plt
-import plotting_functions as pf
-import sat_math_funcs as sm
-from elysium_parameters import thrust, burntime, M0_1, number_of_engines_ascent, number_of_engines_descent, diameter, Cd_ascent, Cd_descent, A, burn_alt, gravity_turn_alt, kick_angle, gamma_change_time, mass_flowrate, M_empty, struct_coeff_2nd_stage, I_sp_1, I_sp_2, delta_V_landing
+from elysium_parameters import thrust, burntime, M0_1, number_of_engines_ascent, number_of_engines_landing, number_of_engines_reentry, diameter, Cd_ascent, Cd_descent, A, reentry_burn_alt, landing_burn_alt, gravity_turn_alt, kick_angle, gamma_change_time, mass_flowrate, M_empty, struct_coeff_2nd_stage, I_sp_1, I_sp_2, delta_V_landing, delta_V_reentry
 #from saturn_v_parameters import thrust, burntime, M0_1, number_of_engines_ascent, number_of_engines_descent, diameter, Cd_ascent, Cd_descent, A, burn_alt, gravity_turn_alt, kick_angle, gamma_change_time, mass_flowrate
 
 g_0 = 9.81 # [m / s^2]
@@ -40,9 +37,9 @@ class Trajectory():
     def get_gamma(self, velocity_z, velocity_x):
         return np.arctan2(velocity_z, velocity_x)
     
-    def get_landing_propellant(self, I_sp_1, delta_V_landing):
-        M_prop_land = np.exp(delta_V_landing / (I_sp_1 * g_0)) * M_empty - M_empty
-        return M_prop_land
+    def get_propellant(self, I_sp_1, delta_V, M_remaining):
+        propellant = np.exp(delta_V / (I_sp_1 * g_0)) * (M_empty + M_remaining) - (M_empty + M_remaining)
+        return propellant
     
     def get_speed(self, velocity_x, velocity_z):
         return np.sqrt(velocity_x ** 2 + velocity_z ** 2)
@@ -83,11 +80,14 @@ class Trajectory():
         self.velocity_z = 3
         self.accel_x = 0
         self.accel_z = 0
-        self.M_prop_land = self.get_landing_propellant(I_sp_1, delta_V_landing)
+        self.M_prop_landing = self.get_propellant(I_sp_1, delta_V_landing, 0)
+        self.M_prop_reentry = self.get_propellant(I_sp_1, delta_V_reentry, self.M_prop_landing)
 
-        print("Propellant available for landing:", self.M_prop_land)
+        print("Propellant available for re-entry:", self.M_prop_reentry)
+        print("Propellant available for landing:", self.M_prop_landing)
 
         self.landing_burn_start_time = 0
+        self.reentry_burn_start_time = 0
 
         self.pos_xs = np.array([])
         self.pos_zs = np.array([])
@@ -131,13 +131,18 @@ class Trajectory():
         if self.pos_z >= gravity_turn_alt and t <= self.kick_time + gamma_change_time:
             gamma = kick_angle
 
-        if t < burntime:
+        if ascending and t < burntime:
             number_of_engines = number_of_engines_ascent
-        elif self.pos_z < burn_alt and not ascending: 
-            number_of_engines = number_of_engines_descent
-            if self.landing_burn_start_time == 0:
-               self.landing_burn_start_time = t
-
+        elif not ascending:
+            if self.pos_z < landing_burn_alt: 
+                number_of_engines = number_of_engines_landing
+                if self.landing_burn_start_time == 0:
+                    self.landing_burn_start_time = t
+            elif self.pos_z < reentry_burn_alt:
+                number_of_engines = number_of_engines_reentry
+                if self.reentry_burn_start_time == 0:
+                    self.reentry_burn_start_time = t
+                
         total_thrust = number_of_engines * thrust
 
         if t < burntime:
@@ -146,16 +151,31 @@ class Trajectory():
             self.thrust_z = np.sin(gamma) * total_thrust / self.mass
 
         if not ascending:
-            burn_start_mass = M_empty + self.M_prop_land
-            self.mass = burn_start_mass # kg
-            if self.pos_z < burn_alt:
+            self.mass = M_empty + self.M_prop_landing + self.M_prop_reentry # kg
+            reentering = self.pos_z < reentry_burn_alt
+            landing = self.pos_z < landing_burn_alt
+            
+            if landing:
                 burn_time_so_far = t - self.landing_burn_start_time
                 fuel_burned = number_of_engines * mass_flowrate * burn_time_so_far
-                fuel_burned = np.clip(fuel_burned, 0, self.M_prop_land)
+                fuel_burned = np.clip(fuel_burned, 0, self.M_prop_landing)
 
-                self.mass = burn_start_mass - fuel_burned
+                self.mass = M_empty + self.M_prop_landing - fuel_burned
 
-                propellant_available = fuel_burned < self.M_prop_land
+                propellant_available = fuel_burned < self.M_prop_landing
+
+                if propellant_available:
+                    self.thrust_x = -np.cos(gamma) * total_thrust / self.mass
+                    self.thrust_z = -np.sin(gamma) * total_thrust / self.mass
+                    
+            elif reentering:
+                burn_time_so_far = t - self.reentry_burn_start_time
+                fuel_burned = number_of_engines * mass_flowrate * burn_time_so_far
+                fuel_burned = np.clip(fuel_burned, 0, self.M_prop_reentry)
+
+                self.mass = M_empty + self.M_prop_landing + self.M_prop_reentry - fuel_burned
+
+                propellant_available = fuel_burned < self.M_prop_reentry
 
                 if propellant_available:
                     self.thrust_x = -np.cos(gamma) * total_thrust / self.mass
