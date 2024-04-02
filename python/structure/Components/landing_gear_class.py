@@ -54,15 +54,7 @@ class LG:
         yp = x / np.tan( np.radians( tau_p ) )
 
         Lp = np.sqrt(x**2 + yp**2)
-
-        # hP = np.sin(np.radians( tau_s - tau_p)) * Lp / 2 * 1/ np.sin(np.radians(tau_s))
-
-        
-        # S_p_max = Lp - (z - drop_h) / np.cos(np.radians(tau_p))
-
-        # #SHADY SHIT as fuck 
-        # S_s_max = 0.2 * Ls
-        #print(f'Lp {Lp}, Ls {Ls}')
+        print(f'Lp {Lp}, Ls {Ls}')
         return Lp, Ls
 
 
