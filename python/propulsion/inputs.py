@@ -49,6 +49,21 @@ class Vinci:  # TODO add specs
     def __init__(self):
         pass
 
+class Merlin1D:
+    def __init__(self):
+
+        self.name = "Merlin1D"
+        self.Thrust = 845e3
+        self.cost = 1e6
+        self.mass_sea = 470
+        self.exit_diameter = 1.1  # m
+        self.exit_area = math.pi * self.exit_diameter ** 2 / 4
+        self.OF_ratio = 2.36
+        self.p_exit = 40000  # pa
+        self.turbopump_overall_power = 10e6  # MW
+        self.diameter_truss_structure = 3.35
+        self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
+
 
 class Propellant:
     def __init__(self,t_ox,t_fuel,p_ox,p_fuel):
