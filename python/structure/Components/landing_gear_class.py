@@ -37,19 +37,15 @@ class LG:
     def LG_geometry(self) -> tuple:
         '''Lw - width of the lander
         tau_p - primary strut angle
-        tau_s - secondary strut angle
-        x - width beyonf the lander frame
-        z - height of the top attachemnt point 
+        x - width beyond the LV frame
         Lp - length of the primary strut
-        hH - height of the primary strut with respect to the lander
         Ls - length of the secondary strut
         drop_h - vertical stroke limit '''
         Dh = 2.0 # Analyzing landing gear from Falcon 9 
         x = self.Lfp - self.outer_radius
         ys = 2.0 + Dh
-        # H0 = self.cg 
         Ls = np.sqrt(x**2 + ys**2)
-        tau_p = 25
+        tau_p = 25 #deg
 
         yp = x / np.tan( np.radians( tau_p ) )
 
@@ -61,11 +57,8 @@ class LG:
     @property
     def mass_gear(self) -> float:
         rho= 13.91187 * 1.2
-
-
         mass_p = rho * self.LG_geometry[0]
         mass_s = rho * self.LG_geometry[1]
-
         return (mass_p + 2 * mass_s + 250) * 4
     
 # test bit 
@@ -75,4 +68,4 @@ if __name__ == "__main__":
     cg=  5.273065608372961
 
     test = LG(2.5,mass,cg)
-    print(f'Lg.mass {test.LG_geometry}, {test.Lfp}')
+    print(f'Lg.mass {test.LG_geometry}, {test.Lfp}, {test.mass_gear}')
