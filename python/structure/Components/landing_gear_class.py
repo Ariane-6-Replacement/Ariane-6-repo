@@ -58,7 +58,7 @@ class LG:
 
         # #SHADY SHIT as fuck 
         # S_s_max = 0.2 * Ls
-
+        #print(f'Lp {Lp}, Ls {Ls}')
         return Lp, Ls
 
 

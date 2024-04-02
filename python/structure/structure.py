@@ -98,7 +98,10 @@ class Structure():
         
     @property
     def mass_landing_gear(self):
-        return LG(self.outer_radius, self.mass_total, self.cg,).mass_gear
+        lgmass = LG(self.outer_radius, self.mass_total, self.cg,).mass_gear
+        print(f"landing gear mass: {lgmass:.0f} kg")
+
+        return lgmass
     
 # if __name__ == "__main__":
 #     print("CALCULATING STRUCTURE")
