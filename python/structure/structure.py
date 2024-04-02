@@ -94,6 +94,8 @@ class Structure():
             temp = self.engine_mass * self.engine_number * hengine + self.mass_engine_structure() * hthrust  +  self._EB.mass * hEB  + self._tank_aft.cylinder.mass * ht1* 1.08 + self._ITS_aft.mass * hITS1 +  self._tank_fwd.cylinder.mass * 1.08 * ht2 + self._ITS_fwd.mass * hITS2
 
             cg  = temp / (hengine + hthrust + hEB + ht1 + ht2 + hITS1 + hITS2)
+            print(f'cg {cg}'
+                  )
             return cg
         
     @property
