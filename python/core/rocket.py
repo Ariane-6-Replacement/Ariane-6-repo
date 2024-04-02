@@ -38,14 +38,11 @@ class Rocket():
         self.inert_mass_fractions = np.array([self.mf2, self.mf2])
         self.ISPs = np.array([self.isp2, self.propulsion.Isp])
 
-        # All outputs in tonnes
 
         self.wet_masses = MassCalculator.get_wet_masses(self.dv_1, self.dv_2, self.inert_mass_fractions,
                                                         self.ISPs, self.payload, self.reflights)
         self.prop_masses = MassCalculator.get_propellant_masses(self.wet_masses, self.inert_mass_fractions)
         self.dry_masses  = MassCalculator.get_dry_masses(self.wet_masses, self.inert_mass_fractions)
-
-        # Convert tonnes to kg
         self.mass2, self.mass = self.wet_masses
         self.mass_prev = self.mass
         self.mass_total = self.mass + self.mass2 + self.payload
@@ -69,7 +66,7 @@ class Rocket():
                                 self.mass_fuel, self.thrust, self.mass_e, self.engine_number)
             self.mass_t = self.structure.mass_total #Returns mass of the tank/s ITS/s and engine bay
             self.mass_es = self.structure.mass_engine_structure
-            self.mass_lg = self.structure.mass_landing_gear
+            self.mass_lg = 1000#self.structure.mass_landing_gear
             self.mass_s = self.mass_e + self.mass_es + self.mass_lg + self.mass_t
             self.mass = self.mass_p + self.mass_s
             self.mass_total = self.mass + self.mass2 + self.payload
