@@ -140,7 +140,7 @@ class UI():
             [f"Number of reflights:", f"{self.rocket.reflights}", "Input"],
             [f"Thrust:", f"{(self.rocket.thrust / 10e6):.1f} MN ", "Margin 40%"],
             [f"Number of Engines:", f"{self.rocket.engine_number}","Margin 40%"],
-            [f"Delta V first stage:", f"{(self.rocket.dv*self.rocket.dv_split):.0f} m/s", "Margin 40%"],
+            [f"Delta V first stage:", f"{(self.rocket.dv_1):.0f} m/s", "Margin 40%"],
 
 
 

@@ -16,7 +16,11 @@ class Rocket():
         #self.aerodynamics = Aerodynamics()
         #self.control = Control()
         self.dv = self.orbit_dv[self.orbit]
-        self.dv_1 = self.dv * self.dv_split
+        self.dv_2 = self.dv * (1 - self.dv_split )
+        landingdv = 0
+        if self.reflights > 0:
+            landingdv = 1000
+        self.dv_1 = self.dv - self.dv_2 + landingdv
         if self.engine_options[self.engine_index] == "Prometheus":
             from python.propulsion.inputs import Prometheus
             self.engine = Prometheus()
@@ -36,8 +40,8 @@ class Rocket():
 
         # All outputs in tonnes
 
-        self.wet_masses = MassCalculator.get_wet_masses(self.dv, 1 - self.dv_split, self.inert_mass_fractions,
-                                                        self.ISPs, self.payload)
+        self.wet_masses = MassCalculator.get_wet_masses(self.dv_1, self.dv_2, self.inert_mass_fractions,
+                                                        self.ISPs, self.payload, self.reflights)
         self.prop_masses = MassCalculator.get_propellant_masses(self.wet_masses, self.inert_mass_fractions)
         self.dry_masses  = MassCalculator.get_dry_masses(self.wet_masses, self.inert_mass_fractions)
 
