@@ -10,8 +10,8 @@ def main():
         payload = 20000,
         cd = 0.2,
         mf2 = 0.04,
-        isp2 = 296,
-        dv_split = 0.5,
+        isp2 = 457,
+        dv_split = 0.40,
         engine_options = ['Prometheus', 'Merlin1D'],
         engine_index = 0, # index in engine options
         engine_number = 9,
@@ -39,7 +39,7 @@ def falcon9():
         payload = 18500,
         cd = 0.2,
         mf2 = 0.03,
-        isp2 = 282,
+        isp2 = 348,
         dv_split = 0.41,
         engine_options = ['Prometheus', 'Merlin1D'],
         engine_index = 1, # index in engine options
@@ -50,7 +50,7 @@ def falcon9():
         material_tank = 3, # index in material options
         material_misc = 3, # index in material options
         bulkhead_options = ["shared", "separate"],
-        bulkhead = 0, # index in bulkhead options
+        bulkhead = 1, # index in bulkhead options
         pressure_ox = 3.5,
         pressure_fuel = 3.5,
         temperature_ox = 90,
@@ -62,5 +62,5 @@ def falcon9():
     ui.create()
 
 if __name__ == "__main__":
-    #main()
-    falcon9()
+    main()
+    # falcon9()
