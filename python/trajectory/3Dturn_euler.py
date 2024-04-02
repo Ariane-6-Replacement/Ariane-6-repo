@@ -5,6 +5,9 @@ g_0 = 9.81 # [m / s^2]
 R_earth = 6_371e3 # [m]
 mu_earth = 3.986_004_418e14 # [m^3 / s^-2]
 
+simulation_timestep = 0.01 # seconds
+simulation_time = 900 # seconds
+
 class Trajectory():
     def __init__(self):
         pass
@@ -278,11 +281,11 @@ class Trajectory():
 
     def run(self):
 
-        dt = 0.01
+        dt = simulation_timestep
 
         times = np.array([])
 
-        t_max = 600
+        t_max = simulation_time
         t = 0
 
         while t < t_max:
