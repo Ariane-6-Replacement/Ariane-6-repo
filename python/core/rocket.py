@@ -70,7 +70,7 @@ class Rocket():
                                 self.mass_fuel, self.thrust, self.mass_e, self.engine_number)
             self.mass_t = self.structure.mass_total #Returns mass of the tank/s ITS/s and engine bay
             self.mass_es = self.structure.mass_engine_structure
-            self.mass_lg = 1000#self.structure.mass_landing_gear
+            self.mass_lg = self.structure.mass_landing_gear
             self.mass_s = self.mass_e + self.mass_es + self.mass_lg + self.mass_t
             self.mass = self.mass_p + self.mass_s
             self.mass_total = self.mass + self.mass2 + self.payload
