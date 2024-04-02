@@ -79,7 +79,7 @@ class CostModel():
         return man_years * 0.3397536 # TODO: ADD REFERENCE
 
     def euro_to_man_years_2022(self, euro):
-        return euro /1000000 / 0.3397536
+        return euro / 1000000 / 0.3397536
 
     def calculate(self,
                   dry_masses, # tonnes
@@ -98,7 +98,6 @@ class CostModel():
         self.total_flights = launches_per_year * lifetime
         engine_cost = self.euro_to_man_years_2022(engine_unit_cost)
         self.number_of_rocket_stages = np.sum(self.rockets_per_stage)
-
         rocket_fleet_count = self.total_flights / (rocket_reflights + 1)
         self.development.calculate(dry_masses)
         self.cost.development_cost_euros = self.man_years_to_million_euro_2022(self.development.cost.total)
@@ -188,12 +187,14 @@ class ProductionModel():
                   rockets_per_stage,
                   number_of_rocket_stages,
                   rocket_fleet_count,
+                  engine_cost,
+                  number_engines,
                   learning_factor):
         # Man-years
         self.cost.unit = 5.0 * rockets_per_stage * learning_factor * dry_masses ** 0.46
 
         # Man-years
-        self.cost.total_unit = 1.02 ** number_of_rocket_stages * np.sum(self.cost.unit) + number_engines * engine_cost
+        self.cost.total_unit = 1.02 ** number_of_rocket_stages * np.sum(self.cost.unit) #+ number_engines * engine_cost
 
         # Man-years
         self.cost.total = rocket_fleet_count * self.cost.total_unit 

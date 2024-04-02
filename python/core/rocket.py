@@ -17,10 +17,10 @@ class Rocket():
         #self.control = Control()
         self.dv = self.orbit_dv[self.orbit]
         self.dv_1 = self.dv * self.dv_split
-        if self.engine_options[self.engine] == "Prometheus":
+        if self.engine_options[self.engine_index] == "Prometheus":
             from python.propulsion.inputs import Prometheus
             self.engine = Prometheus()
-        elif self.engine_options[self.engine] == "Merlin1D":
+        elif self.engine_options[self.engine_index] == "Merlin1D":
             from python.propulsion.inputs import Merlin1D
             self.engine = Merlin1D()
 
