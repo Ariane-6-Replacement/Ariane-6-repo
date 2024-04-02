@@ -304,7 +304,7 @@ class Trajectory():
             times = np.append(times, t)
             success = self.iterate(t, dt)
             if not success:
-                return False
+                # return False
                 pass
 
         # print("Finished")
@@ -316,7 +316,7 @@ class Trajectory():
         # if abs(landing_velocity) > 5:
             # return False
         
-        return True
+        # return True
 
         #print("Required Second Stage Delta V:", required_delta_V)
 
@@ -325,92 +325,92 @@ class Trajectory():
         #print("Final Mass:", self.masses[-1])   
         #print("Landing Propellant Remaining:", self.masses[-1] - self.m_first_stage_structural)
 
-        # fig, axs = plt.subplots(3, 5, figsize=(10, 8))  # 2x2 grid of subplots
+        fig, axs = plt.subplots(3, 5, figsize=(10, 8))  # 2x2 grid of subplots
 
-        # axs[0, 0].plot(times, self.pos_xs / 1000)
-        # axs[0, 0].set_xlabel('Time (s)')
-        # axs[0, 0].set_ylabel('Pos Z (km)')
-        # axs[0, 0].set_title('Pos Z vs Time')
+        axs[0, 0].plot(times, self.pos_xs / 1000)
+        axs[0, 0].set_xlabel('Time (s)')
+        axs[0, 0].set_ylabel('Pos Z (km)')
+        axs[0, 0].set_title('Pos Z vs Time')
 
-        # axs[0, 1].plot(times, self.pos_zs / 1000)
-        # axs[0, 1].set_xlabel('Time (s)')
-        # axs[0, 1].set_ylabel('Pos Z (km)')
-        # axs[0, 1].set_title('Pos Z vs Time')
+        axs[0, 1].plot(times, self.pos_zs / 1000)
+        axs[0, 1].set_xlabel('Time (s)')
+        axs[0, 1].set_ylabel('Pos Z (km)')
+        axs[0, 1].set_title('Pos Z vs Time')
 
-        # axs[0, 2].plot(times, self.rhos)
-        # axs[0, 2].set_xlabel('Time (s)')
-        # axs[0, 2].set_ylabel('Atmospheric Density (kg/m^3)')
-        # axs[0, 2].set_title('Atmospheric Density vs Time')
+        axs[0, 2].plot(times, self.rhos)
+        axs[0, 2].set_xlabel('Time (s)')
+        axs[0, 2].set_ylabel('Atmospheric Density (kg/m^3)')
+        axs[0, 2].set_title('Atmospheric Density vs Time')
         
-        # axs[1, 3].plot(times, self.masses / 1000)
-        # axs[1, 3].set_xlabel('Time (s)')
-        # axs[1, 3].set_ylabel('Mass (tonnes)')
-        # axs[1, 3].set_title('Mass vs Time')
+        axs[1, 3].plot(times, self.masses / 1000)
+        axs[1, 3].set_xlabel('Time (s)')
+        axs[1, 3].set_ylabel('Mass (tonnes)')
+        axs[1, 3].set_title('Mass vs Time')
 
-        # axs[0, 3].plot(times, self.drags / 1e6)
-        # axs[0, 3].set_xlabel('Time (s)')
-        # axs[0, 3].set_ylabel('Drag (MN)')
-        # axs[0, 3].set_title('Drag vs Time')
+        axs[0, 3].plot(times, self.drags / 1e6)
+        axs[0, 3].set_xlabel('Time (s)')
+        axs[0, 3].set_ylabel('Drag (MN)')
+        axs[0, 3].set_title('Drag vs Time')
 
-        # axs[1, 0].plot(times, self.velocity_xs / 1000)
-        # axs[1, 0].set_xlabel('Time (s)')
-        # axs[1, 0].set_ylabel('Velocity X (km/s)')
-        # axs[1, 0].set_title('Velocity X vs Time')
+        axs[1, 0].plot(times, self.velocity_xs / 1000)
+        axs[1, 0].set_xlabel('Time (s)')
+        axs[1, 0].set_ylabel('Velocity X (km/s)')
+        axs[1, 0].set_title('Velocity X vs Time')
 
-        # axs[1, 1].plot(times, self.velocity_zs / 1000)
-        # axs[1, 1].set_xlabel('Time (s)')
-        # axs[1, 1].set_ylabel('Velocity Z (km/s)')
-        # axs[1, 1].set_title('Velocity Z vs Time')
+        axs[1, 1].plot(times, self.velocity_zs / 1000)
+        axs[1, 1].set_xlabel('Time (s)')
+        axs[1, 1].set_ylabel('Velocity Z (km/s)')
+        axs[1, 1].set_title('Velocity Z vs Time')
         
-        # axs[2, 0].plot(times, self.accel_xs / g_0)
-        # axs[2, 0].set_xlabel('Time (s)')
-        # axs[2, 0].set_ylabel('Accel X (g)')
-        # axs[2, 0].set_title('Accel X vs Time')
+        axs[2, 0].plot(times, self.accel_xs / g_0)
+        axs[2, 0].set_xlabel('Time (s)')
+        axs[2, 0].set_ylabel('Accel X (g)')
+        axs[2, 0].set_title('Accel X vs Time')
 
-        # axs[2, 1].plot(times, self.accel_zs / g_0)
-        # axs[2, 1].set_xlabel('Time (s)')
-        # axs[2, 1].set_ylabel('Accel Z (g)')
-        # axs[2, 1].set_title('Accel Z vs Time')
+        axs[2, 1].plot(times, self.accel_zs / g_0)
+        axs[2, 1].set_xlabel('Time (s)')
+        axs[2, 1].set_ylabel('Accel Z (g)')
+        axs[2, 1].set_title('Accel Z vs Time')
         
-        # axs[2, 2].plot(times, self.thrust_xs * self.masses / 10e5)
-        # axs[2, 2].set_xlabel('Time (s)')
-        # axs[2, 2].set_ylabel('Thrust X (MN)')
-        # axs[2, 2].set_title('Thrust X vs Time')
+        axs[2, 2].plot(times, self.thrust_xs * self.masses / 10e5)
+        axs[2, 2].set_xlabel('Time (s)')
+        axs[2, 2].set_ylabel('Thrust X (MN)')
+        axs[2, 2].set_title('Thrust X vs Time')
 
-        # axs[2, 3].plot(times, self.thrust_zs * self.masses / 10e5)
-        # axs[2, 3].set_xlabel('Time (s)')
-        # axs[2, 3].set_ylabel('Thrust Z (MN)')
-        # axs[2, 3].set_title('Thrust Z vs Time')
+        axs[2, 3].plot(times, self.thrust_zs * self.masses / 10e5)
+        axs[2, 3].set_xlabel('Time (s)')
+        axs[2, 3].set_ylabel('Thrust Z (MN)')
+        axs[2, 3].set_title('Thrust Z vs Time')
 
-        # axs[1, 2].plot(times, self.gammas)
-        # axs[1, 2].set_xlabel('Time (s)')
-        # axs[1, 2].set_ylabel('Flight Path Angle')
-        # axs[1, 2].set_ylim(-100, 100)
-        # axs[1, 2].set_title('Flight Path Angle vs Time')
+        axs[1, 2].plot(times, self.gammas)
+        axs[1, 2].set_xlabel('Time (s)')
+        axs[1, 2].set_ylabel('Flight Path Angle')
+        axs[1, 2].set_ylim(-100, 100)
+        axs[1, 2].set_title('Flight Path Angle vs Time')
         
-        # axs[0, 4].plot(self.pos_xs / 1000, self.pos_zs / 1000)
-        # axs[0, 4].set_xlabel('X pos (km)')
-        # axs[0, 4].set_ylabel('Z pos (km)')
-        # # axs[0, 4].set_ylim(0, 125)
-        # # axs[0, 4].set_xlim(0, 125)
-        # axs[0, 4].set_title('Pos Z vs Pos X')
+        axs[0, 4].plot(self.pos_xs / 1000, self.pos_zs / 1000)
+        axs[0, 4].set_xlabel('X pos (km)')
+        axs[0, 4].set_ylabel('Z pos (km)')
+        # axs[0, 4].set_ylim(0, 125)
+        # axs[0, 4].set_xlim(0, 125)
+        axs[0, 4].set_title('Pos Z vs Pos X')
 
-        # axs[1, 4].plot(times, self.speeds / 1000)
-        # ax2 = axs[1, 4].twinx()
-        # ax2.plot(times, self.pos_zs / 1000, color= "purple")
-        # axs[1, 4].set_xlabel('Time (s)')
-        # axs[1, 4].set_ylabel('Speed (km/s)')
-        # axs[1, 4].set_title('Speed vs Time')
+        axs[1, 4].plot(times, self.speeds / 1000)
+        ax2 = axs[1, 4].twinx()
+        ax2.plot(times, self.pos_zs / 1000, color= "purple")
+        axs[1, 4].set_xlabel('Time (s)')
+        axs[1, 4].set_ylabel('Speed (km/s)')
+        axs[1, 4].set_title('Speed vs Time')
 
-        # axs[2, 4].plot(times, 0.5 * self.rhos * self.speeds ** 2 / 1000)
-        # axs[2, 4].set_xlabel('Time (s)')
-        # axs[2, 4].set_ylabel('Dynamic Pressure (kPa)')
-        # axs[2, 4].set_title('Dynamic Pressure vs Time')
+        axs[2, 4].plot(times, 0.5 * self.rhos * self.speeds ** 2 / 1000)
+        axs[2, 4].set_xlabel('Time (s)')
+        axs[2, 4].set_ylabel('Dynamic Pressure (kPa)')
+        axs[2, 4].set_title('Dynamic Pressure vs Time')
 
-        # plt.tight_layout()
-        # plt.show()
+        plt.tight_layout()
+        plt.show()
 
-trajectory = "ElysiumOptimize" # "Falcon 9" # "Elysium"
+trajectory = "Elysium" # "Falcon 9" # "Elysium"
 
 if trajectory == "Elysium":
     elysium_trajectory = Trajectory()
@@ -421,12 +421,12 @@ if trajectory == "Elysium":
         thrust=1_000_000, # newtons
         I_sp_1=306, # seconds
         I_sp_2=457, # seconds
-        kick_angle=np.radians(45), # radians
+        kick_angle=np.radians(68), # radians
         gamma_change_time=10, # seconds
-        m_first_stage_total=700e3,
+        m_first_stage_total=400e3,
         m_first_stage_structural_frac=0.0578,
         m_second_stage_structural=9.272e3, # kg
-        m_second_stage_propellant=60e3, # kg
+        m_second_stage_propellant=80e3, # kg
         m_second_stage_payload=11.5e3, # kg
         delta_V_landing=1000, # m / s
         delta_V_reentry=2000, # m / s
