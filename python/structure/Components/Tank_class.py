@@ -37,7 +37,7 @@ class Tank:
             
     @property
     def mass(self) -> float:
-        return (self._dome_fwd.mass + self._dome_aft.mass + self._cylinder.mass + self._cylinder.insulation)*Km
+        return (self._dome_fwd.mass + 1.123 * 4 *np.pi * self.outer_radius**2 + self._dome_aft.mass + self._cylinder.mass + self._cylinder.insulation)*Km
 
     @property
     def height(self) -> float:

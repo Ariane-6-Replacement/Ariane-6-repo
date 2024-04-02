@@ -63,8 +63,8 @@ class LG:
 
 
     @property
-    def mass(self) -> float:
-        rho= 13.91187 * 1.2 
+    def mass_gear(self) -> float:
+        rho= 13.91187 * 1.2
 
 
         mass_p = rho * self.LG_geometry[0]
