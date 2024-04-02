@@ -71,7 +71,7 @@ class Merlin1D:
         """
 
         self.Isp = 282 # calculated using Isp_calculator.py. UPDATE ITERATIVELY (for now)
-        self.Isp = self.Isp - abs(2.34 - of_ratio) * 100
+        #self.Isp = self.Isp - abs(2.34 - of_ratio) * 100
         return self.Isp
 
 class Propellant:
