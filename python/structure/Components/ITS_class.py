@@ -43,7 +43,7 @@ class Shell:
                 raise ValueError
             s_crit, t_mass = critical_stress(t, self.outer_radius, self.material['youngs_modulus'])
             I = cylindrical_shell_I(self.outer_radius, t_mass)
-            s_max = (s_axial(t_mass, self.outer_radius,1.0,self.thrust) + self.thrust/2 * self.outer_radius / I)
+            s_max = (s_axial(t_mass, self.outer_radius,1.0,self.thrust) + self.thrust*(2/3) * self.outer_radius / I)
             t += 0.0005
         return 2 * self.outer_radius * np.pi * self.height * t_mass * self.material['density']
 

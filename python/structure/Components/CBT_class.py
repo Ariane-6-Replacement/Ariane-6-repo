@@ -19,7 +19,7 @@ class CBT:
 
     if mass_ox > mass_f:
       self._dome_fwd = Dome(self.outer_radius, self.pressure, self.material)
-      self._dome_mid = Dome(self.outer_radius, self.pressure +self.mass_f*g_0*1.5/(np.pi*self.outer_radius**2) , self.material)
+      self._dome_mid = Dome(self.outer_radius, (self.pressure +self.mass_f*g_0*1.5/(np.pi*self.outer_radius**2))*2.0 , self.material)
       self._dome_aft = Dome(self.outer_radius, self.pressure +self.mass_ox*g_0*1.5/(np.pi*self.outer_radius**2), self.material)
       cylinder_height_fwd = round((self.volume_f * 1.05 - self._dome_fwd.inner_volume - self._dome_mid.inner_volume) / (np.pi * self.outer_radius**2),3)
       cylinder_height_aft = round((self.volume_ox * 1.05 - self._dome_aft.inner_volume + self._dome_mid.outer_volume) / (np.pi * self.outer_radius**2),3)

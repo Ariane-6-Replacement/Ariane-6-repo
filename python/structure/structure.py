@@ -13,7 +13,7 @@ class Structure():
         self.material3 = material3 
 
         # self.material3 = material3
-    def calc(self, type, volume_ox, mass_ox, volume_fuel, mass_fuel, thrust, engine_mass, engine_number):
+    def calc(self, type, volume_ox, mass_ox, volume_fuel, mass_fuel, thrust, engine_mass):
         self.type = type
         self.thrust = thrust
         self.volume1 = volume_ox
@@ -21,10 +21,10 @@ class Structure():
         self.mass1 = mass_ox
         self.mass2 = mass_fuel
         self.engine_mass = engine_mass
-        self.engine_number = engine_number 
+        # self.engine_number = engine_number 
         tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.mass1]
         tank2 = [self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
-
+        print(f'Structural sizer inputs: thrust {self.thrust}, volume1 {self.volume1}, volume2 {self.volume2}, mass1 {self.mass1},  mass2 {self.mass2}, engine mass {self.engine_mass}')
         # self.input = "struc in"
         # self.output = 4
 
@@ -123,7 +123,7 @@ class Structure():
                 self._tank_fwd = Tank(*tank1)
                 self._tank_aft = Tank(*tank2)
                 
-            self._ITS_fwd = Shell(self.outer_radius,self.material3,2+self._tank_fwd.dome_fwd.height,self.thrust)
+            self._ITS_fwd = Shell(self.outer_radius,self.material3,2.5+self._tank_fwd.dome_fwd.height,self.thrust)
             self._ITS_aft = Shell(self.outer_radius,self.material3,1+self._tank_aft.dome_fwd.height+self._tank_fwd.dome_aft.height,self.thrust)
             self._EB = Shell(self.outer_radius,self.material3,3+self._tank_aft.dome_aft.height,self.thrust)
     
@@ -132,7 +132,7 @@ class Structure():
         
             #NOTE: 1 - oxidizer, 2 - fuel, possibly add moment 
             self._CBT = CBT(self.outer_radius, self.pressure1, self.material ,self.thrust, self.volume1, self.mass1, self.volume2, self.mass2)
-            self._ITS = Shell(self.outer_radius,self.material,2+self._CBT._dome_fwd.height,self.thrust)
+            self._ITS = Shell(self.outer_radius,self.material,2.5+self._CBT._dome_fwd.height,self.thrust)
             self._EB = Shell(self.outer_radius,self.material,3+self._CBT._dome_aft.height,self.thrust)
           
     @property
@@ -164,8 +164,8 @@ class Structure():
             ht2 = (0.5 * self._CBT._cylinder_fwd.height + self._CBT._cylinder_aft.height + self._EB.height)
             hITS = (0.5 * self._ITS.height + self._CBT._cylinder_fwd.height + self._CBT._cylinder_aft.height + self._EB.height)
             e1 = self._CBT._dome_aft.mass * (self._EB.height - 0.67 * self._CBT._dome_aft.height) + (self._EB.height + self._CBT._cylinder_aft.height - 0.67 * self._CBT._dome_aft.height) * self._CBT._dome_mid.mass  + (self._EB.height + self._CBT._cylinder_aft.height + self._CBT._cylinder_fwd.height+ 0.23 * self._CBT._dome_aft.height) * self._CBT._dome_fwd.mass
-            temp = self.engine_mass * self.engine_number * hengine  + self.mass_engine_structure * hthrust   + hEB* self._EB.mass + self._CBT._cylinder_aft.mass * ht1  + self._CBT._cylinder_fwd.mass * ht2*1.08 + self._ITS.mass * hITS + e1
-            cg = temp / (self.engine_mass*self.engine_number + self.mass_engine_structure + self.mass_total)
+            temp = self.engine_mass  * hengine  + self.mass_engine_structure * hthrust   + hEB* self._EB.mass + self._CBT._cylinder_aft.mass * ht1  + self._CBT._cylinder_fwd.mass * ht2*1.08 + self._ITS.mass * hITS + e1
+            cg = temp / (self.engine_mass + self.mass_engine_structure + self.mass_total)
             return cg
         elif self.type == 'separate': 
             ht1 = (0.5 * self._tank_aft._cylinder.height + self._EB.height)
@@ -174,9 +174,9 @@ class Structure():
             hITS2 = ( 0.5 * self._ITS_fwd.height + self._tank_fwd._cylinder.height + self._ITS_aft.height + self._tank_aft._cylinder.height + self._EB.height)
             e1 = self._tank_aft._dome_aft.mass * (self._EB.height - 0.67 * self._tank_aft._dome_aft.height) + (self._EB.height + self._tank_aft.cylinder.height + 0.23 * self._tank_aft._dome_aft.height) * self._tank_aft._dome_fwd.mass  + (self._EB.height + self._tank_aft._cylinder.height + self._ITS_aft.height - 0.67 * self._tank_aft._dome_aft.height) * self._tank_fwd._dome_aft.mass + (self._EB.height + self._tank_aft.cylinder.height + self._ITS_aft.height + self._tank_fwd.cylinder.height + 0.23 * self._tank_aft._dome_aft.height) * self._tank_fwd._dome_fwd.mass 
 
-            temp = self.engine_mass * self.engine_number * hengine + self.mass_engine_structure * hthrust + self._EB.mass * hEB  + self._tank_aft.cylinder.mass * ht1* 1.08 + self._ITS_aft.mass * hITS1 +  self._tank_fwd.cylinder.mass * 1.08 * ht2 + self._ITS_fwd.mass * hITS2 + e1
+            temp = self.engine_mass * hengine + self.mass_engine_structure * hthrust + self._EB.mass * hEB  + self._tank_aft.cylinder.mass * ht1* 1.08 + self._ITS_aft.mass * hITS1 +  self._tank_fwd.cylinder.mass * 1.08 * ht2 + self._ITS_fwd.mass * hITS2 + e1
 
-            cg = temp / (self.engine_mass*self.engine_number + self.mass_engine_structure + self.mass_total)
+            cg = temp / (self.engine_mass + self.mass_engine_structure + self.mass_total)
             return cg
         else:
             raise ValueError
@@ -185,11 +185,13 @@ class Structure():
         
     @property
     def mass_landing_gear(self):
-        return LG(self.outer_radius, self.mass_total, self.cg,).mass_gear
-        lgmass = LG(self.outer_radius, self.mass_total, self.cg).mass_gear
-        print(f"landing gear mass: {lgmass} kg")
+        lg = LG(self.outer_radius, self.mass_total, self.cg)
+        # print(f"landing gear mass: {lg.mass_gear} kg")
+        print(f"Total mass: {self.mass_total} kg")
 
-        return lgmass
+        return lg.mass_gear
+   
+\
     
 # if __name__ == "__main__":
 #     print("CALCULATING STRUCTURE")
