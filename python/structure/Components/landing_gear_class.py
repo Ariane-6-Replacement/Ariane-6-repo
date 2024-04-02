@@ -8,7 +8,7 @@ class LG:
         self.outer_radius = outer_radius
         self.mass = mass
         self.cg = cg
-        print(f'mass {self.mass}, cg {self.cg}')
+        
     @property
     def Lfp(self) -> float:
         '''H0 - height of the center of gravity with respect to the ground in m
@@ -27,6 +27,7 @@ class LG:
             # print(f'Right {np.sqrt(H0**2 + Lfp**2) - H0}')
             Lfp+=0.1
             # print(f'Left2 {np.sqrt(2*Lfp**2+H0**2) * (1 - np.cos(np.radians(alpha))) * 1/(1+(self.mass + (2*Lfp**2+H0**2))/I) }')
+        print(f'Lfp {Lfp}')
         return Lfp
 
 
