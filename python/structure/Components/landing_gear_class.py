@@ -6,7 +6,7 @@ class LG:
                  cg: float):
 
         self.outer_radius = outer_radius
-        self.mass = self.mass()
+        self.mass = mass
         self.cg = cg
 
     @property

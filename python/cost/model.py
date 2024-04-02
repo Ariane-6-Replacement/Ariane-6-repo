@@ -78,24 +78,25 @@ class CostModel():
     def man_years_to_million_euro_2022(self,man_years):
         return man_years * 0.3397536 # TODO: ADD REFERENCE
 
-    def million_euro_to_man_years_2022(self, million_euro):
-        return million_euro / 0.3397536
+    def euro_to_man_years_2022(self, euro):
+        return euro /1000000 / 0.3397536
 
     def calculate(self,
                   dry_masses, # tonnes
                   prop_masses, # tonnes
                   rocket_reflights,
+                  engine_unit_cost,
+                  engine_number,
                   launches_per_year = 10,
                   lifetime = 20,
                   #rocket_fleet_count = 5,
                   number_of_engines = 11,
                   launch_site_capacity = 12,
-                  engine_unit_cost = 1_000_000, # euros
                   engine_reflights = 15):
         self.rockets_per_stage = np.array([1, 1])
         #self.total_flights = rocket_fleet_count * rocket_reflights
         self.total_flights = launches_per_year * lifetime
-
+        engine_cost = self.euro_to_man_years_2022(engine_unit_cost)
         self.number_of_rocket_stages = np.sum(self.rockets_per_stage)
 
         rocket_fleet_count = self.total_flights / (rocket_reflights + 1)
@@ -105,6 +106,8 @@ class CostModel():
                                   self.rockets_per_stage,
                                   self.number_of_rocket_stages,
                                   rocket_fleet_count,
+                                  engine_cost,
+                                  engine_number,
                                   learning_factor=1.00)
 
         self.operational.calculate(prop_masses,
@@ -190,7 +193,7 @@ class ProductionModel():
         self.cost.unit = 5.0 * rockets_per_stage * learning_factor * dry_masses ** 0.46
 
         # Man-years
-        self.cost.total_unit = 1.02 ** number_of_rocket_stages * np.sum(self.cost.unit)
+        self.cost.total_unit = 1.02 ** number_of_rocket_stages * np.sum(self.cost.unit) + number_engines * engine_cost
 
         # Man-years
         self.cost.total = rocket_fleet_count * self.cost.total_unit 
