@@ -39,7 +39,7 @@ class MassCalculator:
         assert dV_split.size == Isp.size, "Please provide arrays with equal lengths"
 
         wet_masses = np.array([m_payload,0,0])
-
+        print(f'dv:{dV_split}')
         # for i in np.flip(np.array(range(stages))):
             # dV_i = dV_split[i]
          #    f_i = inert_mass_fractions[i]
