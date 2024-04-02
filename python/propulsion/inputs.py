@@ -32,7 +32,7 @@ class Prometheus:
         self.turbopump_overall_power = 10e6  # MW
         self.diameter_truss_structure = 3.35
         self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
-
+        self.cost = 1000000
     def get_Isp(self, of_ratio):
         """"
         Lower O/F can mean less mass because LOX is heavy. Nominal: Isp = 360 for 100bar and O/F=3.5
@@ -63,6 +63,7 @@ class Merlin1D:
         self.turbopump_overall_power = 10e6  # MW
         self.diameter_truss_structure = 3.35
         self.area_truss_structure = math.pi * self.diameter_truss_structure ** 2 / 4
+        self.cost = 1000000
     def get_Isp(self, of_ratio):
         """"
         Lower O/F can mean less mass because LOX is heavy. Nominal: Isp = 360 for 100bar and O/F=3.5
