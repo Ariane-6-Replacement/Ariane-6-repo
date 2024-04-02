@@ -217,6 +217,17 @@ class Trajectory():
                 
         total_thrust = number_of_engines * self.thrust
 
+
+        
+        suicide_burn_time = (np.sqrt(2*g_0*self.pos_z + self.velocity_z**2)+self.velocity_z)/g_0
+        land_accel = self.number_of_engines_landing*self.thrust/(self.mass*0.65)
+        deccel_time = self.velocity_z/(land_accel-g_0)
+        iniate_landing_burn = False 
+        if deccel_time <suicide_burn_time + 5:
+             iniate_landing_burn = True
+             if self.landing_burn_start_time == 0:
+                    self.landing_burn_start_time = t
+
         if t < self.burntime:
             m_first_stage_propellant_burned = number_of_engines * self.mass_flowrate * t
             self.mass = self.m_first_stage + self.m_second_stage + self.m_prop_landing + self.m_prop_reentry - m_first_stage_propellant_burned
@@ -228,8 +239,10 @@ class Trajectory():
             reentering = self.pos_z < self.reentry_burn_alt
             landing = self.pos_z < self.landing_burn_alt
             
-            if landing:
+            if iniate_landing_burn:
                 burn_time_so_far = t - self.landing_burn_start_time
+                if burn_time_so_far < 1:
+                    print("landing alt:", self.pos_z)
                 fuel_burned = number_of_engines * self.mass_flowrate * burn_time_so_far
                 fuel_burned = np.clip(fuel_burned, 0, self.m_prop_landing)
 
@@ -302,7 +315,7 @@ class Trajectory():
             if not success:
                 break
 
-        print("Finished")
+        # print("Finished")
 
         apogee_index = np.argmax(self.pos_zs)
 
@@ -313,9 +326,11 @@ class Trajectory():
         required_delta_V = self.get_required_second_stage_delta_V(apogee_z, apogee_speed)
         print("Required Second Stage Delta V:", required_delta_V)
 
-        print("Final Velocity Z:", self.velocity_zs[-1])
-        print("Final Z:", self.pos_zs[-1])
-        print("Final Mass:", self.masses[-1])
+        if self.velocity_zs[-1]<0:
+            print("crashed going: ", self.velocity_zs[-1] )
+        # print("Final Velocity Z:", self.velocity_zs[-1])
+        # print("Final Z:", self.pos_zs[-1])
+        print("Final Mass:", self.masses[-1])   
         print("Propellant Mass Remaining:", self.masses[-1] - self.m_first_stage_structural)
 
         fig, axs = plt.subplots(3, 5, figsize=(10, 8))  # 2x2 grid of subplots
@@ -384,6 +399,8 @@ class Trajectory():
         axs[0, 4].plot(self.pos_xs / 1000, self.pos_zs / 1000)
         axs[0, 4].set_xlabel('X pos (km)')
         axs[0, 4].set_ylabel('Z pos (km)')
+        # axs[0, 4].set_ylim(0, 125)
+        # axs[0, 4].set_xlim(0, 125)
         axs[0, 4].set_title('Z pos vs X pos')
 
         axs[1, 4].plot(times, self.speeds / 1000)
@@ -401,55 +418,59 @@ class Trajectory():
         plt.tight_layout()
         plt.show()
 
-trajectory = Trajectory()
+trajectory = "Elysium" # "Falcon 9"
 
-# trajectory.setup(
-#     number_of_engines_ascent=9,
-#     number_of_engines_landing=1,
-#     number_of_engines_reentry=3,
-#     thrust=1_000_000, # newtons
-#     I_sp_1=306, # seconds
-#     I_sp_2=457, # seconds
-#     kick_angle=np.radians(45), # radians
-#     gamma_change_time=10, # seconds
-#     m_first_stage_total = 390e3,
-#     m_first_stage_structural_frac= 0.0578,
-#     m_second_stage_structural=9.272e3, # kg
-#     m_second_stage_propellant=75e3, # kg
-#     m_second_stage_payload=11.5e3, # kg
-#     delta_V_landing=200, # m / s
-#     delta_V_reentry=1_300, # m / s
-#     Cd_ascent=0.3,
-#     Cd_descent=1.0,
-#     diameter=5.4, # meters
-#     reentry_burn_alt=55_000, # meters
-#     landing_burn_alt=1_000, # meters
-#     gravity_turn_alt=10_000 # meters
-# )
-
-
-trajectory.setup(
-    number_of_engines_ascent=9*1,
-    number_of_engines_landing=1,
-    number_of_engines_reentry=3,
-    thrust=800_000, # newtons
-    I_sp_1=283, # seconds
-    I_sp_2=348, # seconds
-    kick_angle=np.radians(71), # radians
-    gamma_change_time=7.5, # seconds
-    m_first_stage_total = 421e3,
-    m_first_stage_structural_frac= 0.0578,
-    m_second_stage_structural=3.9e3, # kg
-    m_second_stage_propellant=92e3, # kg
-    m_second_stage_payload=4.8e3, # kg
-    delta_V_landing=200, # m / s
-    delta_V_reentry=1_300, # m / s
-    Cd_ascent=0.3,
-    Cd_descent=1.0,
-    diameter=3.7, # meters
-    reentry_burn_alt=55_000, # meters
-    landing_burn_alt=1_000, # meters
-    gravity_turn_alt=1.5e3 # meters
-)
-
-trajectory.run()
+if trajectory == "Elysium":
+    print("running Elysium")
+    elysium_trajectory = Trajectory()
+    elysium_trajectory.setup(
+        number_of_engines_ascent=9,
+        number_of_engines_landing=3,
+        number_of_engines_reentry=3,
+        thrust=1_000_000, # newtons
+        I_sp_1=306, # seconds
+        I_sp_2=457, # seconds
+        kick_angle=np.radians(45), # radians
+        gamma_change_time=10, # seconds
+        m_first_stage_total = 700e3,
+        m_first_stage_structural_frac= 0.0578,
+        m_second_stage_structural=9.272e3, # kg
+        m_second_stage_propellant=85e3, # kg
+        m_second_stage_payload=11.5e3, # kg
+        delta_V_landing=2500, # m / s
+        delta_V_reentry=1_500, # m / s
+        Cd_ascent=0.3,
+        Cd_descent=1.0,
+        diameter=5.4, # meters  
+        reentry_burn_alt=55_000, # meters
+        landing_burn_alt=5000, # meters
+        gravity_turn_alt=10_000 # meters
+    )
+    elysium_trajectory.run()
+elif trajectory == "Falcon 9":
+    print("running Falcon9")
+    falcon_9_trajectory = Trajectory()
+    falcon_9_trajectory.setup(
+        number_of_engines_ascent=9,
+        number_of_engines_landing=1,
+        number_of_engines_reentry=3,
+        thrust=805_000 * 1, # newtons
+        I_sp_1=283, # seconds
+        I_sp_2=348, # seconds   
+        kick_angle=np.radians(75.5), # radians
+        gamma_change_time=8, # seconds
+        m_first_stage_total = 421e3,
+        m_first_stage_structural_frac= 0.045, #0.0578,
+        m_second_stage_structural=3.9e3, #3.9e3, # kg
+        m_second_stage_propellant=92e3, # kg
+        m_second_stage_payload=13.1e3,
+        delta_V_landing=200, # m / s
+        delta_V_reentry=2_000, # m / s
+        Cd_ascent=0.4,
+        Cd_descent=1.0,
+        diameter=3.7, # meters
+        reentry_burn_alt=55_000, # meters
+        landing_burn_alt=1_000, # meters
+        gravity_turn_alt=1.5e3 # meters
+    )
+    falcon_9_trajectory.run()
