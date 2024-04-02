@@ -7,6 +7,7 @@ def calculate_mass_flow_rate(thrust, Isp):
   # calculate mass flow based on Isp equation
   g0 = 9.80665
   mass_flow = thrust / (Isp * g0)
+  print("mass flow",mass_flow)
   return mass_flow
 
 # determine oxidiser and fuel mass and volume

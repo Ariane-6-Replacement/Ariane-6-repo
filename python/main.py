@@ -14,6 +14,7 @@ def main():
         dv_split = 0.3,
         engine_options = ['Prometheus'],
         engine = 0, # index in engine options
+        engine_number = 9,
         mf1 = 0.05,
         reflights = 5,
         material_options = list(materials.keys()),
