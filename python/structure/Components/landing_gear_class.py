@@ -18,8 +18,8 @@ class LG:
         # print('alpha', np.radians(alpha))
         Lfp = 0.1
         Dh = 2.0 # Analyzing landing gear from Falcon 9 
-        H0 = self.cg + 1.8 + Dh
-        alpha = 23# Ask Thomas for source deg
+        H0 = self.cg + 2.0 + Dh
+        alpha = 35# Ask Thomas for source deg
         I = self.mass * (self.outer_radius)**2 
         
         while np.sqrt(2*Lfp**2+H0**2) * (1 - np.cos(np.radians(alpha))) * 1/(1+(self.mass + (2*Lfp**2+H0**2))/I) > np.sqrt(H0**2 + Lfp**2) - H0:
@@ -45,7 +45,7 @@ class LG:
         drop_h - vertical stroke limit '''
         Dh = 2.0 # Analyzing landing gear from Falcon 9 
         x = self.Lfp - self.outer_radius
-        ys = 1.8 + Dh
+        ys = 2.0 + Dh
         # H0 = self.cg 
         Ls = np.sqrt(x**2 + ys**2)
         tau_p = 25
@@ -68,7 +68,10 @@ class LG:
         return (mass_p + 2 * mass_s + 250) * 4
     
 # test bit 
-# if __name__ == "__main__":
-#     mass = 330000
-#     test = LG(2.7,mass, 15)
-#     print(f'Lg.mass {test.Lfp}')
+if __name__ == "__main__":
+    mass = 6258.0080096848815
+
+    cg=  5.273065608372961
+
+    test = LG(2.5,mass,cg)
+    print(f'Lg.mass {test.LG_geometry}, {test.Lfp}')
