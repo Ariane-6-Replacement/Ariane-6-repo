@@ -31,8 +31,11 @@ class Trajectory():
     def get_gamma(self, velocity_z, velocity_x):
         return np.arctan2(velocity_z, velocity_x)
     
+    def get_g(self, pos_z):
+        return -g_0 * (1 - 2 * pos_z / R_earth)
+    
     def get_propellant(self, I_sp_1, delta_V, M_remaining):
-        propellant = np.exp(delta_V / (I_sp_1 * g_0)) * (self.M_empty + M_remaining) - (self.M_empty + M_remaining)
+        propellant = np.exp(delta_V / (I_sp_1 * g_0)) * (self.m_first_stage_structural + M_remaining) - (self.m_first_stage_structural + M_remaining)
         return propellant
     
     def get_speed(self, velocity_x, velocity_z):
@@ -49,21 +52,22 @@ class Trajectory():
         delta_V_2 = self.delta_V_circularize(r_1, r_2)
         return delta_V_1 + delta_V_2
     
-    def get_delta_V_total(self, pos_z, speed):
+    def get_second_stage_available_delta_V(self):
+        second_stage_initial_mass = self.m_second_stage_structural + self.m_second_stage_propellant + self.m_second_stage_payload
+        second_stage_final_mass = self.m_second_stage_structural + self.m_second_stage_payload
+
+        available_delta_v = g_0 * self.I_sp_2 * np.log(second_stage_initial_mass / second_stage_final_mass)
+        return available_delta_v
+    
+    def get_required_second_stage_delta_V(self, pos_z, speed):
         altitude = R_earth + pos_z
         v_c1 = np.sqrt(mu_earth / (altitude + R_earth))
         delta_V_circ = v_c1 - speed
-
-        available_delta_v = g_0 * self.I_sp_2 * np.log(1 / (1 - self.struct_coeff_2nd_stage))
-
-        print("Available Delta V:", available_delta_v)
 
         GTO_p = R_earth + 250e3 # [m]
         GTO_a = R_earth + 22_500e3 # [m]
 
         required_delta_V = delta_V_circ + self.delta_V_circular_to_circular(altitude, GTO_p) + self.delta_V_circular_to_elliptical(GTO_p, GTO_a)
-
-        print("Required Delta V:", required_delta_V)
 
         return required_delta_V
 
@@ -74,18 +78,18 @@ class Trajectory():
               thrust,
               I_sp_1,
               I_sp_2,
-              mass_flowrate,
-              burntime,
               kick_angle,
               gamma_change_time,
-              M0_1,
-              M_empty,
+              m_first_stage_structural,
+              m_first_stage_propellant,
+              m_second_stage_structural,
+              m_second_stage_propellant,
+              m_second_stage_payload,
               delta_V_landing,
               delta_V_reentry,
               Cd_ascent,
               Cd_descent,
               diameter,
-              struct_coeff_2nd_stage,
               reentry_burn_alt,
               landing_burn_alt,
               gravity_turn_alt):
@@ -97,21 +101,35 @@ class Trajectory():
         self.thrust = thrust
         self.I_sp_1 = I_sp_1
         self.I_sp_2 = I_sp_2
-        self.mass_flowrate = mass_flowrate
-        self.burntime = burntime
+        self.mass_flowrate = self.thrust / (g_0 * self.I_sp_1)
         self.kick_angle = kick_angle
         self.gamma_change_time = gamma_change_time
         
-        self.M0_1 = M0_1
-        self.mass = M0_1
-        self.M_empty = M_empty
-        self.M_prop_landing = self.get_propellant(self.I_sp_1, delta_V_landing, 0)
-        self.M_prop_reentry = self.get_propellant(self.I_sp_1, delta_V_reentry, self.M_prop_landing)
+        self.m_first_stage_structural = m_first_stage_structural
+        self.m_first_stage_propellant = m_first_stage_propellant
+        self.m_second_stage_structural = m_second_stage_structural
+        self.m_second_stage_propellant = m_second_stage_propellant
+        self.m_second_stage_payload = m_second_stage_payload
+        self.burntime = m_first_stage_propellant / (self.mass_flowrate * self.number_of_engines_ascent)
+        
+        self.m_second_stage = self.m_second_stage_structural + self.m_second_stage_propellant + self.m_second_stage_payload
+        self.m_first_stage = self.m_first_stage_propellant + self.m_first_stage_structural
+        
+        self.m_prop_landing = self.get_propellant(self.I_sp_1, delta_V_landing, 0)
+        self.m_prop_reentry = self.get_propellant(self.I_sp_1, delta_V_reentry, self.m_prop_landing)
+        
+        self.mass = self.m_first_stage + self.m_second_stage + self.m_prop_landing + self.m_prop_reentry
+        
+        self.delta_V_first_stage = self.I_sp_1 * g_0 * np.log(self.mass / (self.mass - self.m_first_stage_propellant))
+        self.delta_V_second_stage = self.get_second_stage_available_delta_V()
         
         self.Cd_ascent = Cd_ascent
         self.Cd_descent = Cd_descent
         self.area = np.pi * diameter ** 2 / 4
-        self.struct_coeff_2nd_stage = struct_coeff_2nd_stage
+        
+        self.m_second_stage_structural = m_second_stage_structural
+        self.m_second_stage_propellant = m_second_stage_propellant
+        self.m_second_stage_payload = m_second_stage_payload
         
         self.reentry_burn_alt = reentry_burn_alt
         self.landing_burn_alt = landing_burn_alt
@@ -126,8 +144,12 @@ class Trajectory():
         self.accel_x = 0
         self.accel_z = 0
 
-        print("Propellant available for re-entry:", self.M_prop_reentry)
-        print("Propellant available for landing:", self.M_prop_landing)
+        print("First Stage Delta V:", self.delta_V_first_stage)
+        print("Second Stage Delta V:", self.delta_V_second_stage)
+        print("Total Delta V:", self.delta_V_first_stage + self.delta_V_second_stage)
+        print("Burntime:", self.burntime)
+        print("Propellant available for re-entry:", self.m_prop_reentry)
+        print("Propellant available for landing:", self.m_prop_landing)
 
         self.landing_burn_start_time = 0
         self.reentry_burn_start_time = 0
@@ -186,23 +208,24 @@ class Trajectory():
         total_thrust = number_of_engines * self.thrust
 
         if t < self.burntime:
-            self.mass = self.M0_1 - number_of_engines * self.mass_flowrate * t
+            m_first_stage_propellant_burned = number_of_engines * self.mass_flowrate * t
+            self.mass = self.m_first_stage + self.m_second_stage + self.m_prop_landing + self.m_prop_reentry - m_first_stage_propellant_burned
             self.thrust_x = np.cos(gamma) * total_thrust / self.mass
             self.thrust_z = np.sin(gamma) * total_thrust / self.mass
 
         if not ascending:
-            self.mass = self.M_empty + self.M_prop_landing + self.M_prop_reentry # kg
+            self.mass = self.m_first_stage_structural + self.m_prop_landing + self.m_prop_reentry # kg
             reentering = self.pos_z < self.reentry_burn_alt
             landing = self.pos_z < self.landing_burn_alt
             
             if landing:
                 burn_time_so_far = t - self.landing_burn_start_time
                 fuel_burned = number_of_engines * self.mass_flowrate * burn_time_so_far
-                fuel_burned = np.clip(fuel_burned, 0, self.M_prop_landing)
+                fuel_burned = np.clip(fuel_burned, 0, self.m_prop_landing)
 
-                self.mass = self.M_empty + self.M_prop_landing - fuel_burned
+                self.mass = self.m_first_stage_structural + self.m_prop_landing - fuel_burned
 
-                propellant_available = fuel_burned < self.M_prop_landing
+                propellant_available = fuel_burned < self.m_prop_landing
 
                 if propellant_available:
                     self.thrust_x = -np.cos(gamma) * total_thrust / self.mass
@@ -211,11 +234,11 @@ class Trajectory():
             elif reentering:
                 burn_time_so_far = t - self.reentry_burn_start_time
                 fuel_burned = number_of_engines * self.mass_flowrate * burn_time_so_far
-                fuel_burned = np.clip(fuel_burned, 0, self.M_prop_reentry)
+                fuel_burned = np.clip(fuel_burned, 0, self.m_prop_reentry)
 
-                self.mass = self.M_empty + self.M_prop_landing + self.M_prop_reentry - fuel_burned
+                self.mass = self.m_first_stage_structural + self.m_prop_landing + self.m_prop_reentry - fuel_burned
 
-                propellant_available = fuel_burned < self.M_prop_reentry
+                propellant_available = fuel_burned < self.m_prop_reentry
 
                 if propellant_available:
                     self.thrust_x = -np.cos(gamma) * total_thrust / self.mass
@@ -225,7 +248,7 @@ class Trajectory():
         drag_z = -np.sin(gamma) * drag_force / self.mass
 
         self.accel_x = self.thrust_x + drag_x
-        self.accel_z = -g_0 + self.thrust_z + drag_z
+        self.accel_z = self.get_g(self.pos_z) + self.thrust_z + drag_z
 
         self.velocity_x += self.accel_x * dt
         self.velocity_z += self.accel_z * dt
@@ -277,12 +300,13 @@ class Trajectory():
         apogee_velocity_x = self.velocity_xs[apogee_index]
         apogee_velocity_z = self.velocity_zs[apogee_index]
         apogee_speed = self.get_speed(apogee_velocity_x, apogee_velocity_z)
-        delta_V_total = self.get_delta_V_total(apogee_z, apogee_speed)
+        required_delta_V = self.get_required_second_stage_delta_V(apogee_z, apogee_speed)
+        print("Required Second Stage Delta V:", required_delta_V)
 
         print("Final Velocity Z:", self.velocity_zs[-1])
         print("Final Z:", self.pos_zs[-1])
         print("Final Mass:", self.masses[-1])
-        print("Propellant Mass Remaining:", self.masses[-1] - self.M_empty)
+        print("Propellant Mass Remaining:", self.masses[-1] - self.m_first_stage_structural)
 
         fig, axs = plt.subplots(3, 5, figsize=(10, 8))  # 2x2 grid of subplots
 
@@ -290,93 +314,77 @@ class Trajectory():
         axs[0, 0].set_xlabel('Time (s)')
         axs[0, 0].set_ylabel('Pos x (km)')
         axs[0, 0].set_title('Pos (x vs time)')
-        axs[0, 0].legend()
 
         axs[0, 1].plot(times, self.pos_zs / 1000)
         axs[0, 1].set_xlabel('Time (s)')
         axs[0, 1].set_ylabel('Pos z (km)')
         axs[0, 1].set_title('Pos (z vs time)')
-        axs[0, 1].legend()
 
         axs[0, 2].plot(times, self.rhos)
         axs[0, 2].set_xlabel('Time (s)')
         axs[0, 2].set_ylabel('Rho (kg/m^3)')
         axs[0, 2].set_title('Rho vs Time')
-        axs[0, 2].legend()
         
         axs[1, 3].plot(times, self.masses / 1000)
         axs[1, 3].set_xlabel('Time (s)')
         axs[1, 3].set_ylabel('Mass (tonnes)')
         axs[1, 3].set_title('Mass vs Time')
-        axs[1, 3].legend()
 
         axs[0, 3].plot(times, self.drags / 1e6)
         axs[0, 3].set_xlabel('Time (s)')
         axs[0, 3].set_ylabel('Drag (MN)')
         axs[0, 3].set_title('Drag vs Time')
-        axs[0, 3].legend()
 
         axs[1, 0].plot(times, self.velocity_xs / 1000)
         axs[1, 0].set_xlabel('Time (s)')
         axs[1, 0].set_ylabel('Velocity x (km/s)')
         axs[1, 0].set_title('Velocity x vs Time')
-        axs[1, 0].legend()
 
         axs[1, 1].plot(times, self.velocity_zs / 1000)
         axs[1, 1].set_xlabel('Time (s)')
         axs[1, 1].set_ylabel('Velocity z (km/s)')
         axs[1, 1].set_title('Velocity z vs Time')
-        axs[1, 1].legend()
-
         
-        axs[2, 0].plot(times, self.accel_xs)
+        axs[2, 0].plot(times, self.accel_xs / g_0)
         axs[2, 0].set_xlabel('Time (s)')
-        axs[2, 0].set_ylabel('Accel x (m/s2)')
+        axs[2, 0].set_ylabel('Accel x (g)')
         axs[2, 0].set_title('Accel x vs Time')
-        axs[2, 0].legend()
 
-        axs[2, 1].plot(times, self.accel_zs)
+        axs[2, 1].plot(times, self.accel_zs / g_0)
         axs[2, 1].set_xlabel('Time (s)')
-        axs[2, 1].set_ylabel('Accel z (m/s2)')
+        axs[2, 1].set_ylabel('Accel z (g)')
         axs[2, 1].set_title('Accel z vs Time')
-        axs[2, 1].legend()
         
         axs[2, 2].plot(times, self.thrust_xs * self.masses / 10e5)
         axs[2, 2].set_xlabel('Time (s)')
         axs[2, 2].set_ylabel('Thrust x (MN)')
         axs[2, 2].set_title('Thrust x vs Time')
-        axs[2, 2].legend()
 
         axs[2, 3].plot(times, self.thrust_zs * self.masses / 10e5)
         axs[2, 3].set_xlabel('Time (s)')
         axs[2, 3].set_ylabel('Thrust z (MN)')
         axs[2, 3].set_title('Thrust z vs Time')
-        axs[2, 3].legend()
 
         axs[1, 2].plot(times, self.gammas)
         axs[1, 2].set_xlabel('Time (s)')
         axs[1, 2].set_ylabel('Gamma')
         axs[1, 2].set_ylim(-100, 100)
         axs[1, 2].set_title('Gamma vs Time')
-        axs[1, 2].legend()
         
         axs[0, 4].plot(self.pos_xs / 1000, self.pos_zs / 1000)
         axs[0, 4].set_xlabel('X pos (km)')
         axs[0, 4].set_ylabel('Z pos (km)')
         axs[0, 4].set_title('Z pos vs X pos')
-        axs[0, 4].legend()
 
         axs[1, 4].plot(times, self.speeds / 1000)
         axs[1, 4].set_xlabel('Time (s)')
         axs[1, 4].set_ylabel('Speed (km/s)')
         axs[1, 4].set_title('Speed vs Time')
-        axs[1, 4].legend()
 
         axs[2, 4].plot(times, 0.5 * self.rhos * self.speeds ** 2 / 1000)
         axs[2, 4].set_xlabel('Time (s)')
         axs[2, 4].set_ylabel('Dynamic Pressure (kPa)')
         axs[2, 4].set_title('Dynamic Pressure vs Time')
-        axs[2, 4].legend()
 
         plt.tight_layout()
         plt.show()
@@ -388,22 +396,20 @@ elysium_trajectory.setup(
     number_of_engines_landing=1,
     number_of_engines_reentry=3,
     thrust=1_000_000, # newtons
-    I_sp_1=357, # seconds
+    I_sp_1=306, # seconds
     I_sp_2=457, # seconds
-    mass_flowrate=409, # kg / s
-    burntime=140.3, # s
     kick_angle=np.radians(45), # radians
     gamma_change_time=10, # seconds
-    # First stage mass at beginning of ascent
-    M0_1=700e3, # kg
-    # Empty mass
-    M_empty=40e3, # kg
+    m_first_stage_structural=40e3, # kg
+    m_first_stage_propellant=650e3, # kg
+    m_second_stage_structural=9.272e3, # kg
+    m_second_stage_propellant=40e3, # kg
+    m_second_stage_payload=11.5e3, # kg
     delta_V_landing=200, # m / s
     delta_V_reentry=1_300, # m / s
     Cd_ascent=0.3,
     Cd_descent=1.0,
     diameter=5.4, # meters
-    struct_coeff_2nd_stage=0.75,
     reentry_burn_alt=55_000, # meters
     landing_burn_alt=1_000, # meters
     gravity_turn_alt=10_000 # meters
