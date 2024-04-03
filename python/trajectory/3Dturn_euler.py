@@ -308,10 +308,10 @@ class Trajectory():
             # print("barge overshot")
             return False
 
-        # below_ground = self.pos_z < 0
+        below_ground = self.pos_z < -1000
 
-        # if below_ground:
-        #     return False
+        if below_ground:
+            return False
     
         # Previous position was apogee
         if not before_apogee and self.apogee_index == 0:
@@ -322,8 +322,8 @@ class Trajectory():
             apogee_speed = self.get_speed(apogee_velocity_x, apogee_velocity_z)
             required_delta_V = self.get_required_second_stage_delta_V(apogee_z, apogee_speed)
             print("Required Second Stage Delta V:", required_delta_V / 1000, "km / s")
-            if required_delta_V > self.delta_V_second_stage:
-                return False
+            # if required_delta_V > self.delta_V_second_stage:
+            #     return False
             if apogee_z > self.max_apogee:
                 return False
                 
@@ -360,8 +360,8 @@ class Trajectory():
         t_max = simulation_time
         t = 0
 
-        self.max_barge_distance = 450e3 # meters
-        self.max_apogee = 400e3 # meters
+        self.max_barge_distance = 1000e3 # meters
+        self.max_apogee = 1000e3 # meters
 
         success = True
 
@@ -430,6 +430,7 @@ class Trajectory():
 trajectory = "Elysium" # "Falcon 9" # "Elysium"
 
 if trajectory == "Elysium":
+    print("Running Elysium...")
     elysium_trajectory = Trajectory()
     
     first_stage_ascent_prop_margin = 1.02
@@ -504,7 +505,7 @@ elif trajectory == "ElysiumOptimize":
                                 ", m_second_stage_propellant:", second_stage_propellant)
 
 elif trajectory == "Falcon 9":
-    print("running Falcon9")
+    print("Running Falcon 9...")
     falcon_9_trajectory = Trajectory()
     falcon_9_trajectory.setup(
         number_of_engines_ascent=9,
@@ -517,7 +518,6 @@ elif trajectory == "Falcon 9":
         gamma_change_time=8, # seconds
         m_first_stage_total = 421e3,
         m_first_stage_structural_frac= 0.045, #0.0578,
-        m_second_stage_structural=3.9e3, #3.9e3, # kg
         m_second_stage_propellant=92e3, # kg
         m_second_stage_payload=13.1e3,
         delta_V_landing=200, # m / s
