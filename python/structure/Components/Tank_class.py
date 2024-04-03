@@ -1,3 +1,6 @@
+'''
+Code for creating tank object.
+'''
 from python.structure.Components.dome_class import Dome
 from python.structure.Components.cylinder_class import Cylinder
 from python.structure.materials import materials as m
@@ -12,7 +15,14 @@ class Tank:
         self.material = m[material]
         self.volume = volume
         self.mass_p = mass_p
-       
+        '''
+        outer radius: tank outer radius [m]
+        pressure: MEOP [Pa]
+        material: tank material [-]
+        thrust: experience maximal thrust [N]
+        volume: propellant volume [m^3]
+        mass_P: propellant mass [kg]
+        '''
 
       # Calculate dome_fwd and dome_aft directly within __init__
        
@@ -37,6 +47,7 @@ class Tank:
             
     @property
     def mass(self) -> float:
+        #NOTE: 1.123 kg/m^2 comes from MER relation from Uniersity of Meryland, 4 *np.pi * self.outer_radius**2 assumes area of a sphere
         return (self._dome_fwd.mass + 1.123 * 4 *np.pi * self.outer_radius**2 + self._dome_aft.mass + self._cylinder.mass + self._cylinder.insulation)*Km
 
     @property
@@ -47,10 +58,3 @@ class Tank:
     def inner_volume(self) -> float:
         return self._dome_fwd.inner_volume() + self._cylinder.inner_volume() + self._dome_aft.inner_volume()
   
-
-# if __name__ == "__main__":
-#     tank_test = Tank(2.5,7.8E5,'2219',11E6,400,300E3)
-#     print('DONE')
-#     print('Thickness: ',tank_test._cylinder.thickness)
-#     print('Mass: ',tank_test.cylimass)
-#     print('FINISHED')
