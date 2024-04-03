@@ -137,7 +137,7 @@ class Structure():
           
     @property
     def mass_engine_structure(self):
-        return 4000
+        return 3500
     
     @property
     def mass_total(self)-> float:
