@@ -29,7 +29,7 @@ class Trajectory():
 
     def get_drag(self, rho, velocity_x, velocity_z, A, Cd):
         drag = 0.5 * rho * (velocity_x ** 2 + velocity_z ** 2) * A * Cd
-        return drag # 0
+        return drag
     
     def get_gamma(self, velocity_z, velocity_x):
         return np.arctan2(velocity_z, velocity_x)
@@ -66,6 +66,24 @@ class Trajectory():
         required_delta_V = delta_V_circ + self.delta_V_circular_to_circular(altitude, GTO_p) + self.delta_V_circular_to_elliptical(GTO_p, GTO_a)
 
         return required_delta_V
+    
+    # Based on structures formulation.
+    def get_second_stage_structural_mass(self, second_stage_propellant_mass):
+        prop_mass_extension = second_stage_propellant_mass - 31_000
+        of = 5.8
+        mf = prop_mass_extension / (of+1)
+        mox = prop_mass_extension - mf
+        vf = mf / 70.8
+        vox = mox / 1141
+        Lf = vf / (np.pi * 2.7 ** 2)
+        Lox = vox / (np.pi * 2.7 ** 2)
+        struc_mass_extension = (Lf + Lox) * 3000 * np.pi * 5.4 * 5E-3
+        mfaring = 2657 #kg
+        msyldas = 425 # kg
+        mcone = 200 # kg
+        mstruc = 4540 * 5.8/4.9 + struc_mass_extension + 385
+        second_stage_structural_mass = mfaring + msyldas + mcone + mstruc
+        return second_stage_structural_mass
 
     def setup(self,
               number_of_engines_ascent,
@@ -78,7 +96,6 @@ class Trajectory():
               gamma_change_time,
               m_first_stage_total,
               m_first_stage_structural_frac,
-              m_second_stage_structural,
               m_second_stage_propellant,
               m_second_stage_payload,
               delta_V_landing,
@@ -114,8 +131,10 @@ class Trajectory():
 
         assert self.m_first_stage_propellant > 0, "No propellant available for ascent"
 
-        self.m_second_stage_structural = m_second_stage_structural
         self.m_second_stage_propellant = m_second_stage_propellant
+        # 2nd stage structural mass provided by structures.
+        self.m_second_stage_structural = 9.272e3 # self.get_second_stage_structural_mass(self.m_second_stage_propellant) # 9.272e3 kg
+        print("Second stage structural mass:", self.m_second_stage_structural / 1000, "t")
         self.m_second_stage_payload = m_second_stage_payload
 
         self.burntime = self.m_first_stage_propellant / (self.mass_flowrate * self.number_of_engines_ascent)
@@ -146,7 +165,7 @@ class Trajectory():
         self.accel_x = 0
         self.accel_z = 0
 
-
+        self.second_stage_thrust = 180e3 # newtons # From propulsion.
 
         print("First Stage Delta V:", self.delta_V_first_stage / 1e3, "km / s")
         print("Second Stage Delta V:", self.delta_V_second_stage / 1e3, "km / s")
@@ -156,6 +175,7 @@ class Trajectory():
         print("Propellant available for re-entry:", self.m_prop_reentry / 1e3, "t")
         print("Propellant available for landing:", self.m_prop_landing / 1e3, "t")
         print("TWR:", self.thrust*self.number_of_engines_ascent/(g_0*self.m_total))
+        #print("TWR:", self.thrust*self.number_of_engines_ascent/(g_0*self.m_second_stage))
 
         self.pos_xs = np.array([])
         self.pos_zs = np.array([])
@@ -170,6 +190,13 @@ class Trajectory():
         self.gammas = np.array([])
         self.masses = np.array([])
         self.speeds = np.array([])
+
+        self.ascent_start_index = 0
+        self.coasting_start_index = 0
+        self.apogee_index = 0
+        self.reentry_start_index = 0
+        self.coasting2_start_index = 0
+        self.landing_start_index = 0
 
     def iterate(self, t, dt):
         rho = self.get_density(self.pos_z)
@@ -225,6 +252,14 @@ class Trajectory():
         if in_gravity_turn and t <= self.kick_time + self.gamma_change_time:
             gamma = self.kick_angle
 
+        if not ascending and self.coasting_start_index == 0:
+            self.coasting_start_index = self.counter
+        elif reentering and self.reentry_start_index == 0:
+            self.reentry_start_index = self.counter
+        elif reentering and not reentry_fuel_available and self.coasting2_start_index == 0:
+            self.coasting2_start_index = self.counter
+        elif landing and self.landing_start_index == 0:
+            self.landing_start_index = self.counter
        
         total_thrust = 0
 
@@ -279,26 +314,42 @@ class Trajectory():
         #     return False
     
         # Previous position was apogee
-        if not before_apogee and not self.apogee_check:
-            self.apogee_check = True
-            apogee_z = self.pos_zs[self.counter]
-            apogee_velocity_x = self.velocity_xs[self.counter]
-            apogee_velocity_z = self.velocity_zs[self.counter]
+        if not before_apogee and self.apogee_index == 0:
+            self.apogee_index = self.counter
+            apogee_z = self.pos_zs[self.apogee_index]
+            apogee_velocity_x = self.velocity_xs[self.apogee_index]
+            apogee_velocity_z = self.velocity_zs[self.apogee_index]
             apogee_speed = self.get_speed(apogee_velocity_x, apogee_velocity_z)
             required_delta_V = self.get_required_second_stage_delta_V(apogee_z, apogee_speed)
-            print("Required Second Stage Delta V:", required_delta_V)
+            print("Required Second Stage Delta V:", required_delta_V / 1000, "km / s")
             if required_delta_V > self.delta_V_second_stage:
-                # print("DeltaV")
                 return False
             if apogee_z > self.max_apogee:
-                # print("AP over")
                 return False
                 
-        if self.velocity_z>-5 and self.pos_z<10e3 and not before_apogee:
-            return True
+        if self.velocity_z > -5 and self.pos_z<10e3 and not before_apogee:
+            return False
+        
         self.counter += 1
-
         return True
+    
+    def add_phase(self, axis, xs, ys, legend_location, start, stop, color, linestyle, label='_'):
+        axis.plot(xs[start:stop], ys[start:stop], color=color, linestyle=linestyle, label=label)
+        axis.legend(loc=legend_location, prop={'size': 6})
+
+    def add_flight_phases(self, title, xlabel, ylabel, axis, xs, ys, legend_location, coloring=True):
+        axis.set_xlabel(xlabel)
+        axis.set_ylabel(ylabel)
+        axis.set_title(title)
+        if coloring:
+            # -1 fixes the discontinuity points for graphs with jumps in values.
+            self.add_phase(axis, xs, ys, legend_location, self.ascent_start_index, self.coasting_start_index, self.ascent_color, self.ascent_style, self.ascent_label)
+            self.add_phase(axis, xs, ys, legend_location, self.coasting_start_index - 1, self.reentry_start_index, self.coasting_color, self.coasting_style, self.coasting_label)
+            self.add_phase(axis, xs, ys, legend_location, self.reentry_start_index - 1, self.coasting2_start_index, self.reentry_color, self.reentry_style, self.reentry_label)
+            self.add_phase(axis, xs, ys, legend_location, self.coasting2_start_index - 1, self.landing_start_index, self.coasting_color, self.coasting_style)
+            self.add_phase(axis, xs, ys, legend_location, self.landing_start_index - 1, -1, self.landing_color, self.landing_style, self.landing_label)
+        else:
+            axis.plot(xs, ys)
 
     def run(self):
 
@@ -310,11 +361,10 @@ class Trajectory():
         t = 0
 
         self.max_barge_distance = 450e3 # meters
-        self.max_apogee = 350e3 # meters
+        self.max_apogee = 400e3 # meters
 
         success = True
 
-        self.apogee_check = False
         self.counter = 0
 
         while t < t_max:
@@ -322,8 +372,7 @@ class Trajectory():
             times = np.append(times, t)
             success = self.iterate(t, dt)
             if not success:
-                # return False
-                pass
+                break
 
         # print("Finished")
 
@@ -336,94 +385,44 @@ class Trajectory():
         
         # return True
 
-       
-
         #print("Final Velocity Z:", self.velocity_zs[-1])
         #print("Final Z:", self.pos_zs[-1])
         #print("Final Mass:", self.masses[-1])   
         #print("Landing Propellant Remaining:", self.masses[-1] - self.m_first_stage_structural)
 
+        self.ascent_color = 'red'
+        self.coasting_color = 'blue'
+        self.reentry_color = 'orange'
+        self.landing_color = 'black'
+        self.ascent_style = 'solid'
+        self.coasting_style = 'solid'
+        self.reentry_style = 'solid'
+        self.landing_style = 'solid'
+        self.ascent_label = 'ascent'
+        self.coasting_label = 'coasting'
+        self.reentry_label = 'reentry'
+        self.landing_label = 'landing'
+
         fig, axs = plt.subplots(3, 5, figsize=(10, 8))  # 2x2 grid of subplots
 
-        axs[0, 0].plot(times, self.pos_xs / 1000)
-        axs[0, 0].set_xlabel('Time (s)')
-        axs[0, 0].set_ylabel('Pos Z (km)')
-        axs[0, 0].set_title('Pos Z vs Time')
-
-        axs[0, 1].plot(times, self.pos_zs / 1000)
-        axs[0, 1].set_xlabel('Time (s)')
-        axs[0, 1].set_ylabel('Pos Z (km)')
-        axs[0, 1].set_title('Pos Z vs Time')
-
-        axs[0, 2].plot(times, self.rhos)
-        axs[0, 2].set_xlabel('Time (s)')
-        axs[0, 2].set_ylabel('Atmospheric Density (kg/m^3)')
-        axs[0, 2].set_title('Atmospheric Density vs Time')
-        
-        axs[1, 3].plot(times, self.masses / 1000)
-        axs[1, 3].set_xlabel('Time (s)')
-        axs[1, 3].set_ylabel('Mass (tonnes)')
-        axs[1, 3].set_title('Mass vs Time')
-
-        axs[0, 3].plot(times, self.drags / 1e6)
-        axs[0, 3].set_xlabel('Time (s)')
-        axs[0, 3].set_ylabel('Drag (MN)')
-        axs[0, 3].set_title('Drag vs Time')
-
-        axs[1, 0].plot(times, self.velocity_xs / 1000)
-        axs[1, 0].set_xlabel('Time (s)')
-        axs[1, 0].set_ylabel('Velocity X (km/s)')
-        axs[1, 0].set_title('Velocity X vs Time')
-
-        axs[1, 1].plot(times, self.velocity_zs / 1000)
-        axs[1, 1].set_xlabel('Time (s)')
-        axs[1, 1].set_ylabel('Velocity Z (km/s)')
-        axs[1, 1].set_title('Velocity Z vs Time')
-        
-        axs[2, 0].plot(times, self.accel_xs / g_0)
-        axs[2, 0].set_xlabel('Time (s)')
-        axs[2, 0].set_ylabel('Accel X (g)')
-        axs[2, 0].set_title('Accel X vs Time')
-
-        axs[2, 1].plot(times, self.accel_zs / g_0)
-        axs[2, 1].set_xlabel('Time (s)')
-        axs[2, 1].set_ylabel('Accel Z (g)')
-        axs[2, 1].set_title('Accel Z vs Time')
-        
-        axs[2, 2].plot(times, self.thrust_xs * self.masses / 10e5)
-        axs[2, 2].set_xlabel('Time (s)')
-        axs[2, 2].set_ylabel('Thrust X (MN)')
-        axs[2, 2].set_title('Thrust X vs Time')
-
-        axs[2, 3].plot(times, self.thrust_zs * self.masses / 10e5)
-        axs[2, 3].set_xlabel('Time (s)')
-        axs[2, 3].set_ylabel('Thrust Z (MN)')
-        axs[2, 3].set_title('Thrust Z vs Time')
-
-        axs[1, 2].plot(times, self.gammas)
-        axs[1, 2].set_xlabel('Time (s)')
-        axs[1, 2].set_ylabel('Flight Path Angle')
+        self.add_flight_phases('Pos X vs Time', 'Time (s)', 'Pos X (km)', axs[0, 0], times, self.pos_xs / 1000, 'lower right')
+        self.add_flight_phases('Pos Z vs Time', 'Time (s)', 'Pos Z (km)', axs[0, 1], times, self.pos_zs / 1000, 'lower center')
+        self.add_flight_phases('Atmospheric Density vs Time', 'Time (s)', 'Atmospheric Density (kg/m^3)', axs[0, 2], times, self.rhos, 'upper center')
+        self.add_flight_phases('Mass vs Time', 'Time (s)', 'Mass (tonnes)', axs[1, 3], times, self.masses / 1000, 'upper center')
+        self.add_flight_phases('Drag vs Time', 'Time (s)', 'Drag (MN)', axs[0, 3], times, self.drags / 1e6, 'upper center')
+        self.add_flight_phases('Velocity X vs Time', 'Time (s)', 'Velocity X (km/s)', axs[1, 0], times, self.velocity_xs / 1000, 'lower center')
+        self.add_flight_phases('Velocity Z vs Time', 'Time (s)', 'Velocity Z (km/s)', axs[1, 1], times, self.velocity_zs / 1000, 'lower left')
+        self.add_flight_phases('Accel X vs Time', 'Time (s)', 'Accel X (g)', axs[2, 0], times, self.accel_xs / g_0, 'lower center')
+        self.add_flight_phases('Accel Z vs Time', 'Time (s)', 'Accel Z (g)', axs[2, 1], times, self.accel_zs / g_0, 'upper center')
+        self.add_flight_phases('Thrust X vs Time', 'Time (s)', 'Thrust X (MN)', axs[2, 2], times, self.thrust_xs * self.masses / 10e5, 'upper center')
+        self.add_flight_phases('Thrust Z vs Time', 'Time (s)', 'Thrust Z (MN)', axs[2, 3], times, self.thrust_zs * self.masses / 10e5, 'upper center')
+        self.add_flight_phases('Flight Path Angle vs Time', 'Time (s)', 'Flight Path Angle (degrees)', axs[1, 2], times, self.gammas, 'lower left')
         axs[1, 2].set_ylim(-100, 100)
-        axs[1, 2].set_title('Flight Path Angle vs Time')
-        
-        axs[0, 4].plot(self.pos_xs / 1000, self.pos_zs / 1000)
-        axs[0, 4].set_xlabel('X pos (km)')
-        axs[0, 4].set_ylabel('Z pos (km)')
-        # axs[0, 4].set_ylim(0, 125)
-        # axs[0, 4].set_xlim(0, 125)
-        axs[0, 4].set_title('Pos Z vs Pos X')
-
-        axs[1, 4].plot(times, self.speeds / 1000)
-        ax2 = axs[1, 4].twinx()
-        ax2.plot(times, self.pos_zs / 1000, color= "purple")
-        axs[1, 4].set_xlabel('Time (s)')
-        axs[1, 4].set_ylabel('Speed (km/s)')
-        axs[1, 4].set_title('Speed vs Time')
-
-        axs[2, 4].plot(times, 0.5 * self.rhos * self.speeds ** 2 / 1000)
-        axs[2, 4].set_xlabel('Time (s)')
-        axs[2, 4].set_ylabel('Dynamic Pressure (kPa)')
-        axs[2, 4].set_title('Dynamic Pressure vs Time')
+        self.add_flight_phases('Pos Z vs Pos X', 'Pos X (km)', 'Pos Z (km)', axs[0, 4], self.pos_xs / 1000, self.pos_zs / 1000, 'lower center')
+        self.add_flight_phases('Speed vs Time', 'Time (s)', 'Speed (km/s)', axs[1, 4], times, self.speeds / 1000, 'lower center')
+        #ax2 = axs[1, 4].twinx()
+        #ax2.plot(times, self.pos_zs / 1000, color= "purple")
+        self.add_flight_phases('Dynamic Pressure vs Time', 'Time (s)', 'Dynamic Pressure (kPa)', axs[2, 4], times, 0.5 * self.rhos * self.speeds ** 2 / 1000, 'upper center')
 
         plt.tight_layout()
         plt.show()
@@ -432,6 +431,11 @@ trajectory = "Elysium" # "Falcon 9" # "Elysium"
 
 if trajectory == "Elysium":
     elysium_trajectory = Trajectory()
+    
+    first_stage_ascent_prop_margin = 1.02
+    first_stage_landing_prop_margin = 1.1
+    first_stage_reentry_prop_margin = 1.05
+
     elysium_trajectory.setup(
         number_of_engines_ascent=9,
         number_of_engines_landing=1,
@@ -441,13 +445,13 @@ if trajectory == "Elysium":
         I_sp_2=457, # seconds
         kick_angle=np.radians(68), # radians
         gamma_change_time=10, # seconds
-        m_first_stage_total=400e3,
+        m_first_stage_total=400e3 * first_stage_ascent_prop_margin,
         m_first_stage_structural_frac=0.0578,
-        m_second_stage_structural=9.272e3, # kg
+        #m_second_stage_structural=9.272e3, # kg
         m_second_stage_propellant=80e3, # kg
         m_second_stage_payload=11.5e3, # kg
-        delta_V_landing=1000, # m / s
-        delta_V_reentry=2000, # m / s
+        delta_V_landing=909 * first_stage_landing_prop_margin, # m / s
+        delta_V_reentry=1905 * first_stage_reentry_prop_margin, # m / s
         Cd_ascent=0.3,
         Cd_descent=1.0,
         diameter=5.4, # meters
@@ -480,7 +484,7 @@ elif trajectory == "ElysiumOptimize":
                         gamma_change_time=10, # seconds
                         m_first_stage_total=first_stage_mass,
                         m_first_stage_structural_frac=0.0578,
-                        m_second_stage_structural=9.272e3, # kg
+                        #m_second_stage_structural=9.272e3, # kg
                         m_second_stage_propellant=second_stage_propellant, # kg
                         m_second_stage_payload=11.5e3, # kg
                         delta_V_landing=500, # m / s
