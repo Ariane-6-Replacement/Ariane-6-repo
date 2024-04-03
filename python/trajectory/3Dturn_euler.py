@@ -66,6 +66,24 @@ class Trajectory():
         required_delta_V = delta_V_circ + self.delta_V_circular_to_circular(altitude, GTO_p) + self.delta_V_circular_to_elliptical(GTO_p, GTO_a)
 
         return required_delta_V
+    
+    # Based on structures formulation.
+    def get_second_stage_structural_mass(self, second_stage_propellant_mass):
+        prop_mass_extension = second_stage_propellant_mass - 31_000
+        of = 5.8
+        mf = prop_mass_extension / (of+1)
+        mox = prop_mass_extension - mf
+        vf = mf / 70.8
+        vox = mox / 1141
+        Lf = vf / (np.pi * 2.7 ** 2)
+        Lox = vox / (np.pi * 2.7 ** 2)
+        struc_mass_extension = (Lf + Lox) * 3000 * np.pi * 5.4 * 5E-3
+        mfaring = 2657 #kg
+        msyldas = 425 # kg
+        mcone = 200 # kg
+        mstruc = 4540 * 5.8/4.9 + struc_mass_extension + 385
+        second_stage_structural_mass = mfaring + msyldas + mcone + mstruc
+        return second_stage_structural_mass
 
     def setup(self,
               number_of_engines_ascent,
@@ -78,7 +96,6 @@ class Trajectory():
               gamma_change_time,
               m_first_stage_total,
               m_first_stage_structural_frac,
-              m_second_stage_structural,
               m_second_stage_propellant,
               m_second_stage_payload,
               delta_V_landing,
@@ -114,8 +131,10 @@ class Trajectory():
 
         assert self.m_first_stage_propellant > 0, "No propellant available for ascent"
 
-        self.m_second_stage_structural = m_second_stage_structural
         self.m_second_stage_propellant = m_second_stage_propellant
+        # 2nd stage structural mass provided by structures.
+        self.m_second_stage_structural = 9.272e3 # self.get_second_stage_structural_mass(self.m_second_stage_propellant) # 9.272e3 kg
+        print("Second stage structural mass:", self.m_second_stage_structural / 1000, "t")
         self.m_second_stage_payload = m_second_stage_payload
 
         self.burntime = self.m_first_stage_propellant / (self.mass_flowrate * self.number_of_engines_ascent)
@@ -302,12 +321,10 @@ class Trajectory():
             apogee_velocity_z = self.velocity_zs[self.apogee_index]
             apogee_speed = self.get_speed(apogee_velocity_x, apogee_velocity_z)
             required_delta_V = self.get_required_second_stage_delta_V(apogee_z, apogee_speed)
-            print("Required Second Stage Delta V:", required_delta_V)
+            print("Required Second Stage Delta V:", required_delta_V / 1000, "km / s")
             if required_delta_V > self.delta_V_second_stage:
-                # print("DeltaV")
                 return False
             if apogee_z > self.max_apogee:
-                # print("AP over")
                 return False
                 
         if self.velocity_z > -5 and self.pos_z<10e3 and not before_apogee:
@@ -344,7 +361,7 @@ class Trajectory():
         t = 0
 
         self.max_barge_distance = 450e3 # meters
-        self.max_apogee = 350e3 # meters
+        self.max_apogee = 400e3 # meters
 
         success = True
 
@@ -414,6 +431,11 @@ trajectory = "Elysium" # "Falcon 9" # "Elysium"
 
 if trajectory == "Elysium":
     elysium_trajectory = Trajectory()
+    
+    first_stage_ascent_prop_margin = 1.02
+    first_stage_landing_prop_margin = 1.1
+    first_stage_reentry_prop_margin = 1.05
+
     elysium_trajectory.setup(
         number_of_engines_ascent=9,
         number_of_engines_landing=1,
@@ -423,13 +445,13 @@ if trajectory == "Elysium":
         I_sp_2=457, # seconds
         kick_angle=np.radians(68), # radians
         gamma_change_time=10, # seconds
-        m_first_stage_total=400e3,
+        m_first_stage_total=400e3 * first_stage_ascent_prop_margin,
         m_first_stage_structural_frac=0.0578,
-        m_second_stage_structural=9.272e3, # kg
+        #m_second_stage_structural=9.272e3, # kg
         m_second_stage_propellant=80e3, # kg
         m_second_stage_payload=11.5e3, # kg
-        delta_V_landing=1000, # m / s
-        delta_V_reentry=2000, # m / s
+        delta_V_landing=909 * first_stage_landing_prop_margin, # m / s
+        delta_V_reentry=1905 * first_stage_reentry_prop_margin, # m / s
         Cd_ascent=0.3,
         Cd_descent=1.0,
         diameter=5.4, # meters
@@ -462,7 +484,7 @@ elif trajectory == "ElysiumOptimize":
                         gamma_change_time=10, # seconds
                         m_first_stage_total=first_stage_mass,
                         m_first_stage_structural_frac=0.0578,
-                        m_second_stage_structural=9.272e3, # kg
+                        #m_second_stage_structural=9.272e3, # kg
                         m_second_stage_propellant=second_stage_propellant, # kg
                         m_second_stage_payload=11.5e3, # kg
                         delta_V_landing=500, # m / s
