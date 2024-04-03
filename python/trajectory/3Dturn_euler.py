@@ -294,8 +294,8 @@ class Trajectory():
                 # print("AP over")
                 return False
                 
-        if self.velocity_z>-5 and self.pos_z<10e3 and not before_apogee:
-            return True
+        if self.velocity_z > -5 and self.pos_z<10e3 and not before_apogee:
+            return False
         self.counter += 1
 
         return True
@@ -322,8 +322,7 @@ class Trajectory():
             times = np.append(times, t)
             success = self.iterate(t, dt)
             if not success:
-                # return False
-                pass
+                break
 
         # print("Finished")
 
