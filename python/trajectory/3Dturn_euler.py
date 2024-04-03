@@ -134,7 +134,6 @@ class Trajectory():
         self.m_second_stage_propellant = m_second_stage_propellant
         # 2nd stage structural mass provided by structures.
         self.m_second_stage_structural = 9.272e3 # self.get_second_stage_structural_mass(self.m_second_stage_propellant) # 9.272e3 kg
-        print("Second stage structural mass:", self.m_second_stage_structural / 1000, "t")
         self.m_second_stage_payload = m_second_stage_payload
 
         self.burntime = self.m_first_stage_propellant / (self.mass_flowrate * self.number_of_engines_ascent)
@@ -142,10 +141,21 @@ class Trajectory():
         self.m_second_stage = self.m_second_stage_structural + self.m_second_stage_propellant + self.m_second_stage_payload
         
         self.m_total = self.m_first_stage + self.m_second_stage
+
         self.mass = self.m_total
         self.delta_V_first_stage = self.I_sp_1 * g_0 * np.log(self.m_total / (self.m_total - self.m_first_stage_propellant ))
         self.delta_V_second_stage = self.I_sp_2 * g_0 * np.log(self.m_second_stage / (self.m_second_stage - self.m_second_stage_propellant))
         
+        print("First stage structural mass:", self.m_first_stage_structural / 1000, "t")
+        print("First stage propellant mass:", self.m_first_stage_propellant / 1000, "t")
+        print("First stage total mass:", self.m_first_stage / 1000, "t")
+
+        print("Second stage structural mass:", self.m_second_stage_structural / 1000, "t")
+        print("Second stage propellant mass:", self.m_second_stage_propellant / 1000, "t")
+        print("Second stage total mass:", self.m_second_stage / 1000, "t")
+        
+        print("Total rocket mass:", self.m_total / 1000, "t")
+
         self.Cd_ascent = Cd_ascent
         self.Cd_descent = Cd_descent
         self.area = np.pi * diameter ** 2 / 4
@@ -174,8 +184,8 @@ class Trajectory():
         print("Propellant available for ascent:", self.m_first_stage_propellant / 1e3, "t")
         print("Propellant available for re-entry:", self.m_prop_reentry / 1e3, "t")
         print("Propellant available for landing:", self.m_prop_landing / 1e3, "t")
-        print("TWR:", self.thrust*self.number_of_engines_ascent/(g_0*self.m_total))
-        #print("TWR:", self.thrust*self.number_of_engines_ascent/(g_0*self.m_second_stage))
+        print("First Stage TWR:", self.thrust*self.number_of_engines_ascent/(g_0*self.m_total))
+        print("Second Stage TWR:", self.second_stage_thrust * 1/(g_0*self.m_second_stage))
 
         self.pos_xs = np.array([])
         self.pos_zs = np.array([])
@@ -221,7 +231,7 @@ class Trajectory():
         
         if deccel_time - 5.3 > impact_time and self.pos_z<10e3 and not before_apogee and not self.iniate_landing_burn :
              self.iniate_landing_burn  = True
-             print( " deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
+             #print( " deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
             
 
         landing = not before_apogee and self.iniate_landing_burn 
@@ -408,18 +418,20 @@ class Trajectory():
         self.add_flight_phases('Pos X vs Time', 'Time (s)', 'Pos X (km)', axs[0, 0], times, self.pos_xs / 1000, 'lower right')
         self.add_flight_phases('Pos Z vs Time', 'Time (s)', 'Pos Z (km)', axs[0, 1], times, self.pos_zs / 1000, 'lower center')
         self.add_flight_phases('Atmospheric Density vs Time', 'Time (s)', 'Atmospheric Density (kg/m^3)', axs[0, 2], times, self.rhos, 'upper center')
-        self.add_flight_phases('Mass vs Time', 'Time (s)', 'Mass (tonnes)', axs[1, 3], times, self.masses / 1000, 'upper center')
         self.add_flight_phases('Drag vs Time', 'Time (s)', 'Drag (MN)', axs[0, 3], times, self.drags / 1e6, 'upper center')
+        self.add_flight_phases('Pos Z vs Pos X', 'Pos X (km)', 'Pos Z (km)', axs[0, 4], self.pos_xs / 1000, self.pos_zs / 1000, 'lower center')
+        #axs[0, 4].set_ylim(-3, 65)
+        #axs[0, 4].set_xlim(-3, 80)
         self.add_flight_phases('Velocity X vs Time', 'Time (s)', 'Velocity X (km/s)', axs[1, 0], times, self.velocity_xs / 1000, 'lower center')
         self.add_flight_phases('Velocity Z vs Time', 'Time (s)', 'Velocity Z (km/s)', axs[1, 1], times, self.velocity_zs / 1000, 'lower left')
+        self.add_flight_phases('Flight Path Angle vs Time', 'Time (s)', 'Flight Path Angle (degrees)', axs[1, 2], times, self.gammas, 'lower left')
+        axs[1, 2].set_ylim(-100, 100)
+        self.add_flight_phases('Mass vs Time', 'Time (s)', 'Mass (tonnes)', axs[1, 3], times, self.masses / 1000, 'upper center')
+        self.add_flight_phases('Speed vs Time', 'Time (s)', 'Speed (km/s)', axs[1, 4], times, self.speeds / 1000, 'lower center')
         self.add_flight_phases('Accel X vs Time', 'Time (s)', 'Accel X (g)', axs[2, 0], times, self.accel_xs / g_0, 'lower center')
         self.add_flight_phases('Accel Z vs Time', 'Time (s)', 'Accel Z (g)', axs[2, 1], times, self.accel_zs / g_0, 'upper center')
         self.add_flight_phases('Thrust X vs Time', 'Time (s)', 'Thrust X (MN)', axs[2, 2], times, self.thrust_xs * self.masses / 10e5, 'upper center')
         self.add_flight_phases('Thrust Z vs Time', 'Time (s)', 'Thrust Z (MN)', axs[2, 3], times, self.thrust_zs * self.masses / 10e5, 'upper center')
-        self.add_flight_phases('Flight Path Angle vs Time', 'Time (s)', 'Flight Path Angle (degrees)', axs[1, 2], times, self.gammas, 'lower left')
-        axs[1, 2].set_ylim(-100, 100)
-        self.add_flight_phases('Pos Z vs Pos X', 'Pos X (km)', 'Pos Z (km)', axs[0, 4], self.pos_xs / 1000, self.pos_zs / 1000, 'lower center')
-        self.add_flight_phases('Speed vs Time', 'Time (s)', 'Speed (km/s)', axs[1, 4], times, self.speeds / 1000, 'lower center')
         #ax2 = axs[1, 4].twinx()
         #ax2.plot(times, self.pos_zs / 1000, color= "purple")
         self.add_flight_phases('Dynamic Pressure vs Time', 'Time (s)', 'Dynamic Pressure (kPa)', axs[2, 4], times, 0.5 * self.rhos * self.speeds ** 2 / 1000, 'upper center')
