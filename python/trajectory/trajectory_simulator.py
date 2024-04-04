@@ -222,14 +222,6 @@ class Trajectory():
         drag_force = self.get_drag(rho, self.velocity_x, self.velocity_z, self.area, Cd)
         gamma = self.get_gamma(self.velocity_z, self.velocity_x)
         
-
-        below_ground = self.pos_z < -1000
-
-        if below_ground:
-            print("Trajectory ends up below ground!")
-            return False
-        
-        
         if self.pos_z >= 0:
             impact_time = (np.sqrt(2 * g_0 * self.pos_z + self.velocity_z ** 2) + self.velocity_z) / g_0
         else:
@@ -351,6 +343,12 @@ class Trajectory():
         if self.velocity_z > -5 and self.pos_z < 10e3 and not before_apogee:
             pass
             #print("Landing burn unsuccessful. Impacting ground with", abs(self.velocity_z), "m / s downward velocity")
+        
+        below_ground = self.pos_z < -1000
+
+        if below_ground:
+            print("Trajectory ends up below ground!")
+            return False
         
         self.counter += 1
         return True
