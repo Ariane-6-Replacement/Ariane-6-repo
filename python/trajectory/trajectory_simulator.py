@@ -231,7 +231,7 @@ class Trajectory():
         
         impact_time = 0
         try:
-            impact_time = (np.sqrt(2 * g_0 * self.pos_zs + self.velocity_z ** 2) + self.velocity_z) / g_0
+            impact_time = (np.sqrt(2 * g_0 * self.pos_z + self.velocity_z ** 2) + self.velocity_z) / g_0
         except:
             pass
 
