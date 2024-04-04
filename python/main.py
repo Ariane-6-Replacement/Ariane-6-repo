@@ -1,3 +1,4 @@
+import numpy as np
 from python.core.rocket import Rocket
 from python.ui.setup import UI
 from python.structure.materials import materials as materials
@@ -26,8 +27,19 @@ def main():
         pressure_fuel = 5,
         temperature_ox = 90,
         temperature_fuel = 111,
-        diameter = 5,
+        diameter = 5, # m
         of_ratio = 3.5,
+        trajectory_timestep = 0.01, # seconds
+        trajectory_max_time = 900, # seconds
+        number_of_engines_ascent = 9,
+        number_of_engines_landing = 1,
+        number_of_engines_reentry = 3,
+        kick_angle = 68, # degrees
+        kick_time = 10, # seconds
+        delta_V_landing = 909, # m / s
+        delta_V_reentry = 1905, # m / s
+        reentry_burn_alt = 55_000, # m
+        gravity_turn_alt = 10_000 # m
     )
     ui = UI(rocket)
     ui.create()
@@ -57,6 +69,17 @@ def falcon9():
         temperature_fuel = 111,
         diameter = 3.66,
         of_ratio = 2.34,
+        trajectory_timestep = 0.01,
+        trajectory_max_time = 900,
+        number_of_engines_ascent = 9,
+        number_of_engines_landing = 1,
+        number_of_engines_reentry = 3,
+        kick_angle = 75.5, # degrees
+        kick_time = 8,
+        delta_V_landing = 200,
+        delta_V_reentry = 2_000,
+        reentry_burn_alt = 55_000,
+        gravity_turn_alt = 1500
     )
     ui = UI(rocket)
     ui.create()

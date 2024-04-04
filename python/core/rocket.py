@@ -3,7 +3,7 @@ import numpy as np
 
 from python.propulsion.propulsion import Propulsion
 from python.structure.structure import Structure
-from python.trajectory.trajectory import Trajectory
+from python.trajectory.trajectory_simulator import Trajectory
 from python.cost.model import MassCalculator
 from python.cost.model import CostModel
 
@@ -32,7 +32,7 @@ class Rocket():
                                      self.pressure_fuel*10**5)
         self.structure = Structure(self.diameter / 2, self.material_options[self.material_tank], self.pressure_ox,
                                    self.pressure_fuel, self.material_options[self.material_misc])
-        self.trajectory = Trajectory(self.orbit_options[self.orbit], self.payload, self.cd)
+        self.trajectory = Trajectory()
 
     def mass_estimation(self):
         self.inert_mass_fractions = np.array([self.mf2, self.mf2])
@@ -46,9 +46,10 @@ class Rocket():
         self.mass2, self.mass = self.wet_masses
         self.mass_prev = self.mass
         self.mass_total = self.mass + self.mass2 + self.payload
+        self.mass_s = self.dry_masses[0] / self.mass
     def cost_estimator(self):
         cm = CostModel()
-        self.prop_masses = np.array([self.prop_masses[0],self.mass_p / 1000])
+        self.prop_masses = np.array([self.prop_masses[0], self.mass_p / 1000])
         self.dry_masses = np.array([self.dry_masses[0], self.mass_s]) / 1000
         cm.calculate(self.dry_masses,self.prop_masses , self.reflights, self.engine.cost, self.engine_number)
         self.total_lifetime_cost = cm.cost.total_lifetime_euros
@@ -60,8 +61,43 @@ class Rocket():
     def iterate(self):
         e = 10e9
         i = 0
+
+        # Propellant margins can be changed here. Seems too minor to include in the user interface (too much clutter). 
+        first_stage_ascent_prop_margin = 1.02
+        first_stage_landing_prop_margin = 1.1
+        first_stage_reentry_prop_margin = 1.05
+
+        max_converge = 100
+
         while e > 10000:
-            self.thrust, self.burntime = self.trajectory.thrust_burntime(self.mass_total, self.dv)
+            if i == 0 or i == max_converge - 1:
+                self.trajectory.setup(
+                    simulation_timestep = self.trajectory_timestep, # seconds
+                    simulation_time = self.trajectory_max_time, # seconds
+                    number_of_engines_ascent=self.number_of_engines_ascent,
+                    number_of_engines_landing=self.number_of_engines_landing,
+                    number_of_engines_reentry=self.number_of_engines_reentry,
+                    thrust=self.engine.Thrust, # newtons
+                    I_sp_1=self.propulsion.Isp, # seconds
+                    I_sp_2=self.isp2, # seconds 
+                    kick_angle=np.radians(self.kick_angle), # degrees -> radians
+                    gamma_change_time=self.kick_time, # seconds
+                    m_first_stage_total=self.mass * first_stage_ascent_prop_margin,
+                    m_first_stage_structural_frac=self.mass_s / self.mass,
+                    #m_second_stage_structural=9.272e3, # kg
+                    m_second_stage_propellant=self.prop_masses[1], # kg
+                    m_second_stage_payload=self.payload, # kg
+                    delta_V_landing=self.delta_V_landing * first_stage_landing_prop_margin, # m / s
+                    delta_V_reentry=self.delta_V_reentry * first_stage_reentry_prop_margin, # m / s
+                    Cd_ascent=self.cd,
+                    Cd_descent=1.0, # assumed constant
+                    diameter=self.diameter, # meters
+                    reentry_burn_alt=self.reentry_burn_alt, # meters
+                    gravity_turn_alt=self.gravity_turn_alt # meters
+                )
+                self.trajectory.run()
+            self.thrust = self.trajectory.number_of_engines_ascent * self.trajectory.thrust
+            self.burntime = self.trajectory.burntime
             self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = (
                 self.propulsion.mass_volume(self.thrust, self.burntime, self.temperature_fuel, self.temperature_ox,
                                             self.pressure_ox, self.pressure_fuel))
@@ -78,7 +114,7 @@ class Rocket():
             i += 1
             self.mass_prev = self.mass
             print(f"Iterated! Mass = {self.mass:.0f}, e = {e:.0f}")
-            if i >= 100:
+            if i >= max_converge:
                 print(f"Non convergence!")
                 break
         self.cost_estimator()
