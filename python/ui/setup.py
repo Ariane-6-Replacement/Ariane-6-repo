@@ -109,7 +109,7 @@ class UI():
 
             'diameter': LabelEntry(self.root, "Diameter (m):", self.rocket.diameter),
             'of_ratio': LabelEntry(self.root, "O/F ratio:", self.rocket.of_ratio),
-            '2nd_label': Label(self.root, "Trajectory Simulation", font=label_font),
+            '2nd_label': Label(self.root, "Trajectory simulation", font=label_font),
 
             'trajectory_timestep': LabelEntry(self.root, "Simulation Timestep (s):", self.rocket.trajectory_timestep, range=[0.001, 1]),
             'trajectory_max_time': LabelEntry(self.root, "Maximum Simulation Time (s):", self.rocket.trajectory_max_time, range=[1, 4000]),
