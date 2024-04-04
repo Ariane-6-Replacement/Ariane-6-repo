@@ -229,8 +229,12 @@ class Trajectory():
             print("Trajectory ends up below ground!")
             return False
         
-        height = np.clip(self.pos_z, 0, abs(self.pos_z))
-        impact_time = (np.sqrt(2 * g_0 * height + self.velocity_z ** 2) + self.velocity_z) / g_0
+        impact_time = 0
+        try:
+            impact_time = (np.sqrt(2 * g_0 * self.pos_zs + self.velocity_z ** 2) + self.velocity_z) / g_0
+        except:
+            pass
+
         land_accel = self.number_of_engines_landing * self.thrust / (self.m_first_stage_structural + self.m_prop_landing)
         deccel_time = -self.velocity_z / (land_accel - g_0)
         
