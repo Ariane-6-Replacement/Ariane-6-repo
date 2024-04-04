@@ -69,22 +69,6 @@ class Rocket():
 
         max_converge = 100
 
-        print("thrust", self.engine.Thrust)
-        print("isp1", self.propulsion.Isp)
-        print("isp2", self.isp2)
-        print("kick_angle", np.radians(self.kick_angle))
-        print("kick_time", self.kick_time)
-        print("total mass 1", self.mass * first_stage_ascent_prop_margin)
-        print("structural frac", self.struct_frac_1)
-        print("prop mass 2", self.prop_masses[1])
-        print("payload", self.payload)
-        print("delta_V_landing", self.delta_V_landing * first_stage_landing_prop_margin)
-        print("delta_V_reentry", self.delta_V_reentry * first_stage_reentry_prop_margin)
-        print("cd", self.cd)
-        print("diameter", self.diameter)
-        print("reentry_burn_alt", self.reentry_burn_alt)
-        print("gravity_turn_alt", self.gravity_turn_alt)
-
         while e > 10000:
             if i == 0 or i == max_converge - 1:
                 self.trajectory.setup(

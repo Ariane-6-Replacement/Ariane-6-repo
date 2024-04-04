@@ -230,11 +230,9 @@ class Trajectory():
         land_accel = self.number_of_engines_landing * self.thrust / (self.m_first_stage_structural + self.m_prop_landing)
         deccel_time = -self.velocity_z / (land_accel - g_0)
         
-        
         if deccel_time > impact_time and self.pos_z < 10e3 and not before_apogee and not self.iniate_landing_burn :
              self.iniate_landing_burn = True
-             #print( " deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
-            #- 5.3 
+             #print("deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
 
         landing = not before_apogee and self.iniate_landing_burn 
         reentering = not before_apogee and self.pos_z < self.reentry_burn_alt
@@ -264,7 +262,6 @@ class Trajectory():
         if in_gravity_turn and t <= self.kick_time + self.gamma_change_time:
             gamma = self.kick_angle
 
-       
         total_thrust = 0
 
         if ascending:
