@@ -231,10 +231,10 @@ class Trajectory():
         deccel_time = -self.velocity_z / (land_accel - g_0)
         
         
-        if deccel_time - 5.3 > impact_time and self.pos_z < 10e3 and not before_apogee and not self.iniate_landing_burn :
+        if deccel_time > impact_time and self.pos_z < 10e3 and not before_apogee and not self.iniate_landing_burn :
              self.iniate_landing_burn = True
              #print( " deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
-            
+            #- 5.3 
 
         landing = not before_apogee and self.iniate_landing_burn 
         reentering = not before_apogee and self.pos_z < self.reentry_burn_alt
@@ -341,7 +341,7 @@ class Trajectory():
             #    return False
                 
         if self.velocity_z > -5 and self.pos_z < 10e3 and not before_apogee:
-            pass
+            return False
             #print("Landing burn unsuccessful. Impacting ground with", abs(self.velocity_z), "m / s downward velocity")
         
         below_ground = self.pos_z < -1000
