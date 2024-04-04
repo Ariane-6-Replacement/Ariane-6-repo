@@ -46,7 +46,7 @@ class Rocket():
         self.mass2, self.mass = self.wet_masses
         self.mass_prev = self.mass
         self.mass_total = self.mass + self.mass2 + self.payload
-        self.mass_s = self.dry_masses[0] / self.mass
+        self.struct_frac_1 = self.inert_mass_fractions[1]
     def cost_estimator(self):
         cm = CostModel()
         self.prop_masses = np.array([self.prop_masses[0], self.mass_p / 1000])
@@ -69,6 +69,22 @@ class Rocket():
 
         max_converge = 100
 
+        print("thrust", self.engine.Thrust)
+        print("isp1", self.propulsion.Isp)
+        print("isp2", self.isp2)
+        print("kick_angle", np.radians(self.kick_angle))
+        print("kick_time", self.kick_time)
+        print("total mass 1", self.mass * first_stage_ascent_prop_margin)
+        print("structural frac", self.struct_frac_1)
+        print("prop mass 2", self.prop_masses[1])
+        print("payload", self.payload)
+        print("delta_V_landing", self.delta_V_landing * first_stage_landing_prop_margin)
+        print("delta_V_reentry", self.delta_V_reentry * first_stage_reentry_prop_margin)
+        print("cd", self.cd)
+        print("diameter", self.diameter)
+        print("reentry_burn_alt", self.reentry_burn_alt)
+        print("gravity_turn_alt", self.gravity_turn_alt)
+
         while e > 10000:
             if i == 0 or i == max_converge - 1:
                 self.trajectory.setup(
@@ -83,9 +99,9 @@ class Rocket():
                     kick_angle=np.radians(self.kick_angle), # degrees -> radians
                     gamma_change_time=self.kick_time, # seconds
                     m_first_stage_total=self.mass * first_stage_ascent_prop_margin,
-                    m_first_stage_structural_frac=self.mass_s / self.mass,
+                    m_first_stage_structural_frac=self.struct_frac_1,
                     #m_second_stage_structural=9.272e3, # kg
-                    m_second_stage_propellant=self.prop_masses[1], # kg
+                    m_second_stage_propellant=self.prop_masses[0], # kg
                     m_second_stage_payload=self.payload, # kg
                     delta_V_landing=self.delta_V_landing * first_stage_landing_prop_margin, # m / s
                     delta_V_reentry=self.delta_V_reentry * first_stage_reentry_prop_margin, # m / s
@@ -109,6 +125,7 @@ class Rocket():
             self.mass_lg = self.structure.mass_landing_gear
             self.mass_s = self.mass_e + self.mass_es + self.mass_lg + self.mass_t
             self.mass = self.mass_p + self.mass_s
+            self.struct_frac_1 = self.mass_s / self.mass
             self.mass_total = self.mass + self.mass2 + self.payload
             e = np.abs(self.mass - self.mass_prev)
             i += 1

@@ -221,16 +221,22 @@ class Trajectory():
 
         drag_force = self.get_drag(rho, self.velocity_x, self.velocity_z, self.area, Cd)
         gamma = self.get_gamma(self.velocity_z, self.velocity_x)
-
-
         
-        impact_time = (np.sqrt(2 * g_0 * self.pos_z + self.velocity_z ** 2) + self.velocity_z) / g_0
+
+        below_ground = self.pos_z < -1000
+
+        if below_ground:
+            print("Trajectory ends up below ground!")
+            return False
+        
+        height = np.clip(self.pos_z, 0, abs(self.pos_z))
+        impact_time = (np.sqrt(2 * g_0 * height + self.velocity_z ** 2) + self.velocity_z) / g_0
         land_accel = self.number_of_engines_landing * self.thrust / (self.m_first_stage_structural + self.m_prop_landing)
         deccel_time = -self.velocity_z / (land_accel - g_0)
         
         
-        if deccel_time - 5.3 > impact_time and self.pos_z<10e3 and not before_apogee and not self.iniate_landing_burn :
-             self.iniate_landing_burn  = True
+        if deccel_time - 5.3 > impact_time and self.pos_z < 10e3 and not before_apogee and not self.iniate_landing_burn :
+             self.iniate_landing_burn = True
              #print( " deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
             
 
@@ -262,14 +268,6 @@ class Trajectory():
         if in_gravity_turn and t <= self.kick_time + self.gamma_change_time:
             gamma = self.kick_angle
 
-        if not ascending and self.coasting_start_index == 0:
-            self.coasting_start_index = self.counter
-        elif reentering and self.reentry_start_index == 0:
-            self.reentry_start_index = self.counter
-        elif reentering and not reentry_fuel_available and self.coasting2_start_index == 0:
-            self.coasting2_start_index = self.counter
-        elif landing and self.landing_start_index == 0:
-            self.landing_start_index = self.counter
        
         total_thrust = 0
 
@@ -282,6 +280,19 @@ class Trajectory():
         elif reentering and reentry_fuel_available:
             self.mass = self.m_first_stage_structural + self.m_prop_landing + self.m_prop_reentry - reentry_fuel_burned
             total_thrust = -self.number_of_engines_reentry * self.thrust
+        
+        if not ascending and self.coasting_start_index == 0:
+            print("Rocket mass at start of coast phase:", self.mass / 1000, "t")
+            self.coasting_start_index = self.counter
+        elif reentering and self.reentry_start_index == 0:
+            print("Rocket mass at start of reentry phase:", self.mass / 1000, "t")
+            self.reentry_start_index = self.counter
+        elif reentering and not reentry_fuel_available and self.coasting2_start_index == 0:
+            print("Rocket mass at end of reentry phase:", self.mass / 1000, "t")
+            self.coasting2_start_index = self.counter
+        elif landing and self.landing_start_index == 0:
+            print("Rocket mass at start of landing phase:", self.mass / 1000, "t")
+            self.landing_start_index = self.counter
 
         self.thrust_x = np.cos(gamma) * total_thrust / self.mass
         self.thrust_z = np.sin(gamma) * total_thrust / self.mass
@@ -317,12 +328,6 @@ class Trajectory():
         #if self.pos_x > self.max_barge_distance:
             # print("barge overshot")
             #return False
-
-        below_ground = self.pos_z < -1000
-
-        if below_ground:
-            print("Trajectory ends up below ground!")
-            #return False
     
         # Previous position was apogee
         if not before_apogee and self.apogee_index == 0:
@@ -340,7 +345,8 @@ class Trajectory():
             #    return False
                 
         if self.velocity_z > -5 and self.pos_z < 10e3 and not before_apogee:
-            print("Landing burn unsuccessful. Impacting ground with", abs(self.velocity_z), "m / s downward velocity")
+            pass
+            #print("Landing burn unsuccessful. Impacting ground with", abs(self.velocity_z), "m / s downward velocity")
         
         self.counter += 1
         return True
