@@ -71,7 +71,7 @@ class Cylinder:
         #Buckling due to bending moment
         M_buckling = bending.critical_cylinder_bending(self.outer_radius, t, self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
      
-        #NOTE: Moment magnitude is assumed to be half of the thrust magnitude; If better modeling is available change is recommneded; 
+        #NOTE: Moment magnitude is assumed to be half of the thrust magnitude; If better modelling is available, change of this value is recommneded; 
         while M_buckling / (self.thrust / 2) < FOSY:
             if t>0.02:
                 raise ValueError

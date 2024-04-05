@@ -1,3 +1,7 @@
+'''
+Code developed for trajectory purpose only;
+Sources: Ariane 5 Manual, Ariane Group, Wikipedia
+'''
 prop_mass_extension = NEWMASS - 31000
 of = 5.8
 mf = prop_mass_extension / (of+1)
