@@ -6,6 +6,7 @@ from python.structure.structure import Structure
 from python.trajectory.trajectory import Trajectory
 from python.cost.model import MassCalculator
 from python.cost.model import CostModel
+from python.structure.materials import materials as materials
 
 
 #This class is the main class for the rocket. It contains all the other classes and is the one that is called in the
@@ -73,7 +74,10 @@ class Rocket():
         max_converge = 100
 
         while e > 10000:
-            if i == 0 or i == max_converge - 1:
+            # Trajectory simulation is very slow so only run it for the first iteration.
+            # This could be fixed in the future by writing the code in a faster language such as C++ or using scipy.odeint instead of our Python euler integrator.
+            # Still, the mass optimization should not change it massively so this should be a good first approximation of the trajectories.
+            if i == 0:
                 self.trajectory.setup(
                     simulation_timestep = self.trajectory_timestep, # seconds
                     simulation_time = self.trajectory_max_time, # seconds
@@ -87,7 +91,6 @@ class Rocket():
                     gamma_change_time=self.kick_time, # seconds
                     m_first_stage_total=self.mass * first_stage_ascent_prop_margin,
                     m_first_stage_structural_frac=self.struct_frac_1,
-                    #m_second_stage_structural=9.272e3, # kg
                     m_second_stage_propellant=self.prop_masses[0], # kg
                     m_second_stage_payload=self.payload, # kg
                     delta_V_landing=self.delta_V_landing * first_stage_landing_prop_margin, # m / s
@@ -100,6 +103,7 @@ class Rocket():
                     landing_type = self.landing_type
                 )
                 self.trajectory.run()
+
             self.thrust = self.trajectory.number_of_engines_ascent * self.trajectory.thrust
             self.burntime = self.trajectory.burntime
             self.mass_e, self.mass_fuel, self.mass_ox, self.volume_fuel, self.volume_ox, self.engine_number = (
@@ -118,8 +122,89 @@ class Rocket():
             e = np.abs(self.mass - self.mass_prev)
             i += 1
             self.mass_prev = self.mass
-            print(f"Iterated! Mass = {self.mass:.0f}, e = {e:.0f}")
+            print(f"Iterated! Mass = {self.mass:.0f} kg, e = {e:.0f}")
             if i >= max_converge:
                 print(f"Non convergence!")
                 break
         self.cost_estimator()
+
+def get_elysium_1_preset():
+    elysium_1 = Rocket(
+        orbit_options = ['LEO', 'GTO', 'GEO', "LTO"],
+        orbit_dv = [9256, 9256 + 2440, 9256 + 2440 + 1472, 9256 + 2440 + 679],
+        orbit = 0, # index in orbit options
+        payload = 20000,
+        cd = 0.2,
+        mf2 = 0.04,
+        isp2 = 457,
+        dv_split = 0.40,
+        engine_options = ['Prometheus', 'Merlin1D'],
+        engine_index = 0, # index in engine options
+        engine_number = 9,
+        mf1 = 0.05,
+        reflights = 5,
+        material_options = list(materials.keys()),
+        material_tank = 3, # index in material options
+        material_misc = 3, # index in material options
+        bulkhead_options = ["shared", "separate"],
+        bulkhead = 0, # index in bulkhead options
+        pressure_ox = 5,
+        pressure_fuel = 5,
+        temperature_ox = 90,
+        temperature_fuel = 111,
+        diameter = 5, # m
+        of_ratio = 3.5,
+        trajectory_timestep = 0.05, # seconds
+        trajectory_max_time = 800, # seconds
+        number_of_engines_ascent = 9,
+        number_of_engines_landing = 1,
+        number_of_engines_reentry = 3,
+        kick_angle = 68, # degrees
+        kick_time = 10, # seconds
+        delta_V_landing = 909, # m / s
+        delta_V_reentry = 1905, # m / s
+        reentry_burn_alt = 55_000, # m
+        gravity_turn_alt = 10_000 # m
+    )
+    return elysium_1
+
+def get_falcon_9_preset():
+    falcon_9 = Rocket(
+        orbit_options = ['LEO', 'GTO', 'GEO', "LTO"],
+        orbit_dv = [9256, 9256 + 2440, 9256 + 2440 + 1472, 9256 + 2440 + 679],
+        orbit = 0, # index in orbit options
+        payload = 18500,
+        cd = 0.2,
+        mf2 = 0.03,
+        isp2 = 348,
+        dv_split = 0.41,
+        engine_options = ['Prometheus', 'Merlin1D'],
+        engine_index = 1, # index in engine options
+        #engine_number = 9,
+        #mf1 = 0.05,
+        reflights = 10,
+        material_options = list(materials.keys()),
+        material_tank = 3, # index in material options
+        material_misc = 3, # index in material options
+        bulkhead_options = ["shared", "separate"],
+        bulkhead = 1, # index in bulkhead options
+        pressure_ox = 3.5,
+        pressure_fuel = 3.5,
+        temperature_ox = 90,
+        temperature_fuel = 111,
+        diameter = 3.66,
+        of_ratio = 2.34,
+        trajectory_timestep = 0.05,
+        trajectory_max_time = 600,
+        number_of_engines_ascent = 9,
+        number_of_engines_landing = 1,
+        number_of_engines_reentry = 3,
+        kick_angle = 75.5, # degrees
+        kick_time = 8,
+        delta_V_landing = 200,
+        delta_V_reentry = 2_000,
+        reentry_burn_alt = 55_000,
+        gravity_turn_alt = 1500,
+        landing_type = "Falcon 9"
+    )
+    return falcon_9

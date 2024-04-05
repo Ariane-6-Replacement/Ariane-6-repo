@@ -1,9 +1,10 @@
+import copy
 import tkinter as tk
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from tkinter import ttk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.pyplot as plt
-import numpy as np
 
+from python.core.rocket import get_elysium_1_preset, get_falcon_9_preset
 
 # This file contains the UI class which is used to create the input and output screen for the rocket.
 # It uses the tkinter library as its base and creates the input screen based on the inputs given in the main.py file.
@@ -30,11 +31,12 @@ class LabelEntry(Label):
         self.range = range
 
 class LabelCombobox(Label):
-    def __init__(self, root, label, value_index, values, **kwargs):
+    def __init__(self, root, label, value_index, values, callback=None, **kwargs):
         super().__init__(root, label)
         assert value_index < len(values), "Specified dropdown index is outside of range of values provided"
         self.var = tk.StringVar(value=str(values[value_index]))
         self.element = ttk.Combobox(root, textvariable=self.var, values=values, **kwargs)
+        self.var.trace_add("write", callback)
 
 class LabelCheckbutton(Label):
     def __init__(self, root, label, value, **kwargs):
@@ -51,8 +53,22 @@ class LabelScale(Label):
         self.element.grid(padx=padx, pady=pady)
 
 class UI():
-    def __init__(self, rocket):
-        self.rocket = rocket
+    def __init__(self, default_preset="Elysium 1"): # "Elysium 1" or "Falcon 9"
+        self.preset_names = ["Elysium 1", "Falcon 9"]
+        self.presets = [get_elysium_1_preset(), get_falcon_9_preset()]
+
+        if default_preset == "Falcon 9":
+            self.preset = 1
+        else:
+            self.preset = 0
+
+        self.set_rocket()
+
+    def set_rocket(self, *args):
+        if hasattr(self, 'labels'):
+            self.preset = self.preset_names.index(str(self.labels['preset'].var.get()))
+        self.rocket = self.presets[self.preset]
+        self.create()
         
     def get_outputs(self):
         ui_outputs = {}
@@ -80,14 +96,12 @@ class UI():
                 ui_outputs[key] = value
         return ui_outputs
 
-    def create(self):
-        self.root = tk.Tk()
-        self.root.title("Input Screen")
-
+    def create_labels(self):
         label_font = ('Helvetica', 12, 'bold')
 
         self.labels = {
             '0th_label': Label(self.root, "General properties", font=label_font),
+            'preset': LabelCombobox(self.root, "IDM Preset:", self.preset, self.preset_names, self.set_rocket, state="readonly", width=17),
             #'dv': LabelEntry(self.root, "Delta V total (m/s):", self.rocket.dv),
             'orbit': LabelCombobox(self.root, "Orbit:", self.rocket.orbit, self.rocket.orbit_options, state="readonly", width=17),
             'payload': LabelEntry(self.root, "Payload (kg):", self.rocket.payload),
@@ -144,15 +158,25 @@ class UI():
         self.labels['dv_split'].element.bind("<Return>", lambda event: self.update_dv_split_slider())
         self.labels['submit'].label.bind("<ButtonRelease-1>", lambda event: self.submit_new_rocket())
 
+    def create(self):
+        if hasattr(self, 'root'):
+            self.root.destroy()
+        # if hasattr(self, 'results_root'):
+        #     results_root.destroy()
+        self.root = tk.Tk()
+        self.root.title("Input Screen")
+
+        self.create_labels()
+
         self.root.mainloop()
 
     def show_result(self):
-        root = tk.Tk()
-        root.title("Output Screen")
+        results_root = tk.Tk()
+        results_root.title("Output Screen")
         label_font = ('Helvetica', 10, 'bold')
-        ttk.Label(root, text="Parameter", font = label_font).grid(column=0, row=0, sticky='')
-        ttk.Label(root, text="Value", font=label_font).grid(column=1, row=0, sticky='e')
-        ttk.Label(root, text="Certainty", font=label_font).grid(column=2, row=0, sticky='')
+        ttk.Label(results_root, text="Parameter", font = label_font).grid(column=0, row=0, sticky='')
+        ttk.Label(results_root, text="Value", font=label_font).grid(column=1, row=0, sticky='e')
+        ttk.Label(results_root, text="Certainty", font=label_font).grid(column=2, row=0, sticky='')
         values = [
             [f"-----------General properties------------", "---------------", "---------------"],
             [f"Orbit:", f"{self.rocket.orbit_options[self.rocket.orbit]}", "Input"],
@@ -199,14 +223,34 @@ class UI():
         # Dynamically create labels to display each value
         for i, value in enumerate(values):
             i+=1
-            ttk.Label(root, text=value[0]).grid(column=0, row=i, sticky='')
-            ttk.Label(root, text=value[1]).grid(column=1, row=i, sticky='e')
-            ttk.Label(root, text=value[2]).grid(column=2, row=i, sticky='w')
-
-        trajectory_plot_button = ttk.Button(root, text="Show Trajectory Plots")
-        trajectory_plot_button.bind("<ButtonRelease-1>", lambda event: self.plot_trajectories())
+            ttk.Label(results_root, text=value[0]).grid(column=0, row=i, sticky='')
+            ttk.Label(results_root, text=value[1]).grid(column=1, row=i, sticky='e')
+            ttk.Label(results_root, text=value[2]).grid(column=2, row=i, sticky='w')
+            
+        trajectory_plot_button = ttk.Button(results_root, text="Show Trajectory Plots")
+        trajectory_plot_button.bind("<ButtonRelease-1>", lambda event: self.create_trajectory_plot())
         trajectory_plot_button.grid(column=0, row=len(values) + 1, pady=10)
-        root.mainloop()
+        results_root.mainloop()
+
+    def create_trajectory_plot(self):
+        fig = self.rocket.trajectory.setup_plot()
+        # Create a new Tkinter root window
+        new_root = tk.Tk()
+        new_root.title("Trajectory Simulation Plots")
+
+        # Create a canvas to embed the figure in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=new_root)
+        canvas.draw()
+
+        toolbar = NavigationToolbar2Tk(canvas, new_root)
+        toolbar.update()
+
+        # Pack the canvas and toolbar into the window
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        toolbar.pack(side=tk.BOTTOM, fill=tk.X)
+
+        # Run the Tkinter main loop for the new window
+        new_root.mainloop()
 
     def update_dv_split(self):
         value = self.labels['dv_split_slider'].var.get()
@@ -233,6 +277,3 @@ class UI():
     def iterate_rocket(self):
         self.rocket.iterate()
         self.show_result()
-
-    def plot_trajectories(self):
-        self.rocket.trajectory.plot()

@@ -391,6 +391,7 @@ class Trajectory():
         self.accel_z = 0
 
         # Initialize storage arrays for simulation data (all empty initially)
+        self.times = np.array([])
         self.pos_xs = np.array([])
         self.pos_zs = np.array([])
         self.velocity_xs = np.array([])
@@ -690,7 +691,7 @@ class Trajectory():
             # If coloring is disabled, plot the entire data set without separation
             axis.plot(xs, ys)
 
-    def plot(self):
+    def setup_plot(self):
         """
         This function generates a grid of subplots and visualizes various aspects of the rocket simulation.
         """
@@ -710,7 +711,7 @@ class Trajectory():
         self.landing_label = 'landing'
 
         # Create a figure with a 3x5 grid of subplots (15 total) and set the figure size
-        self.fig, axs = plt.subplots(3, 5, figsize=(10, 8), num="Trajectory Simulation Plots")
+        fig, axs = plt.subplots(3, 5, figsize=(10, 8), layout="constrained")
 
         # -------- Plot Position vs Time --------
         # Plot position X vs time (converted to km for readability)
@@ -757,19 +758,12 @@ class Trajectory():
         # Plot dynamic pressure vs time (converted to kPa for readability)
         self.add_flight_phases('Dynamic Pressure vs Time', 'Time (s)', 'Dynamic Pressure (kPa)', axs[2, 4], self.times, 0.5 * self.rhos * self.speeds ** 2 / 1000, 'upper center')
 
-        # Adjust spacing between subplots for better readability
-        plt.tight_layout()
+        return fig
 
-        # Display the entire plot
-        plt.show()
-           
     def run(self):
         """
         This function runs the main simulation loop for the rocket trajectory.
         """
-
-        # Initialize empty array to store simulation timesteps
-        self.times = np.array([])
 
         # Current simulation time (starts at 0)
         t = 0
@@ -807,7 +801,7 @@ class Trajectory():
                 break
 
         # Print ending message
-        print("Finished trajectory simulation!")
+        print("Completed {:.0%} of trajectory simulation".format(1))
         
 # This block of code only executes if the script is run directly (not imported as a module)
 if __name__ == "__main__":
@@ -866,7 +860,8 @@ if __name__ == "__main__":
         elysium_trajectory.run()
 
         # Plot the results of the Elysium trajectory simulation
-        elysium_trajectory.plot()
+        elysium_trajectory.setup_plot()
+        plt.show()
 
     elif trajectory == "Falcon 9":
         print("Running Falcon 9 trajectory...")
@@ -917,4 +912,5 @@ if __name__ == "__main__":
         falcon_9_trajectory.run()
 
         # Plot the results of the Falcon 9 trajectory simulation
-        falcon_9_trajectory.plot()
+        falcon_9_trajectory.setup_plot()
+        plt.show()
