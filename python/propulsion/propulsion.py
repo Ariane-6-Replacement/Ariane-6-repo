@@ -4,6 +4,8 @@ from python.propulsion.inputs import first_stage
 from python.propulsion.volume_mass_calculator import get_propellant_mass_volume
 import math
 
+# The class for the propulsion system. It calculates the mass and volume of the propellant and the engines. It uses
+# engine characteristics from the inputs.py file and the volume_mass_calculator.py file to calculate the mass and volume.
 class Propulsion():
     def __init__(self, engine, of_ratio,p_ox,p_fuel):
         # engine name

@@ -3,6 +3,8 @@ from python.structure.Components.ITS_class import Shell
 from python.structure.Components.CBT_class import CBT
 from python.structure.Components.landing_gear_class import LG
 
+#Main class to calculate the structural properties of the rocket. Uses several sub-classes to calculate the mass and
+# volume of the tanks, engine bays, and landing gear.
 class Structure():
     def __init__(self, outer_radius,material, pressure_ox, pressure_fuel, material3):
         self.outer_radius = outer_radius
@@ -24,7 +26,7 @@ class Structure():
         # self.engine_number = engine_number 
         tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.mass1]
         tank2 = [self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
-        print(f'Structural sizer inputs: thrust {self.thrust}, volume1 {self.volume1}, volume2 {self.volume2}, mass1 {self.mass1},  mass2 {self.mass2}, engine mass {self.engine_mass}')
+        #print(f'Structural sizer inputs: thrust {self.thrust}, volume1 {self.volume1}, volume2 {self.volume2}, mass1 {self.mass1},  mass2 {self.mass2}, engine mass {self.engine_mass}')
         # self.input = "struc in"
         # self.output = 4
 
@@ -187,7 +189,7 @@ class Structure():
     def mass_landing_gear(self):
         lg = LG(self.outer_radius, self.mass_total, self.cg)
         # print(f"landing gear mass: {lg.mass_gear} kg")
-        print(f"Total mass: {self.mass_total} kg")
+        #print(f"Total mass: {self.mass_total} kg")
 
         return lg.mass_gear
    
