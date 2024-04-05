@@ -11,7 +11,7 @@ class Dome:
         Dome object, containing all relevant parameters. 
 
         :param outer_radius: in m
-        :param pressureL in Pa
+        :param pressure: in Pa
         :param material: dictionary object from materials database (databases/materials.py)
        
         """
@@ -24,12 +24,12 @@ class Dome:
     
     @property
     def height(self) -> float:
-            #Critical ratio for the lowest dome height from Analysis of Stress at Several Junctions in Pressiurzed Shells, Johns et al., 1963;
+            #Critical ratio for the lowest dome height source: "Analysis of Stress at Several Junctions in Pressiurzed Shells" Johns et al. 1963;
             return self.outer_radius * 0.707
    
     @property
     def thickness(self) -> float:
-         t=  es.t_ellipsoid(self.outer_radius, self.height, self.pressure, self.material['yield_stress'])
+         t = es.t_ellipsoid(self.outer_radius, self.height, self.pressure, self.material['yield_stress'])
          return round(t, 4)
          
     @property

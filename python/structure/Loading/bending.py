@@ -8,7 +8,6 @@ from python.structure.Loading.buckling_coeff import gamma_d
 import numpy as np
 
 
-
 def critical_cylinder_bending(r, t ,p, E, v):
     """
     Shell bending formula from NASA SP-8007

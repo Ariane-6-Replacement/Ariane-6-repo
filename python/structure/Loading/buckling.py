@@ -6,7 +6,7 @@ Source(s): NASA SP-8007
 
 from python.structure.Loading.buckling_coeff import gamma_d
 import numpy as np
-import pandas as pd
+
 
 
 def _check_moderately_long(gamma: float, l: float, r: float, t: float, v: float) -> bool:
@@ -38,7 +38,7 @@ def critical_cylinder_buckling(p, r, t, l, E, v):
     :param r: radius
     :param t: thickness
     :param v: poisson's ratio
-    :param L: length
+    :param l: length
     :return: Critical Buckling Load (axial force)
     """
     # Number of buckle half waves in the axial direction
