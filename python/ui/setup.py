@@ -4,6 +4,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
 
+
+# This file contains the UI class which is used to create the input and output screen for the rocket.
+# It uses the tkinter library as its base and creates the input screen based on the inputs given in the main.py file.
 class Label():
     def __init__(self, root, label, **kwargs):
         self.label = ttk.Label(root, text=label, **kwargs)
@@ -91,7 +94,9 @@ class UI():
             'cd': LabelEntry(self.root, "Drag Coefficient:", self.rocket.cd),
             'mf2': LabelEntry(self.root, "Inert mass fraction 2nd stage:", self.rocket.mf2),
             'isp2': LabelEntry(self.root, "ISP 2nd stage:", self.rocket.isp2),
+            
             '1st_label': Label(self.root, "1st stage properties", font=label_font),
+            
             'dv_split_slider': LabelScale(self.root, "dV fraction stage 1:", padx=10, pady=10, from_=0, to_=1, orient="horizontal", length=150, command=lambda event: self.update_dv_split()),
             'dv_split': Entry(self.root, self.rocket.dv_split, range=[0, 1]),
             'engine_index': LabelCombobox(self.root, "Engine:", self.rocket.engine_index, self.rocket.engine_options, state="readonly", width=17),
@@ -107,9 +112,29 @@ class UI():
 
             'diameter': LabelEntry(self.root, "Diameter (m):", self.rocket.diameter),
             'of_ratio': LabelEntry(self.root, "O/F ratio:", self.rocket.of_ratio),
+            '2nd_label': Label(self.root, "Trajectory simulation", font=label_font),
+
+            'trajectory_timestep': LabelEntry(self.root, "Simulation Timestep (s):", self.rocket.trajectory_timestep, range=[0.001, 1]),
+            'trajectory_max_time': LabelEntry(self.root, "Maximum Simulation Time (s):", self.rocket.trajectory_max_time, range=[1, 4000]),
+
+            '3rd_label': Label(self.root, "Ascent properties", font=label_font),
+
+            'number_of_engines_ascent': LabelEntry(self.root, "Number of Engines (ascent):", self.rocket.number_of_engines_ascent, range=[1, 30]),
+            'kick_angle': LabelEntry(self.root, "Kick Angle (deg):", self.rocket.kick_angle, range=[0, 90]),
+            'kick_time': LabelEntry(self.root, "Kick Time (s):", self.rocket.kick_time, range=[0, 300]),
+            'gravity_turn_alt': LabelEntry(self.root, "Gravity Turn Altitude (m):", self.rocket.gravity_turn_alt, range=[0, 30_000]),
+
+            '4th_label': Label(self.root, "Re-entry and landing properties", font=label_font),
+
+            'number_of_engines_reentry': LabelEntry(self.root, "Number of Engines (re-entry):", self.rocket.number_of_engines_reentry, range=[1, 30]),
+            'number_of_engines_landing': LabelEntry(self.root, "Number of Engines (landing):", self.rocket.number_of_engines_landing, range=[1, 30]),
+            'delta_V_reentry': LabelEntry(self.root, "Delta V (re-entry) (m/s):", self.rocket.delta_V_reentry, range=[0, 10_000]),
+            'delta_V_landing': LabelEntry(self.root, "Delta V (landing) (m/s):", self.rocket.delta_V_landing, range=[0, 10_000]),
+            'reentry_burn_alt': LabelEntry(self.root, "Re-entry Burn Altitude (m/s):", self.rocket.reentry_burn_alt, range=[0, 200_000]),
+
             'submit': Button(self.root, columnspan=2, text="Submit")
         }
-        
+
         for i, key in enumerate(self.labels.keys()):
             if hasattr(self.labels[key], 'label'):
                 self.labels[key].label.grid(column=0, row=i)
@@ -178,17 +203,9 @@ class UI():
             ttk.Label(root, text=value[1]).grid(column=1, row=i, sticky='e')
             ttk.Label(root, text=value[2]).grid(column=2, row=i, sticky='w')
 
-        fig = self.rocket.trajectory.fig
-        canvas = FigureCanvasTkAgg(fig, master=root)
-        canvas_widget = canvas.get_tk_widget()
-
-        # Place the canvas within the Tkinter window
-        canvas_widget.grid(column=0, row=len(values)+1, columnspan = 3, sticky="")
-
-        #iterate_button = ttk.Button(root, text="Iterate")
-        #iterate_button.bind("<ButtonRelease-1>", lambda event: self.iterate_rocket())
-        #iterate_button.grid(column=0, row=len(values) + 1, pady=10)
-        plt.close()
+        trajectory_plot_button = ttk.Button(root, text="Show Trajectory Plots")
+        trajectory_plot_button.bind("<ButtonRelease-1>", lambda event: self.plot_trajectories())
+        trajectory_plot_button.grid(column=0, row=len(values) + 1, pady=10)
         root.mainloop()
 
     def update_dv_split(self):
@@ -216,3 +233,6 @@ class UI():
     def iterate_rocket(self):
         self.rocket.iterate()
         self.show_result()
+
+    def plot_trajectories(self):
+        self.rocket.trajectory.plot()

@@ -14,11 +14,10 @@ class Shell:
                  thrust:float
                  ):
         """
-        Cylinder object, containing all relevant parameters. Cylinder coordinate system is defined with the origin at the
-        center of the bottom edge. The z_c axis moves along the cylinder's axis in the direction from aft to forward.
+        Inter Tank Stage object, containing all relevant parameters.
         :param outer_radius: in m
-        :param thickness: in m
         :param height: in m
+        :param thrust: in N
         :param material: dictionary object from materials database
         """
 
@@ -28,27 +27,32 @@ class Shell:
         self.thrust = thrust
 
         
-    @property
-    def insulation(self):
-        return self.height * self.outer_radius * 2 * np.pi * 1.123
 
     @property
     def mass(self):
       
         s_crit=0   #Initial Critical Buckling Stress
-        t=0.002   #Shell thickness - assumed 
+        t=0.002   #Inital Shell thickness - 
         s_max = 1
         while s_crit / s_max < FOS_ITS:
+
             if t>0.025:
-                raise ValueError
+
+                raise ValueError #Check for excessive thickness of the ITS
+            
             s_crit, t_mass = critical_stress(t, self.outer_radius, self.material['youngs_modulus'])
-            I = cylindrical_shell_I(self.outer_radius, t_mass)
+
+            I = cylindrical_shell_I(self.outer_radius, t_mass) 
+
+            #NOTE: Moment magnitude is assumed to be 2/3 of the thrust magnitude; If better modelling is available, change of this value is recommneded; 
             s_max = (s_axial(t_mass, self.outer_radius,1.0,self.thrust) + self.thrust*(2/3) * self.outer_radius / I)
+
             t += 0.0005
+        
         return 2 * self.outer_radius * np.pi * self.height * t_mass * self.material['density']
 
   
-
+#NOTE: UNIT TESTING 
 # if __name__ == "__main__":
 #     tank_test = Shell(2.5, '2195',2, 10E9)
 #     print('DONE')

@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Main class for the trajectory simulator. This class contains all the functions and variables needed to simulate the
+# ascent and landing.
+
 g_0 = 9.81 # [m / s^2]
 R_earth = 6_371e3 # [m]
 mu_earth = 3.986_004_418e14 # [m^3 / s^-2]
-
-simulation_timestep = 0.01# seconds
-simulation_time = 900 # seconds
 
 class Trajectory():
     def __init__(self):
@@ -66,8 +66,28 @@ class Trajectory():
         required_delta_V = delta_V_circ + self.delta_V_circular_to_circular(altitude, GTO_p) + self.delta_V_circular_to_elliptical(GTO_p, GTO_a)
 
         return required_delta_V
+    
+    # Based on structures formulation.
+    def get_second_stage_structural_mass(self, second_stage_propellant_mass):
+        prop_mass_extension = second_stage_propellant_mass - 31_000
+        of = 5.8
+        mf = prop_mass_extension / (of+1)
+        mox = prop_mass_extension - mf
+        vf = mf / 70.8
+        vox = mox / 1141
+        Lf = vf / (np.pi * 2.7 ** 2)
+        Lox = vox / (np.pi * 2.7 ** 2)
+        struc_mass_extension = (Lf + Lox) * 3000 * np.pi * 5.4 * 5E-3
+        mfaring = 2657 #kg
+        msyldas = 425 # kg
+        mcone = 200 # kg
+        mstruc = 4540 * 5.8/4.9 + struc_mass_extension + 385
+        second_stage_structural_mass = mfaring + msyldas + mcone + mstruc
+        return second_stage_structural_mass
 
     def setup(self,
+              simulation_timestep,
+              simulation_time,
               number_of_engines_ascent,
               number_of_engines_landing,
               number_of_engines_reentry,
@@ -78,7 +98,6 @@ class Trajectory():
               gamma_change_time,
               m_first_stage_total,
               m_first_stage_structural_frac,
-              m_second_stage_structural,
               m_second_stage_propellant,
               m_second_stage_payload,
               delta_V_landing,
@@ -87,8 +106,10 @@ class Trajectory():
               Cd_descent,
               diameter,
               reentry_burn_alt,
-              landing_burn_alt,
               gravity_turn_alt):
+        
+        self.simulation_timestep = simulation_timestep
+        self.simulation_time = simulation_time
         
         self.number_of_engines_ascent = number_of_engines_ascent
         self.number_of_engines_landing = number_of_engines_landing
@@ -114,8 +135,9 @@ class Trajectory():
 
         assert self.m_first_stage_propellant > 0, "No propellant available for ascent"
 
-        self.m_second_stage_structural = m_second_stage_structural
         self.m_second_stage_propellant = m_second_stage_propellant
+        # 2nd stage structural mass formula provided by structures.
+        self.m_second_stage_structural = self.get_second_stage_structural_mass(self.m_second_stage_propellant) # 9.272e3 kg
         self.m_second_stage_payload = m_second_stage_payload
 
         self.burntime = self.m_first_stage_propellant / (self.mass_flowrate * self.number_of_engines_ascent)
@@ -123,16 +145,26 @@ class Trajectory():
         self.m_second_stage = self.m_second_stage_structural + self.m_second_stage_propellant + self.m_second_stage_payload
         
         self.m_total = self.m_first_stage + self.m_second_stage
+
         self.mass = self.m_total
         self.delta_V_first_stage = self.I_sp_1 * g_0 * np.log(self.m_total / (self.m_total - self.m_first_stage_propellant ))
         self.delta_V_second_stage = self.I_sp_2 * g_0 * np.log(self.m_second_stage / (self.m_second_stage - self.m_second_stage_propellant))
         
+        print("First stage structural mass:", self.m_first_stage_structural / 1000, "t")
+        print("First stage propellant mass:", self.m_first_stage_propellant / 1000, "t")
+        print("First stage total mass:", self.m_first_stage / 1000, "t")
+
+        print("Second stage structural mass:", self.m_second_stage_structural / 1000, "t")
+        print("Second stage propellant mass:", self.m_second_stage_propellant / 1000, "t")
+        print("Second stage total mass:", self.m_second_stage / 1000, "t")
+        
+        print("Total rocket mass:", self.m_total / 1000, "t")
+
         self.Cd_ascent = Cd_ascent
         self.Cd_descent = Cd_descent
         self.area = np.pi * diameter ** 2 / 4
         
         self.reentry_burn_alt = reentry_burn_alt
-        self.landing_burn_alt = landing_burn_alt
         self.gravity_turn_alt = gravity_turn_alt
         
         self.kick_time = 0
@@ -155,8 +187,8 @@ class Trajectory():
         print("Propellant available for ascent:", self.m_first_stage_propellant / 1e3, "t")
         print("Propellant available for re-entry:", self.m_prop_reentry / 1e3, "t")
         print("Propellant available for landing:", self.m_prop_landing / 1e3, "t")
-        print("TWR:", self.thrust*self.number_of_engines_ascent/(g_0*self.m_total))
-        #print("TWR:", self.thrust*self.number_of_engines_ascent/(g_0*self.m_second_stage))
+        print("First Stage TWR:", self.thrust*self.number_of_engines_ascent/(g_0*self.m_total))
+        print("Second Stage TWR:", self.second_stage_thrust * 1/(g_0*self.m_second_stage))
 
         self.pos_xs = np.array([])
         self.pos_zs = np.array([])
@@ -192,18 +224,18 @@ class Trajectory():
 
         drag_force = self.get_drag(rho, self.velocity_x, self.velocity_z, self.area, Cd)
         gamma = self.get_gamma(self.velocity_z, self.velocity_x)
+        
+        if self.pos_z >= 0:
+            impact_time = (np.sqrt(2 * g_0 * self.pos_z + self.velocity_z ** 2) + self.velocity_z) / g_0
+        else:
+            impact_time = 2 * self.velocity_z / g_0
 
-
+        land_accel = self.number_of_engines_landing * self.thrust / (self.m_first_stage_structural + self.m_prop_landing)
+        deccel_time = -self.velocity_z / (land_accel - g_0)
         
-        impact_time = (np.sqrt(2*g_0*self.pos_z + self.velocity_z**2)+self.velocity_z)/g_0
-        land_accel = self.number_of_engines_landing*self.thrust/(self.m_first_stage_structural + self.m_prop_landing)
-        deccel_time = -self.velocity_z/(land_accel-g_0)
-        
-        
-        if deccel_time - 5.3 > impact_time and self.pos_z<10e3 and not before_apogee and not self.iniate_landing_burn :
-             self.iniate_landing_burn  = True
-             print( " deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
-            
+        if deccel_time > impact_time and self.pos_z < 10e3 and not before_apogee and not self.iniate_landing_burn :
+             self.iniate_landing_burn = True
+             #print("deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
 
         landing = not before_apogee and self.iniate_landing_burn 
         reentering = not before_apogee and self.pos_z < self.reentry_burn_alt
@@ -233,15 +265,6 @@ class Trajectory():
         if in_gravity_turn and t <= self.kick_time + self.gamma_change_time:
             gamma = self.kick_angle
 
-        if not ascending and self.coasting_start_index == 0:
-            self.coasting_start_index = self.counter
-        elif reentering and self.reentry_start_index == 0:
-            self.reentry_start_index = self.counter
-        elif reentering and not reentry_fuel_available and self.coasting2_start_index == 0:
-            self.coasting2_start_index = self.counter
-        elif landing and self.landing_start_index == 0:
-            self.landing_start_index = self.counter
-       
         total_thrust = 0
 
         if ascending:
@@ -253,6 +276,19 @@ class Trajectory():
         elif reentering and reentry_fuel_available:
             self.mass = self.m_first_stage_structural + self.m_prop_landing + self.m_prop_reentry - reentry_fuel_burned
             total_thrust = -self.number_of_engines_reentry * self.thrust
+        
+        if not ascending and self.coasting_start_index == 0:
+            print("Rocket mass at start of coast phase:", self.mass / 1000, "t")
+            self.coasting_start_index = self.counter
+        elif reentering and self.reentry_start_index == 0:
+            print("Rocket mass at start of reentry phase:", self.mass / 1000, "t")
+            self.reentry_start_index = self.counter
+        elif reentering and not reentry_fuel_available and self.coasting2_start_index == 0:
+            print("Rocket mass at end of reentry phase:", self.mass / 1000, "t")
+            self.coasting2_start_index = self.counter
+        elif landing and self.landing_start_index == 0:
+            print("Rocket mass at start of landing phase:", self.mass / 1000, "t")
+            self.landing_start_index = self.counter
 
         self.thrust_x = np.cos(gamma) * total_thrust / self.mass
         self.thrust_z = np.sin(gamma) * total_thrust / self.mass
@@ -285,14 +321,9 @@ class Trajectory():
         self.masses = np.append(self.masses, self.mass)
         self.speeds = np.append(self.speeds, speed)
 
-        if self.pos_x > self.max_barge_distance:
+        #if self.pos_x > self.max_barge_distance:
             # print("barge overshot")
-            return False
-
-        # below_ground = self.pos_z < 0
-
-        # if below_ground:
-        #     return False
+            #return False
     
         # Previous position was apogee
         if not before_apogee and self.apogee_index == 0:
@@ -302,15 +333,21 @@ class Trajectory():
             apogee_velocity_z = self.velocity_zs[self.apogee_index]
             apogee_speed = self.get_speed(apogee_velocity_x, apogee_velocity_z)
             required_delta_V = self.get_required_second_stage_delta_V(apogee_z, apogee_speed)
-            print("Required Second Stage Delta V:", required_delta_V)
-            if required_delta_V > self.delta_V_second_stage:
-                # print("DeltaV")
-                return False
-            if apogee_z > self.max_apogee:
-                # print("AP over")
-                return False
+            print("Trajectory reached apogee!")
+            print("Required Second Stage Delta V:", required_delta_V / 1000, "km / s")
+            # if required_delta_V > self.delta_V_second_stage:
+            #     return False
+            #if apogee_z > self.max_apogee:
+            #    return False
                 
-        if self.velocity_z > -5 and self.pos_z<10e3 and not before_apogee:
+        if self.velocity_z > -5 and self.pos_z < 10e3 and not before_apogee:
+            return False
+            #print("Landing burn unsuccessful. Impacting ground with", abs(self.velocity_z), "m / s downward velocity")
+        
+        below_ground = self.pos_z < -1000
+
+        if below_ground:
+            print("Trajectory ends up below ground!")
             return False
         
         self.counter += 1
@@ -320,10 +357,14 @@ class Trajectory():
         axis.plot(xs[start:stop], ys[start:stop], color=color, linestyle=linestyle, label=label)
         axis.legend(loc=legend_location, prop={'size': 6})
 
-    def add_flight_phases(self, title, xlabel, ylabel, axis, xs, ys, legend_location, coloring=True):
+    def add_flight_phases(self, title, xlabel, ylabel, axis, xs, ys, legend_location, lower_y_zero_bound=True, coloring=True):
         axis.set_xlabel(xlabel)
         axis.set_ylabel(ylabel)
         axis.set_title(title)
+        #axis.set_xlim(left=0)
+        if lower_y_zero_bound:
+            pass
+            #axis.set_ylim(bottom=0)
         if coloring:
             # -1 fixes the discontinuity points for graphs with jumps in values.
             self.add_phase(axis, xs, ys, legend_location, self.ascent_start_index, self.coasting_start_index, self.ascent_color, self.ascent_style, self.ascent_label)
@@ -334,45 +375,7 @@ class Trajectory():
         else:
             axis.plot(xs, ys)
 
-    def run(self):
-
-        dt = simulation_timestep
-
-        times = np.array([])
-
-        t_max = simulation_time
-        t = 0
-
-        self.max_barge_distance = 450e3 # meters
-        self.max_apogee = 350e3 # meters
-
-        success = True
-
-        self.counter = 0
-
-        while t < t_max:
-            t += dt
-            times = np.append(times, t)
-            success = self.iterate(t, dt)
-            if not success:
-                break
-
-        # print("Finished")
-
-        #apogee_index = np.argmax(self.pos_zs)
-
-        # landing_velocity = self.velocity_zs[-1]
-
-        # if abs(landing_velocity) > 5:
-            # return False
-        
-        # return True
-
-        #print("Final Velocity Z:", self.velocity_zs[-1])
-        #print("Final Z:", self.pos_zs[-1])
-        #print("Final Mass:", self.masses[-1])   
-        #print("Landing Propellant Remaining:", self.masses[-1] - self.m_first_stage_structural)
-
+    def plot(self):
         self.ascent_color = 'red'
         self.coasting_color = 'blue'
         self.reentry_color = 'orange'
@@ -386,125 +389,111 @@ class Trajectory():
         self.reentry_label = 'reentry'
         self.landing_label = 'landing'
 
-        fig, axs = plt.subplots(3, 5, figsize=(10, 8))  # 2x2 grid of subplots
+        self.fig, axs = plt.subplots(3, 5, figsize=(10, 8), num="Trajectory Simulation Plots")  # 2x2 grid of subplots
 
-        self.add_flight_phases('Pos X vs Time', 'Time (s)', 'Pos X (km)', axs[0, 0], times, self.pos_xs / 1000, 'lower right')
-        self.add_flight_phases('Pos Z vs Time', 'Time (s)', 'Pos Z (km)', axs[0, 1], times, self.pos_zs / 1000, 'lower center')
-        self.add_flight_phases('Atmospheric Density vs Time', 'Time (s)', 'Atmospheric Density (kg/m^3)', axs[0, 2], times, self.rhos, 'upper center')
-        self.add_flight_phases('Mass vs Time', 'Time (s)', 'Mass (tonnes)', axs[1, 3], times, self.masses / 1000, 'upper center')
-        self.add_flight_phases('Drag vs Time', 'Time (s)', 'Drag (MN)', axs[0, 3], times, self.drags / 1e6, 'upper center')
-        self.add_flight_phases('Velocity X vs Time', 'Time (s)', 'Velocity X (km/s)', axs[1, 0], times, self.velocity_xs / 1000, 'lower center')
-        self.add_flight_phases('Velocity Z vs Time', 'Time (s)', 'Velocity Z (km/s)', axs[1, 1], times, self.velocity_zs / 1000, 'lower left')
-        self.add_flight_phases('Accel X vs Time', 'Time (s)', 'Accel X (g)', axs[2, 0], times, self.accel_xs / g_0, 'lower center')
-        self.add_flight_phases('Accel Z vs Time', 'Time (s)', 'Accel Z (g)', axs[2, 1], times, self.accel_zs / g_0, 'upper center')
-        self.add_flight_phases('Thrust X vs Time', 'Time (s)', 'Thrust X (MN)', axs[2, 2], times, self.thrust_xs * self.masses / 10e5, 'upper center')
-        self.add_flight_phases('Thrust Z vs Time', 'Time (s)', 'Thrust Z (MN)', axs[2, 3], times, self.thrust_zs * self.masses / 10e5, 'upper center')
-        self.add_flight_phases('Flight Path Angle vs Time', 'Time (s)', 'Flight Path Angle (degrees)', axs[1, 2], times, self.gammas, 'lower left')
-        axs[1, 2].set_ylim(-100, 100)
+        self.add_flight_phases('Pos X vs Time', 'Time (s)', 'Pos X (km)', axs[0, 0], self.times, self.pos_xs / 1000, 'lower right')
+        self.add_flight_phases('Pos Z vs Time', 'Time (s)', 'Pos Z (km)', axs[0, 1], self.times, self.pos_zs / 1000, 'lower center')
+        self.add_flight_phases('Atmospheric Density vs Time', 'Time (s)', 'Atmospheric Density (kg/m^3)', axs[0, 2], self.times, self.rhos, 'upper center')
+        self.add_flight_phases('Drag vs Time', 'Time (s)', 'Drag (MN)', axs[0, 3], self.times, self.drags / 1e6, 'upper center')
         self.add_flight_phases('Pos Z vs Pos X', 'Pos X (km)', 'Pos Z (km)', axs[0, 4], self.pos_xs / 1000, self.pos_zs / 1000, 'lower center')
-        self.add_flight_phases('Speed vs Time', 'Time (s)', 'Speed (km/s)', axs[1, 4], times, self.speeds / 1000, 'lower center')
-        #ax2 = axs[1, 4].twinx()
-        #ax2.plot(times, self.pos_zs / 1000, color= "purple")
-        self.add_flight_phases('Dynamic Pressure vs Time', 'Time (s)', 'Dynamic Pressure (kPa)', axs[2, 4], times, 0.5 * self.rhos * self.speeds ** 2 / 1000, 'upper center')
+        self.add_flight_phases('Velocity X vs Time', 'Time (s)', 'Velocity X (km/s)', axs[1, 0], self.times, self.velocity_xs / 1000, 'lower center')
+        self.add_flight_phases('Velocity Z vs Time', 'Time (s)', 'Velocity Z (km/s)', axs[1, 1], self.times, self.velocity_zs / 1000, 'lower left')
+        self.add_flight_phases('Flight Path Angle vs Time', 'Time (s)', 'Flight Path Angle (degrees)', axs[1, 2], self.times, self.gammas, 'lower left')
+        axs[1, 2].set_ylim(-100, 100)
+        self.add_flight_phases('Mass vs Time', 'Time (s)', 'Mass (tonnes)', axs[1, 3], self.times, self.masses / 1000, 'upper center')
+        self.add_flight_phases('Speed vs Time', 'Time (s)', 'Speed (km/s)', axs[1, 4], self.times, self.speeds / 1000, 'lower center')
+        self.add_flight_phases('Accel X vs Time', 'Time (s)', 'Accel X (g)', axs[2, 0], self.times, self.accel_xs / g_0, 'lower center')
+        self.add_flight_phases('Accel Z vs Time', 'Time (s)', 'Accel Z (g)', axs[2, 1], self.times, self.accel_zs / g_0, 'upper center')
+        self.add_flight_phases('Thrust X vs Time', 'Time (s)', 'Thrust X (MN)', axs[2, 2], self.times, self.thrust_xs * self.masses / 10e5, 'upper center')
+        self.add_flight_phases('Thrust Z vs Time', 'Time (s)', 'Thrust Z (MN)', axs[2, 3], self.times, self.thrust_zs * self.masses / 10e5, 'upper center')
+        self.add_flight_phases('Dynamic Pressure vs Time', 'Time (s)', 'Dynamic Pressure (kPa)', axs[2, 4], self.times, 0.5 * self.rhos * self.speeds ** 2 / 1000, 'upper center')
 
         plt.tight_layout()
         plt.show()
 
-trajectory = "Elysium" # "Falcon 9" # "Elysium"
+    def run(self):
+        self.times = np.array([])
+        t = 0
+        #self.max_barge_distance = 1000e3 # meters
+        #self.max_apogee = 1000e3 # meters
+        success = True
+        self.counter = 0
+        print("Starting trajectory simulation!")
+        while t < self.simulation_time:
+            t += self.simulation_timestep
+            self.times = np.append(self.times, t)
+            success = self.iterate(t, self.simulation_timestep)
+            if not success:
+                break
+        if success:
+            print("Finished trajectory simulation!")
+        else:
+            print("Failed to simulate a successful trajectory.")
+        
+if __name__ == "__main__":
 
-if trajectory == "Elysium":
-    elysium_trajectory = Trajectory()
-    elysium_trajectory.setup(
-        number_of_engines_ascent=9,
-        number_of_engines_landing=1,
-        number_of_engines_reentry=3,
-        thrust=1_000_000, # newtons
-        I_sp_1=306, # seconds
-        I_sp_2=457, # seconds
-        kick_angle=np.radians(68), # radians
-        gamma_change_time=10, # seconds
-        m_first_stage_total=400e3,
-        m_first_stage_structural_frac=0.0578,
-        m_second_stage_structural=9.272e3, # kg
-        m_second_stage_propellant=80e3, # kg
-        m_second_stage_payload=11.5e3, # kg
-        delta_V_landing=1000, # m / s
-        delta_V_reentry=2000, # m / s
-        Cd_ascent=0.3,
-        Cd_descent=1.0,
-        diameter=5.4, # meters
-        reentry_burn_alt=55_000, # meters
-        landing_burn_alt=5000, # meters
-        gravity_turn_alt=10_000 # meters
-    )
-    elysium_trajectory.run()
-elif trajectory == "ElysiumOptimize":
-    print("Running Elysium Optimize...")
-    elysium_optimal = Trajectory()
-    for N_engines_ascent in [9, 11]:
-        # print("engines")
-        for first_stage_mass in np.arange(400e3,700e3, 10e3):
-            # print("M1")
-            for kick_angle in np.arange(45, 85, 1):
-                # print("kick_angle")
-                for second_stage_propellant in np.arange(30e3, 90e3, 10e3):
-                    # print("secondstage")
+    trajectory = "Elysium" # "Falcon 9" # "Elysium"
 
-                    elysium_optimal.setup(
-                        
-                        number_of_engines_ascent=N_engines_ascent,
-                        number_of_engines_landing=3,
-                        number_of_engines_reentry=3,
-                        thrust=1_000_000, # newtons
-                        I_sp_1=306, # seconds
-                        I_sp_2=457, # seconds
-                        kick_angle=np.radians(kick_angle), # radians
-                        gamma_change_time=10, # seconds
-                        m_first_stage_total=first_stage_mass,
-                        m_first_stage_structural_frac=0.0578,
-                        m_second_stage_structural=9.272e3, # kg
-                        m_second_stage_propellant=second_stage_propellant, # kg
-                        m_second_stage_payload=11.5e3, # kg
-                        delta_V_landing=500, # m / s
-                        delta_V_reentry=1500, # m / s
-                        Cd_ascent=0.3,
-                        Cd_descent=1.0,
-                        diameter=5.4, # meters
-                        reentry_burn_alt=55_000, # meters
-                        landing_burn_alt=5e3, # meters
-                        gravity_turn_alt=10e3# meters
-                    )
-                    success = elysium_optimal.run()
-                    if success:
-                        print("number_of_engines_ascent:", N_engines_ascent,
-                                ", m_first_stage_total:",first_stage_mass,
-                                ", kick_angle:", kick_angle,
-                                ", m_second_stage_propellant:", second_stage_propellant)
+    if trajectory == "Elysium":
+        print("Running Elysium trajectory...")
+        elysium_trajectory = Trajectory()
+        
+        first_stage_ascent_prop_margin = 1.02
+        first_stage_landing_prop_margin = 1.1
+        first_stage_reentry_prop_margin = 1.05
 
-elif trajectory == "Falcon 9":
-    print("running Falcon9")
-    falcon_9_trajectory = Trajectory()
-    falcon_9_trajectory.setup(
-        number_of_engines_ascent=9,
-        number_of_engines_landing=1,
-        number_of_engines_reentry=3,
-        thrust=805_000 * 1, # newtons
-        I_sp_1=283, # seconds
-        I_sp_2=348, # seconds   
-        kick_angle=np.radians(75.5), # radians
-        gamma_change_time=8, # seconds
-        m_first_stage_total = 421e3,
-        m_first_stage_structural_frac= 0.045, #0.0578,
-        m_second_stage_structural=3.9e3, #3.9e3, # kg
-        m_second_stage_propellant=92e3, # kg
-        m_second_stage_payload=13.1e3,
-        delta_V_landing=200, # m / s
-        delta_V_reentry=2_000, # m / s
-        Cd_ascent=0.4,
-        Cd_descent=1.0,
-        diameter=3.7, # meters
-        reentry_burn_alt=55_000, # meters
-        landing_burn_alt=1_000, # meters
-        gravity_turn_alt=1.5e3 # meters
-    )
-    falcon_9_trajectory.run()
+        elysium_trajectory.setup(
+            simulation_timestep = 0.01, # seconds
+            simulation_time = 900, # seconds
+            number_of_engines_ascent=9, # input
+            number_of_engines_landing=1, # input
+            number_of_engines_reentry=3, # input
+            thrust=1_000_000, # newtons # self.engine.Thrust
+            I_sp_1=306, # seconds # self.propulsion.Isp
+            I_sp_2=457, # seconds # self.isp2, 
+            kick_angle=np.radians(68), # degrees input
+            gamma_change_time=10, # seconds input
+            m_first_stage_total=400e3 * first_stage_ascent_prop_margin, # self.mass
+            m_first_stage_structural_frac=0.0578, # self.dry_masses[0] / self.mass
+            #m_second_stage_structural=9.272e3, # kg
+            m_second_stage_propellant=80e3, # kg # self.prop_masses[1]
+            m_second_stage_payload=11.5e3, # kg # self.payload
+            delta_V_landing=909 * first_stage_landing_prop_margin, # m / s input
+            delta_V_reentry=1905 * first_stage_reentry_prop_margin, # m / s input
+            Cd_ascent=0.3, # self.cd
+            Cd_descent=1.0, # assumed constant
+            diameter=5.4, # meters # self.diameter
+            reentry_burn_alt=55_000, # meters input
+            gravity_turn_alt=10_000 # meters input
+        )
+        elysium_trajectory.run()
+        elysium_trajectory.plot()
+    elif trajectory == "Falcon 9":
+        print("Running Falcon 9 trajectory...")
+        falcon_9_trajectory = Trajectory()
+        falcon_9_trajectory.setup(
+            simulation_timestep = 0.01, # seconds
+            simulation_time = 900, # seconds
+            number_of_engines_ascent=9,
+            number_of_engines_landing=1,
+            number_of_engines_reentry=3,
+            thrust=805_000 * 1, # newtons
+            I_sp_1=283, # seconds
+            I_sp_2=348, # seconds   
+            kick_angle=np.radians(75.5), # radians
+            gamma_change_time=8, # seconds
+            m_first_stage_total = 421e3,
+            m_first_stage_structural_frac= 0.045, #0.0578,
+            m_second_stage_propellant=92e3, # kg
+            m_second_stage_payload=13.1e3,
+            delta_V_landing=200, # m / s
+            delta_V_reentry=2_000, # m / s
+            Cd_ascent=0.4,
+            Cd_descent=1.0,
+            diameter=3.7, # meters
+            reentry_burn_alt=55_000, # meters
+            #landing_burn_alt=1_000, # meters
+            gravity_turn_alt=1.5e3 # meters
+        )
+        falcon_9_trajectory.run()
+        falcon_9_trajectory.plot()
