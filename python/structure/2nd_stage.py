@@ -1,5 +1,5 @@
 '''
-Code developed for trajectory purpose only;
+Code developed for trajectory purposes only;
 Sources: Ariane 5 Manual, Ariane Group, Wikipedia
 '''
 prop_mass_extension = NEWMASS - 31000
