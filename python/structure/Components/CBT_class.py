@@ -4,8 +4,7 @@ from python.structure.materials import materials as m
 import numpy as np 
 from python.structure.constants import g_0, Km
 class CBT:
-  def __init__(self, outer_radius, pressure, material, thrust, 
-              #  moment,
+  def __init__(self, outer_radius, pressure, material, thrust,
                 volume_ox, mass_ox, volume_f, mass_f):
     self.outer_radius = outer_radius
     self.pressure = pressure
@@ -15,7 +14,17 @@ class CBT:
     self.volume_f = volume_f
     self.mass_ox = mass_ox
     self.mass_f = mass_f
-    # self.moment = moment 
+    """
+        Common Bulkhead Tank object, containing all relevant parameters.
+        :param outer_radius: in m
+        :param pressure: in Pa
+        :param thrust: in N
+        :param volume_ox: in m^3
+        :param volume_f: in m^3
+        :param mass_ox: in kg
+        "param mass_f: in kg 
+        :param material: dictionary object from materials database
+        """
 
     if mass_ox > mass_f:
       self._dome_fwd = Dome(self.outer_radius, self.pressure, self.material)
@@ -45,11 +54,10 @@ class CBT:
       return self._cylinder_aft.height + self._cylinder_fwd.height 
 
     
-
+#NOTE: UNIT TESTING 
 # if __name__ == "__main__":
 #   test = CBT(2.7,7E5,'2195',11E6,328, 440E3,273,126E3) 
 #   print('DONE')
-#   print('Mass: ', test.mass)
 #   print(f"Height {test.height}")
 #   print(f'M1 {test._dome_fwd.mass} M2 {test._dome_mid.mass} M3 {test._dome_aft.mass}')
         
