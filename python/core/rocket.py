@@ -3,7 +3,7 @@ import numpy as np
 
 from python.propulsion.propulsion import Propulsion
 from python.structure.structure import Structure
-from python.trajectory.trajectory_simulator import Trajectory
+from python.trajectory.trajectory import Trajectory
 from python.cost.model import MassCalculator
 from python.cost.model import CostModel
 
@@ -13,6 +13,7 @@ from python.cost.model import CostModel
 
 class Rocket():
     def __init__(self, **kwargs):
+        self.landing_type = None
         self.update_values(**kwargs)
 
     def update_values(self, **kwargs):
@@ -95,7 +96,8 @@ class Rocket():
                     Cd_descent=1.0, # assumed constant
                     diameter=self.diameter, # meters
                     reentry_burn_alt=self.reentry_burn_alt, # meters
-                    gravity_turn_alt=self.gravity_turn_alt # meters
+                    gravity_turn_alt=self.gravity_turn_alt, # meters
+                    landing_type = self.landing_type
                 )
                 self.trajectory.run()
             self.thrust = self.trajectory.number_of_engines_ascent * self.trajectory.thrust
