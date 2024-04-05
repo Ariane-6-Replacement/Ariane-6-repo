@@ -5,6 +5,12 @@ Make sure you are running from ~filepath/Ariane-6-repo. Otherwise you will get e
 to fix try in terminal: 
 export PYTHONPATH=/path/to/project_root:$PYTHONPATH
 
+
+In general; run the IDM from main.py
+
+- main.py calls rocket.py which in turn calls all the necessary scripts
+- the ui is setup in setup.py
+- 
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 Contact persons:
 
@@ -41,10 +47,7 @@ file to run just trajectory: 3D turn
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-
-
-
-
-
 Other:
 Control and aerodynamics systems have not been worked out
+
+Other limitations include: uncertainty of the cost model, constant Cd assumption(ascend/descend differ), lack of heating estimations/calculations, second stage modelled as impulsive shot
