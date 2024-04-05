@@ -1,3 +1,6 @@
+'''
+Code for creating dome object.
+'''
 import python.structure.geometry as geometry
 import python.structure.Loading.ellipse_stress as es
 import numpy as np

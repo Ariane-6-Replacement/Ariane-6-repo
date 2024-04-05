@@ -8,36 +8,6 @@ from numpy.polynomial.polynomial import Polynomial
 from scipy.integrate import trapz
 
 
-# CUBOID #############################################################
-
-def rectangle_I(width: float, height: float) -> float:
-    """
-    Calculates the area moment of inertia of a rectangular section.
-    :param width: width of the rectangle
-    :param height: height of the rectangle
-    :return: moment of inertia of the rectangular section
-    """
-    return (width * (height ** 3)) / 12
-
-
-def rectangle_J(width: float, height: float) -> float:
-    """
-    Calculates the torsional constant of a rectangle.
-    :param width: width of the rectangle
-    :param height: height of the rectangle
-    :return: torsion constant of the rectangular section
-    """
-    a = max(width, height)  # Long side
-    b = min(width, height)  # Short side
-
-    A = a * (b ** 3)
-    B = 1 - (b ** 4) / (12 * (a ** 4))
-    C = 0.21 * (b / a)
-
-    J = A * ((1 / 3) - C * B)
-    return J
-
-
 # CYLINDER ###########################################################
 
 def cylindrical_shell_I(radius: float, thickness: float) -> float:

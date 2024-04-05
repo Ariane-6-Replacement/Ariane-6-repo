@@ -1,3 +1,6 @@
+'''
+Code for creating common bulkhead tank object.
+'''
 from python.structure.Components.cylinder_class import Cylinder
 from python.structure.Components.dome_class import Dome
 from python.structure.materials import materials as m
@@ -35,7 +38,7 @@ class CBT:
       The hydrostatic pressure effect caused by propellant is accounted by multiplying by the
       highest estiamted T/W ration and divided by cross-section area
       For common bulkhead to account for compressive stress form the concave side of the dome additioanl factor of 2.0 is included
-      This is deemded sufficient if the the convex side is pressurized firs;
+      This is deemded sufficient if the the convex side is pressurized first;
       '''
       self._dome_mid = Dome(self.outer_radius, (self.pressure +self.mass_f*g_0*2.0/(np.pi*self.outer_radius**2))*2.0 , self.material)
       self._dome_aft = Dome(self.outer_radius, self.pressure +self.mass_ox*g_0*2.0/(np.pi*self.outer_radius**2), self.material)
@@ -64,13 +67,6 @@ class CBT:
   def height(self) -> float:
       return self._cylinder_aft.height + self._cylinder_fwd.height 
 
-    
-#NOTE: UNIT TESTING 
-# if __name__ == "__main__":
-#   test = CBT(2.7,7E5,'2195',11E6,328, 440E3,273,126E3) 
-#   print('DONE')
-#   print(f"Height {test.height}")
-#   print(f'M1 {test._dome_fwd.mass} M2 {test._dome_mid.mass} M3 {test._dome_aft.mass}')
         
       
     

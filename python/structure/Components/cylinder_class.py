@@ -1,3 +1,6 @@
+"""
+Code for creating cylinder object.
+"""
 import python.structure.geometry as geometry
 from python.structure.Loading import buckling, pressure_loading, bending, axial_stress
 from python.structure.constants import FOSY, Mi
@@ -66,19 +69,17 @@ class Cylinder:
             t+=0.0005
             N_buckling = buckling.critical_cylinder_buckling(self.pressure, self.outer_radius,t, self.height, self.material['youngs_modulus'],self.material['poisson_ratio'])
     
-        Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
 
         #Buckling due to bending moment
-        M_buckling = bending.critical_cylinder_bending(self.outer_radius, t, self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
+        M_buckling = bending.critical_cylinder_bending(self.outer_radius, t, self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'])
      
         #NOTE: Moment magnitude is assumed to be half of the thrust magnitude; If better modelling is available, change of this value is recommneded; 
         while M_buckling / (self.thrust / 2) < FOSY:
             if t>0.02:
                 raise ValueError
             t += 0.0005
-            Ixx = geometry.cylindrical_shell_I(self.outer_radius, t)
             M_buckling = bending.critical_cylinder_bending(self.outer_radius, t 
-            ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'], Ixx)
+            ,self.pressure, self.material['youngs_modulus'],self.material['poisson_ratio'])
         return round(t, 4)
     
     @property

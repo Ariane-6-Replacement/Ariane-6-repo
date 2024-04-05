@@ -1,3 +1,6 @@
+"""
+Testing file for structure.py."""   
+
 from python.structure.Components.Tank_class import Tank
 from python.structure.Components.ITS_class import Shell
 from python.structure.Components.CBT_class import CBT
@@ -15,6 +18,7 @@ class Structure():
         # self.material3 = material3
         self.type = type
         self.thrust = thrust
+        print(f'THrust {self.thrust}')
         self.volume1 = volume_ox
         self.volume2 = volume_fuel
         self.mass1 = mass_ox
@@ -24,8 +28,6 @@ class Structure():
         tank1 = [self.outer_radius,self.pressure1,self.material,self.thrust,self.volume1,self.mass1]
         tank2 = [self.outer_radius,self.pressure2,self.material,self.thrust,self.volume2,self.mass2]
 
-        # self.input = "struc in"
-        # self.output = 4
 
         if type == "separate":
             
@@ -56,21 +58,21 @@ class Structure():
           
     @property
     def mass_engine_structure(self):
-        return 0
+        return 3500
     
     @property
     def mass_total(self)-> float:
         if self.type == 'shared':
-            return self._CBT.mass + self._EB.mass + self._ITS.mass
+            return self._CBT.mass + self._EB.mass + self._ITS.mass + self.engine_mass * self.engine_number + self.mass_engine_structure
         else: 
             return self._tank_fwd.mass + self._tank_aft.mass + self._EB.mass + self._ITS_fwd.mass + self._ITS_aft.mass
 
     @property
     def height_total(self) -> float:
         if self.type == 'shared':
-            return self._CBT.height + self._ITS.height +  self._EB.height + 3.0
+            return self._CBT.height + self._ITS.height +  self._EB.height 
         else:
-            return self._tank_fwd.cylinder.height + self._tank_aft.cylinder.height + self._ITS_fwd.height +  self._ITS_aft.height + self._EB.height + 3.0
+            return self._tank_fwd.cylinder.height + self._tank_aft.cylinder.height + self._ITS_fwd.height +  self._ITS_aft.height + self._EB.height 
 
 
     @property
@@ -105,22 +107,38 @@ class Structure():
     @property
     def mass_landing_gear(self):
         print(f'Struts {LG(self.outer_radius, self.mass_total, self.cg).LG_geometry}')
-        return LG(self.outer_radius, self.mass_total, self.cg).mass
+        return LG(self.outer_radius, self.mass_total, self.cg).mass_gear
+    
+    @property
+    def mass_total_config(self):
+        return self.mass_total + self.mass_landing_gear
     
 if __name__ == "__main__":
-    print("CALCULATING STRUCTURE")
-    # test = Structure(2.5,'2195',7E5,7E5,'2195','shared',140, 60E3, 180, 200E3, 1E6,1000,9)
+
+
     #Ariane 5
-    # test = Structure(2.7,3E5,'2219',120, 130E3, 3E5, 390, 25E3, 20E6,'2219')
+    #test =Structure(2.7,'2219',3E5,3E5,'2219', 'separate', 120,130E3,390, 25E3,14.1E6,1500,1)
 
-    test =Structure(2.7,'2219',3E5,3E5,'2219', 'shared', 120,130E3,390, 25E3,13.145E6,1500,1)
-    # test =Structure(2.7,'2219',3E5,3E5,'2219', 'separate', 120,130E3,390, 25E3,14.1E6,1500,1)
-
+    test =Structure(2.7,'2195',7E5,7E5,'7075', 'shared', 229,262E3,176, 75E3,9E6,1100,9)
     print('DONE')
     print('#####################OUTPUT##############')
     print(f'CG: {test.cg}')
     print('Mass:',test.mass_total)
     print('Height: ', test.height_total)
+
+    # print('#############Engine Bay####################')
+    print('EB height:',test._EB.height,'mass: ',test._EB.mass )
+    # print(f'ITS {test._ITS.mass}, {test._ITS.height} m')
+    # print(f'CBT {test._CBT.mass} aft vol {test._CBT._cylinder_aft.inner_volume} fwd vol {test._CBT._cylinder_fwd.inner_volume}, {test._CBT._dome_mid.inner_volume}')
+
+    
+    print(f'cylinder fwd {test._CBT._cylinder_fwd.mass} kg, {test._CBT._cylinder_fwd.height} m')
+    print(f'cylinder aft {test._CBT._cylinder_aft.mass} kg, {test._CBT._cylinder_aft.height} m')
+    print(f'dome fwd {test._CBT._dome_fwd.mass} kg {test._CBT._dome_fwd.height} m')
+    print(f'dome mid {test._CBT._dome_mid.mass}')
+    print(f'dome aft {test._CBT._dome_aft.mass}')
+    print(f'mass_landing_gear {test.mass_landing_gear}')
+
     # print('#############TANK FWD####################')
     # print('Tank mass:', test._tank_fwd.mass,'height: ',test._tank_fwd.height)
     # print('Cylinder mass: ',test._tank_fwd.cylinder.mass,' heigh:',test._tank_fwd.cylinder.height,' thickenss:',test._tank_fwd.cylinder.thickness)
@@ -132,14 +150,11 @@ if __name__ == "__main__":
     # print('Dome mass aft: ',test._tank_aft.dome_aft.mass,'heigh: ',test._tank_aft.dome_aft.height,'thickness: ',test._tank_aft.dome_aft.thickness)
     # print('ITS 2 height:',test._ITS_aft.height,'mass: ',test._ITS_aft.mass )
     # print('#############Engine Bay####################')
-    print('EB height:',test._EB.height,'mass: ',test._EB.mass )
     print(f'ITS {test._ITS.mass}')
     print(f'CBT {test._CBT.mass} aft vol {test._CBT._cylinder_aft.inner_volume} fwd vol {test._CBT._cylinder_fwd.inner_volume}, {test._CBT._dome_mid.inner_volume}')
-
-    
     print(f'cylinder fwd {test._CBT._cylinder_fwd.mass} kg, {test._CBT._cylinder_fwd.height} m')
     print(f'cylinder aft {test._CBT._cylinder_aft.mass} kg, {test._CBT._cylinder_aft.height} m')
     print(f'dome fwd {test._CBT._dome_fwd.mass} kg {test._CBT._dome_fwd.height} m')
     print(f'dome mid {test._CBT._dome_mid.mass}')
     print(f'dome aft {test._CBT._dome_aft.mass}')
-    print(f'mass_landing_gear {test.mass_landing_gear}')
+    print(f'TOTAL MASS: {test.mass_total_config}')

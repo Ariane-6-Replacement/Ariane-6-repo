@@ -1,3 +1,6 @@
+'''
+Code for creating landing gear object.
+'''
 import numpy as np
 from python.structure.constants import Km
 class LG:
@@ -57,8 +60,12 @@ class LG:
         rho= 13.91187 * Km #The value was calulated using data provided by Almatec - a company designign landing gear for Themis Project
         mass_p = rho * self.LG_geometry[0]
         mass_s = rho * self.LG_geometry[1]
-        #Assumption: the hydraulic system + all metal components per leg weight 250 kg max; If better data is available, it is recommended;
-        #Design Decision: Tripod landing gear configuration with 4 legs
+
+        #NOTE:
+        '''
+        Assumption: the hydraulic system + all metal components per leg weight 250 kg max; If better data is available, it is recommended;
+        Design Decision: Tripod landing gear configuration with 4 legs
+        '''
         return (mass_p + 2 * mass_s + 250) * 4
     
 

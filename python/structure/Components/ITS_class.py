@@ -1,4 +1,6 @@
-
+"""
+Code for creating inter tank structure object.
+"""
 from python.structure.Loading.isogrid_stress import critical_stress
 from python.structure.materials import materials as m
 from python.structure.geometry import cylindrical_shell_I
@@ -52,9 +54,3 @@ class Shell:
         return 2 * self.outer_radius * np.pi * self.height * t_mass * self.material['density']
 
   
-#NOTE: UNIT TESTING 
-# if __name__ == "__main__":
-#     tank_test = Shell(2.5, '2195',2, 10E9)
-#     print('DONE')
-#     print('Output: ',tank_test.mass)
-#     print('FINISHED')

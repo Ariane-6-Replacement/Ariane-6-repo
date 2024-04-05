@@ -1,7 +1,7 @@
 """
 This file interpolates NASA SP-8007 knockdown factor (KDF) for pressurized cylinders.
 
-Source(s): NASA SP-8007
+Source: NASA SP-8007
 """
 
 import numpy as np

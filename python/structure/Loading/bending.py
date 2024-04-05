@@ -1,7 +1,7 @@
 """
 Contains formulas related to critical stresses due to bending loads.
 
-Source(s): NASA SP-8007
+Source: NASA SP-8007
 """
 
 from python.structure.Loading.buckling_coeff import gamma_d

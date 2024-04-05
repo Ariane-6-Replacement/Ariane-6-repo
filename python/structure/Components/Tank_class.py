@@ -23,9 +23,15 @@ class Tank:
         :param material: dictionary object from materials database (databases/materials.py)
         '''
 
-       
+        #NOTE:
+        '''
+        The hydrostatic pressure effect caused by propellant is accounted by multiplying by the
+        highest estiamted T/W ration and divided by cross-section area
+        For common bulkhead to account for compressive stress form the concave side of the dome additioanl factor of 2.0 is included
+        This is deemded sufficient if the the convex side is pressurized first;
+        '''
         self._dome_fwd = Dome(self.outer_radius, self.pressure, self.material)
-        self._dome_aft = Dome(self.outer_radius, self.pressure +self.mass_p*g_0*1.5/(np.pi*self.outer_radius**2), self.material)
+        self._dome_aft = Dome(self.outer_radius, self.pressure +self.mass_p*g_0*2.0/(np.pi*self.outer_radius**2), self.material)
         
         # Calculate cylinder height and create cylinder object
         cylinder_height = round((self.volume * Ku - self._dome_fwd.inner_volume - self._dome_aft.inner_volume) / (np.pi * self.outer_radius**2),3)

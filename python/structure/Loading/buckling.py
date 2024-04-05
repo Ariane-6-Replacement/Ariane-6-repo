@@ -46,7 +46,7 @@ def critical_cylinder_buckling(p, r, t, l, E, v):
     # Number of buckle waves in the circumferential direction
     n = 1  # Critical case
 
-    # Flexural Rigidity, make this a function
+    # Flexural Rigidity
     D = E * t ** 3 / (12 * (1 - v))
 
     phi = 1 / 16 * np.sqrt(r / t)
