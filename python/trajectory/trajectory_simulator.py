@@ -106,7 +106,10 @@ class Trajectory():
               Cd_descent,
               diameter,
               reentry_burn_alt,
-              gravity_turn_alt):
+              gravity_turn_alt,
+              landing_type = None):
+        
+        self.landing_type = landing_type
         
         self.simulation_timestep = simulation_timestep
         self.simulation_time = simulation_time
@@ -124,20 +127,33 @@ class Trajectory():
         self.kick_angle = kick_angle
         self.gamma_change_time = gamma_change_time
 
-        self.m_first_stage = m_first_stage_total
-
-        self.m_first_stage_structural = self.m_first_stage * m_first_stage_structural_frac
+        # 2nd stage structural mass formula provided by structures.
+        if self.landing_type == "Falcon 9":
+            self.m_first_stage_propellant = 395_700 # kg
+            self.m_first_stage_structural = 25_600 # kg
+            self.m_first_stage = 421_000 # kg
+            self.Cd_ascent=0.4
+            self.m_second_stage_structural = 3.9e3 # kg
+            self.m_second_stage_propellant = 92e3 # kg
+            self.second_stage_thrust = 981e3 # newtons
+            self.landing_burn_alt = 1_000 # meters
+        else:
+            self.m_first_stage = m_first_stage_total
+            self.m_first_stage_structural = self.m_first_stage * m_first_stage_structural_frac
+            
+            self.m_second_stage_propellant = m_second_stage_propellant
+            self.second_stage_thrust = 180e3 # newtons # From propulsion.
+            self.m_second_stage_structural = self.get_second_stage_structural_mass(self.m_second_stage_propellant) # 9.272e3 kg
+        
 
         self.m_prop_landing = self.get_propellant(self.I_sp_1, delta_V_landing, 0)
         self.m_prop_reentry = self.get_propellant(self.I_sp_1, delta_V_reentry, self.m_prop_landing)
-        
-        self.m_first_stage_propellant = self.m_first_stage - (self.m_first_stage_structural + self.m_prop_landing + self.m_prop_reentry)
+
+        if self.landing_type != "Falcon 9":
+            self.m_first_stage_propellant = self.m_first_stage - (self.m_first_stage_structural + self.m_prop_landing + self.m_prop_reentry)
 
         assert self.m_first_stage_propellant > 0, "No propellant available for ascent"
 
-        self.m_second_stage_propellant = m_second_stage_propellant
-        # 2nd stage structural mass formula provided by structures.
-        self.m_second_stage_structural = self.get_second_stage_structural_mass(self.m_second_stage_propellant) # 9.272e3 kg
         self.m_second_stage_payload = m_second_stage_payload
 
         self.burntime = self.m_first_stage_propellant / (self.mass_flowrate * self.number_of_engines_ascent)
@@ -177,8 +193,6 @@ class Trajectory():
         self.velocity_z = 3
         self.accel_x = 0
         self.accel_z = 0
-
-        self.second_stage_thrust = 180e3 # newtons # From propulsion.
 
         print("First Stage Delta V:", self.delta_V_first_stage / 1e3, "km / s")
         print("Second Stage Delta V:", self.delta_V_second_stage / 1e3, "km / s")
@@ -225,19 +239,25 @@ class Trajectory():
         drag_force = self.get_drag(rho, self.velocity_x, self.velocity_z, self.area, Cd)
         gamma = self.get_gamma(self.velocity_z, self.velocity_x)
         
-        if self.pos_z >= 0:
-            impact_time = (np.sqrt(2 * g_0 * self.pos_z + self.velocity_z ** 2) + self.velocity_z) / g_0
-        else:
-            impact_time = 2 * self.velocity_z / g_0
-
-        land_accel = self.number_of_engines_landing * self.thrust / (self.m_first_stage_structural + self.m_prop_landing)
-        deccel_time = -self.velocity_z / (land_accel - g_0)
         
-        if deccel_time > impact_time and self.pos_z < 10e3 and not before_apogee and not self.iniate_landing_burn :
-             self.iniate_landing_burn = True
-             #print("deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
+             
 
-        landing = not before_apogee and self.iniate_landing_burn 
+        if self.landing_type == "Falcon 9":
+            landing = not before_apogee and self.pos_z < self.landing_burn_alt
+        else:
+            if self.pos_z >= 0:
+                impact_time = (np.sqrt(2 * g_0 * self.pos_z + self.velocity_z ** 2) + self.velocity_z) / g_0
+            else:
+                impact_time = 2 * self.velocity_z / g_0
+
+            land_accel = self.number_of_engines_landing * self.thrust / (self.m_first_stage_structural + self.m_prop_landing)
+            deccel_time = -self.velocity_z / (land_accel - g_0)
+            
+            if deccel_time > impact_time and self.pos_z < 10e3 and not before_apogee and not self.iniate_landing_burn :
+                self.iniate_landing_burn = True
+                #print("deccel_time:", deccel_time, "impact time:", impact_time, self.pos_z)
+            landing = not before_apogee and self.iniate_landing_burn 
+
         reentering = not before_apogee and self.pos_z < self.reentry_burn_alt
 
         if landing:
@@ -340,14 +360,15 @@ class Trajectory():
             #if apogee_z > self.max_apogee:
             #    return False
                 
-        if self.velocity_z > -5 and self.pos_z < 10e3 and not before_apogee:
+        if self.velocity_z > -5 and self.pos_z < 2e3 and not before_apogee:
+            print("Trajectory landing burn may be unsuccessful due to uncertainties.")
             return False
             #print("Landing burn unsuccessful. Impacting ground with", abs(self.velocity_z), "m / s downward velocity")
         
         below_ground = self.pos_z < -1000
 
         if below_ground:
-            print("Trajectory ends up below ground!")
+            print("Trajectory may end up below ground due to uncertainties in landing burn altitude.")
             return False
         
         self.counter += 1
@@ -419,16 +440,22 @@ class Trajectory():
         success = True
         self.counter = 0
         print("Starting trajectory simulation!")
+
+        frames = self.simulation_time / self.simulation_timestep
+
+        completed_tenths = 0
+
         while t < self.simulation_time:
+            if int(self.counter / frames * 100) >= 10 * completed_tenths:
+                completed_tenths += 1
+                print("Completed {:.0%} of trajectory simulation".format(completed_tenths * 10 / 100))
+
             t += self.simulation_timestep
             self.times = np.append(self.times, t)
             success = self.iterate(t, self.simulation_timestep)
             if not success:
                 break
-        if success:
-            print("Finished trajectory simulation!")
-        else:
-            print("Failed to simulate a successful trajectory.")
+        print("Finished trajectory simulation!")
         
 if __name__ == "__main__":
 

@@ -79,7 +79,8 @@ def falcon9():
         delta_V_landing = 200,
         delta_V_reentry = 2_000,
         reentry_burn_alt = 55_000,
-        gravity_turn_alt = 1500
+        gravity_turn_alt = 1500,
+        landing_type = "Falcon 9"
     )
     ui = UI(rocket)
     ui.create()
@@ -87,5 +88,5 @@ def falcon9():
 if __name__ == "__main__":
     # SELECT TEMPLATE TO RUN
 
-    # Elysium1()
-    falcon9()
+    Elysium1()
+    #falcon9()
