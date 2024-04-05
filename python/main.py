@@ -88,5 +88,5 @@ def falcon9():
 if __name__ == "__main__":
     # SELECT TEMPLATE TO RUN
 
-    Elysium1()
-    #falcon9()
+    #Elysium1()
+    falcon9()
