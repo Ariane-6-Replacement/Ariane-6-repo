@@ -4,6 +4,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
 
+
+# This file contains the UI class which is used to create the input and output screen for the rocket.
+# It uses the tkinter library as its base and creates the input screen based on the inputs given in the main.py file.
 class Label():
     def __init__(self, root, label, **kwargs):
         self.label = ttk.Label(root, text=label, **kwargs)

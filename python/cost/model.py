@@ -1,19 +1,13 @@
 import numpy as np
 import math
 
+# Cost and mass model for the rocket. It calculates the  mass of the rocket based on the inputs given in the main.py file.
+# Additionally, it gives a first estimate for the cost, based on the final mass and properties of the rocket.
+
+
 # Constants:
 
 g_0 = 9.81 # m / s^2
-
-# Falcon 9 Test inputs:
-
-#dV = 10_000 # Required delta V (m/s)
-#dV_split = [0.346768978, 0.653231022] # Stage dV fraction (0 to 1) 
-#m_payload = 22_800 # Payload mass (kg) 
-#inert_mass_fractions = [0.0551575931, 0.0403852128] # Mass of structure relative to total mass of that stage (0 to 1)
-#I_sp = [296.5, 340] # Engine specific impulse for each stage.
-
-############################################################################
 
 class Cost:
      def __init__(self, **kwargs):

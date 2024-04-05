@@ -7,14 +7,16 @@ from python.trajectory.trajectory_simulator import Trajectory
 from python.cost.model import MassCalculator
 from python.cost.model import CostModel
 
+
+#This class is the main class for the rocket. It contains all the other classes and is the one that is called in the
+# main.py file. It handles most variables and functions that are used in the other classes and the main iteration loop.
+
 class Rocket():
     def __init__(self, **kwargs):
         self.update_values(**kwargs)
 
     def update_values(self, **kwargs):
         self.__dict__.update(**kwargs)
-        #self.aerodynamics = Aerodynamics()
-        #self.control = Control()
         self.dv = self.orbit_dv[self.orbit]
         self.dv_2 = self.dv * (1 - self.dv_split )
         landingdv = 0

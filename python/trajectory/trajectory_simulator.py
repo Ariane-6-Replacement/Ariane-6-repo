@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Main class for the trajectory simulator. This class contains all the functions and variables needed to simulate the
+# ascent and landing.
+
 g_0 = 9.81 # [m / s^2]
 R_earth = 6_371e3 # [m]
 mu_earth = 3.986_004_418e14 # [m^3 / s^-2]

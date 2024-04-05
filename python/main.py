@@ -3,7 +3,7 @@ from python.core.rocket import Rocket
 from python.ui.setup import UI
 from python.structure.materials import materials as materials
 
-def main():
+def Elysium1():
     rocket = Rocket(
         orbit_options = ['LEO', 'GTO', 'GEO', "LTO"],
         orbit_dv = [9256, 9256 + 2440, 9256 + 2440 + 1472, 9256 + 2440 +679],
@@ -46,7 +46,7 @@ def main():
 def falcon9():
     rocket = Rocket(
         orbit_options = ['LEO', 'GTO', 'GEO', "LTO"],
-        orbit_dv = [9256, 9256 + 2440, 9256 + 2440 + 1472, 9256 + 2440 +679],
+        orbit_dv = [9256, 9256 + 2440, 9256 + 2440 + 1472, 9256 + 2440 + 679],
         orbit = 0, # index in orbit options
         payload = 18500,
         cd = 0.2,
@@ -85,5 +85,7 @@ def falcon9():
     ui.create()
 
 if __name__ == "__main__":
-    main()
-    # falcon9()
+    # SELECT TEMPLATE TO RUN
+
+    # Elysium1()
+    falcon9()
