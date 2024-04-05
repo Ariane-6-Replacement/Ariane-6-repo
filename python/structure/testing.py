@@ -116,29 +116,26 @@ class Structure():
 if __name__ == "__main__":
 
 
-    #Ariane 5
-    #test =Structure(2.7,'2219',3E5,3E5,'2219', 'separate', 120,130E3,390, 25E3,14.1E6,1500,1)
+    #Ariane 5, set the Mthrustructure to 0 in Constants.py, 
+    # test =Structure(2.7,'2219',3E5,3E5,'2219', 'shared', 120,130E3,390, 25E3,13.145E6,1500,1)
 
     test =Structure(2.7,'2195',7E5,7E5,'7075', 'shared', 229,262E3,176, 75E3,9E6,1100,9)
     print('DONE')
     print('#####################OUTPUT##############')
-    print(f'CG: {test.cg}')
-    print('Mass:',test.mass_total)
+    print(f'CG location: {test.cg}')
+    print('Mass without landing gear:',test.mass_total)
     print('Height: ', test.height_total)
-
-    # print('#############Engine Bay####################')
     print('EB height:',test._EB.height,'mass: ',test._EB.mass )
-    # print(f'ITS {test._ITS.mass}, {test._ITS.height} m')
-    # print(f'CBT {test._CBT.mass} aft vol {test._CBT._cylinder_aft.inner_volume} fwd vol {test._CBT._cylinder_fwd.inner_volume}, {test._CBT._dome_mid.inner_volume}')
-
-    
+    print(f'ITS {test._ITS.mass}, {test._ITS.height} m')
+    print(f'CBT {test._CBT.mass} aft vol {test._CBT._cylinder_aft.inner_volume} fwd vol {test._CBT._cylinder_fwd.inner_volume}, {test._CBT._dome_mid.inner_volume}')
     print(f'cylinder fwd {test._CBT._cylinder_fwd.mass} kg, {test._CBT._cylinder_fwd.height} m')
     print(f'cylinder aft {test._CBT._cylinder_aft.mass} kg, {test._CBT._cylinder_aft.height} m')
     print(f'dome fwd {test._CBT._dome_fwd.mass} kg {test._CBT._dome_fwd.height} m')
     print(f'dome mid {test._CBT._dome_mid.mass}')
     print(f'dome aft {test._CBT._dome_aft.mass}')
     print(f'mass_landing_gear {test.mass_landing_gear}')
-
+    print(f'TOTAL MASS: {test.mass_total_config}')
+    #PRINTS FOR SEPARATE CONFIGURATION
     # print('#############TANK FWD####################')
     # print('Tank mass:', test._tank_fwd.mass,'height: ',test._tank_fwd.height)
     # print('Cylinder mass: ',test._tank_fwd.cylinder.mass,' heigh:',test._tank_fwd.cylinder.height,' thickenss:',test._tank_fwd.cylinder.thickness)
@@ -150,11 +147,3 @@ if __name__ == "__main__":
     # print('Dome mass aft: ',test._tank_aft.dome_aft.mass,'heigh: ',test._tank_aft.dome_aft.height,'thickness: ',test._tank_aft.dome_aft.thickness)
     # print('ITS 2 height:',test._ITS_aft.height,'mass: ',test._ITS_aft.mass )
     # print('#############Engine Bay####################')
-    print(f'ITS {test._ITS.mass}')
-    print(f'CBT {test._CBT.mass} aft vol {test._CBT._cylinder_aft.inner_volume} fwd vol {test._CBT._cylinder_fwd.inner_volume}, {test._CBT._dome_mid.inner_volume}')
-    print(f'cylinder fwd {test._CBT._cylinder_fwd.mass} kg, {test._CBT._cylinder_fwd.height} m')
-    print(f'cylinder aft {test._CBT._cylinder_aft.mass} kg, {test._CBT._cylinder_aft.height} m')
-    print(f'dome fwd {test._CBT._dome_fwd.mass} kg {test._CBT._dome_fwd.height} m')
-    print(f'dome mid {test._CBT._dome_mid.mass}')
-    print(f'dome aft {test._CBT._dome_aft.mass}')
-    print(f'TOTAL MASS: {test.mass_total_config}')
