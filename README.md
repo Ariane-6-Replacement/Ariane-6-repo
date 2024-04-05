@@ -1,4 +1,10 @@
 # Ariane-6-repo
+
+Make sure you are running from ~filepath/Ariane-6-repo. Otherwise you will get errors such as 'can not import python'
+
+to fix try in terminal: 
+export PYTHONPATH=/path/to/project_root:$PYTHONPATH
+
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 Contact persons:
 
