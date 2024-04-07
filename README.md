@@ -14,7 +14,8 @@ Then to open the IDM simply, run the following command:
 - The ui is setup in setup.py
 
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  Contact persons:
+
+Contact persons:
 
 Trajectory: Josh Shoemaker, Martin Starkov, Timo Esser  
 Structure: Marcel Kwapien, Thomas, McGearty
@@ -23,6 +24,7 @@ Cost & Operations: Mike Noeri Tümah, Kristian Haralambiev
 IDM: Arnout Dourleijn, Martin Starkov
 
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 Assumptions Trajectory:
 
 - Gravity turn
@@ -48,7 +50,7 @@ Improvements to be made:
 
 File to run only trajectory code: trajectory/trajectory.py
 
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 Other:
 Control and aerodynamics systems have not been worked out.
