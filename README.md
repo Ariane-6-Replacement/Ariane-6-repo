@@ -1,6 +1,6 @@
 # Ariane-6-repo
 
-There are two ways to run the code. The simplest way is by clicking on the `run_idm.exe` file located in the same directory as this README file.
+There are two ways to run the code. The simplest way is by clicking on the `run_idm.exe` file located in the same directory as this README file (or download it directly from [this link](https://github.com/Ariane-6-Replacement/Ariane-6-repo/raw/main/run_idm.exe)).
 
 Alternatively, you can run the IDM from the console. Make sure you are running it from wherever you cloned this repository ~filepath/Ariane-6-repo/python. Otherwise you will get errors such as 'cannot import python' or 'no module named python'
 
