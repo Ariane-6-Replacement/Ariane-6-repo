@@ -12,7 +12,8 @@ Then to open the IDM simply, run the following command:
 
 - main.py calls rocket.py which in turn calls all the necessary scripts
 - The ui is setup in setup.py
-- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   Contact persons:
 
 Trajectory: Josh Shoemaker, Martin Starkov, Timo Esser  
