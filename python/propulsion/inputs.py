@@ -91,9 +91,9 @@ class Propellant:
         self.M_fuel = 16.04 / 1000  # kg/mol
 
         # density (determined using thermodynamic table, see density.py)
-        self.density_ox = get_density("NIST_LOX_densities.json", self.temperature_ox, self.pressure_ox,
+        self.density_ox = get_density("lox", self.temperature_ox, self.pressure_ox,
                                       self.M_ox * 1000)  # kg/m3 liquid oxygen
-        self.density_fuel = get_density("NIST_methane_densities.json", self.temperature_fuel, self.pressure_fuel,
+        self.density_fuel = get_density("methane", self.temperature_fuel, self.pressure_fuel,
                                         self.M_fuel * 1000)  # kg/m3 liquid methane  # should be checked , at which temperature?
 
         # Raptor Mixture Ratio: 3.8 kg LOX to 1kg Methane. [Source](https://en.wikipedia.org/wiki/Raptor_(rocket_engine)).
